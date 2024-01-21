@@ -2,18 +2,28 @@
 
 extern "C"
 __declspec(dllexport)
-void ManagedArray_Free(void* array)
+void Dismantler_Init(Disassembler** handle)
 {
-	delete[] array;
+	*handle = new Disassembler();
 }
 
 extern "C"
 __declspec(dllexport)
-void Test(ManagedInterface::ManagedArray<ILInstruction>* array)
+void Dismantler_Destroy(Disassembler* handle)
 {
-	Disassembler dissasembler;
+	delete handle;
+}
 
-	uint8_t code[] = { 0x00, 0x00, 0x00, 0x00 };
+extern "C"
+__declspec(dllexport)
+void Dismantler_Dissasemble(Disassembler* handle, void* address, uint64_t size, ManagedInterface::ManagedArray<ILInstruction>* array)
+{
+	*array = ManagedInterface::ManagedArray<ILInstruction>(handle->Disassemble(address, size));
+}
 
-	*array = ManagedInterface::ManagedArray<ILInstruction>(dissasembler.Disassemble(code, sizeof(code)));
+extern "C"
+__declspec(dllexport)
+void ManagedArray_Destroy(void* array)
+{
+	delete[] array;
 }

@@ -16,11 +16,6 @@ public:
 			memcpy(m_Array, array.data(), m_Size * sizeof(T));
 		}
 
-		void Free()
-		{
-			delete[] m_Array;
-		}
-
 	private:
 		T* m_Array;
 		uint64_t m_Size;

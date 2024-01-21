@@ -21,7 +21,9 @@ namespace Saber.DissasemblyView
 
             m_DissasemblyViewer = (ScrollViewer)FindName("dism_view");
 
-            NativeInterface.Testing();
-        }
+            NativeInterface native = new NativeInterface();
+
+            native.Dissasemble(new byte[] { 0x48, 0x8B, 0x44, 0xD8, 0x50 });
+		}
     }
 }
