@@ -220,12 +220,14 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 
 			if (mod == 3)
 			{
+				bool high = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && (operand.m_Register == Register::general) && mem >= 4;
+
 				resolved.m_Operands[i].m_Type = ILOperandType_Register;
 
-				resolved.m_Operands[i].m_Register.m_Base = mem + base_extend;
+				resolved.m_Operands[i].m_Register.m_Base = mem - (high ? 4 : 0) + base_extend;
 				resolved.m_Operands[i].m_Register.m_Type = operand.m_Register;
 
-				resolved.m_Operands[i].m_Register.m_BaseHigh = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && mem >= 4;
+				resolved.m_Operands[i].m_Register.m_BaseHigh = high;
 
 				break;
 			}
@@ -332,8 +334,10 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 			{
 				if (operand.m_Rex)
 				{
-					resolved.m_Operands[i].m_Register.m_Base = operand.m_Value + reg_extend;
-					resolved.m_Operands[i].m_Register.m_BaseHigh = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && operand.m_Value >= 4;
+					bool high = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && (operand.m_Register == Register::general) && operand.m_Value >= 4;
+
+					resolved.m_Operands[i].m_Register.m_Base = operand.m_Value - (high ? 4 : 0) + reg_extend;
+					resolved.m_Operands[i].m_Register.m_BaseHigh = high;
 				}
 				else
 				{
@@ -352,8 +356,10 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				mod = (modrrm >> 6) & ((1 << 2) - 1);
 			}
 
-			resolved.m_Operands[i].m_Register.m_Base = reg + reg_extend;
-			resolved.m_Operands[i].m_Register.m_BaseHigh = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && reg >= 4;
+			bool high = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && (operand.m_Register == Register::general) && reg >= 4;
+
+			resolved.m_Operands[i].m_Register.m_Base = reg - (high ? 4 : 0) + reg_extend;
+			resolved.m_Operands[i].m_Register.m_BaseHigh = high;
 		} break;
 		}
 	}
@@ -369,6 +375,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 			break;
 		}
 
+
 		if (operand.m_Type != OpType::imm &&
 			operand.m_Type != OpType::rel &&
 			operand.m_Type != OpType::moffs)
@@ -380,6 +387,11 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 		if (operand.m_Constant)
 		{
 			value = operand.m_Value;
+		}
+		else if (operand.m_Type == OpType::moffs)
+		{
+			value = *reinterpret_cast<const int64_t*>(bytes);
+			bytes += 8;
 		}
 		else
 		{
@@ -447,8 +459,8 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 		else if (operand.m_Type == OpType::moffs)
 		{
 			resolved.m_Operands[i].m_Type = ILOperandType_MemoryAbsolute;
-			resolved.m_Operands[i].m_Relative.m_Value = value;
-			resolved.m_Operands[i].m_Relative.m_Segment = GetSegment(prefixes);
+			resolved.m_Operands[i].m_MemoryValue.m_Value = value;
+			resolved.m_Operands[i].m_MemoryValue.m_Segment = GetSegment(prefixes);
 		}
 	}
 

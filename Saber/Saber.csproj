@@ -36,6 +36,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -51,7 +52,10 @@
     <Compile Include="DissasemblyView\DissasemblerControl.xaml.cs">
       <DependentUpon>DissasemblerControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Native\NativeInterface.cs" />
+    <Compile Include="Native\ManagedArray.cs" />
+    <Compile Include="Native\ManagedInterface.cs" />
+    <Compile Include="Native\ManagedObject.cs" />
+    <Compile Include="Native\ManagedString.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SaberPackage.cs" />
   </ItemGroup>

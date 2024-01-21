@@ -11,9 +11,9 @@
 			 Name="MyToolWindow">
     <Grid>
         <StackPanel Orientation="Vertical">
-            <TextBlock Margin="10" HorizontalAlignment="Center">Dissasembler</TextBlock>
-			<ScrollViewer x:Name="dism_view" Height="262">
-                
+			<TextBlock Margin="10" HorizontalAlignment="Center">Dissasembler</TextBlock>
+			<ScrollViewer x:Name="dism_view" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="250">
+
 			</ScrollViewer>
 		</StackPanel>
 	</Grid>
