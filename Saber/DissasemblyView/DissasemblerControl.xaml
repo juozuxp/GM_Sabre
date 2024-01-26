@@ -9,12 +9,11 @@
 			 mc:Ignorable="d"
 			 d:DesignHeight="300" d:DesignWidth="300"
 			 Name="MyToolWindow">
-    <Grid>
-        <StackPanel Orientation="Vertical">
-			<TextBlock Margin="10" HorizontalAlignment="Center">Dissasembler</TextBlock>
-			<ScrollViewer x:Name="dism_view" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="250">
-
-			</ScrollViewer>
-		</StackPanel>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<ScrollViewer x:Name="dism_view" VerticalScrollBarVisibility="Auto">
+		</ScrollViewer>
 	</Grid>
 </UserControl>

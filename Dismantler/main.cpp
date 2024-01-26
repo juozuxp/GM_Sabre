@@ -71,5 +71,5 @@ int main()
 	Disassembler dis = Disassembler();
 	Visualizer vis = Visualizer();
 
-	vis.PrintToConsole(dis.Disassemble(rawData, sizeof(rawData)));
+	vis.PrintToConsole(dis.Disassemble(rawData, sizeof(rawData)), Visualizer::Options());
 }

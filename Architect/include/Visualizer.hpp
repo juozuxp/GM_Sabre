@@ -6,7 +6,13 @@
 class Visualizer
 {
 public:
-	void PrintToConsole(const std::vector<ILInstruction>& instructions);
+	struct Options
+	{
+		void* m_RelativeBase;
+	};
 
-	std::vector<std::wstring> ToStringArray(const std::vector<ILInstruction>& instructions);
+public:
+	void PrintToConsole(const std::vector<ILInstruction>& instructions, const Options& options);
+
+	std::vector<std::wstring> ToStringArray(const std::vector<ILInstruction>& instructions, const Options& options);
 };

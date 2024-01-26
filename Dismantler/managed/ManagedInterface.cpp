@@ -50,7 +50,7 @@ ManagedArray<ManagedString>* Disassembler_Dissasemble(void* code, uint32_t size)
 	Visualizer visualizer;
 
 	std::vector<ILInstruction> instructions = disassembler.Disassemble(code, size);
-	std::vector<std::wstring> strings = visualizer.ToStringArray(instructions);
+	std::vector<std::wstring> strings = visualizer.ToStringArray(instructions, Visualizer::Options());
 
 	std::vector<ManagedString*> managed;
 
