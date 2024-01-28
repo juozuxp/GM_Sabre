@@ -9,7 +9,7 @@ Visualizer::Visualizer(const Options& options) :
 {
 }
 
-void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions, void* reference)
+void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions, const void* reference)
 {
 	for (const std::wstring& instruction : ToStrings(instructions, reference))
 	{
@@ -17,7 +17,7 @@ void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions, 
 	}
 }
 
-std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstruction>& instructions, void* reference)
+std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstruction>& instructions, const void* reference)
 {
 	std::vector<Visual> visuals;
 
@@ -190,7 +190,7 @@ std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstru
 				visual.m_Type = VisType::OperandAddressValue;
 
 				visual.m_Value.m_Size = operand.m_Scale;
-				visual.m_Value.m_Value = reinterpret_cast<int64_t>(reference) + operand.m_Value + instruction.m_Size;
+				visual.m_Value.m_Value = reinterpret_cast<int64_t>(reference) + operand.m_Relative.m_Value + instruction.m_Size;
 
 				visuals.push_back(visual);
 			} break;
@@ -210,7 +210,7 @@ std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstru
 				}
 
 				visual.m_Value.m_Size = operand.m_Scale;
-				visual.m_Value.m_Value = reinterpret_cast<int64_t>(reference) + operand.m_Value + instruction.m_Size;
+				visual.m_Value.m_Value = reinterpret_cast<int64_t>(reference) + operand.m_Relative.m_Value + instruction.m_Size;
 
 				visuals.push_back(visual);
 			} break;
@@ -222,7 +222,7 @@ std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstru
 
 				if (operand.m_MemoryValue.m_Segment != IL_INVALID_REGISTER)
 				{
-					visual.m_Value.m_Segment = VisReg_Sreg_64 + operand.m_Relative.m_Segment;
+					visual.m_Value.m_Segment = VisReg_Sreg_64 + operand.m_MemoryValue.m_Segment;
 				}
 				else
 				{
@@ -236,12 +236,14 @@ std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstru
 			} break;
 			}
 		}
+
+		reference = reinterpret_cast<const uint8_t*>(reference) + instruction.m_Size;
 	}
 
 	return visuals;
 }
 
-std::vector<std::wstring> Visualizer::ToStrings(const std::vector<ILInstruction>& instructions, void* reference)
+std::vector<std::wstring> Visualizer::ToStrings(const std::vector<ILInstruction>& instructions, const void* reference)
 {
 	constexpr std::wstring_view general64[] = { L"rax", L"rcx", L"rdx", L"rbx", L"rsp", L"rbp", L"rsi", L"rdi", L"r8", L"r9", L"r10", L"r11", L"r12", L"r13", L"r14", L"r15" };
 	constexpr std::wstring_view general32[] = { L"eax", L"ecx", L"edx", L"ebx", L"esp", L"ebp", L"esi", L"edi", L"r8d", L"r9d", L"r10d", L"r11d", L"r12d", L"r13d", L"r14d", L"r15d" };
@@ -443,7 +445,7 @@ std::vector<std::wstring> Visualizer::ToStrings(const std::vector<ILInstruction>
 			} break;
 			case ILOperandType_ValueRelative:
 			{
-				stream << std::setfill(L'0') << std::setw(16) << std::hex << std::uppercase << (reinterpret_cast<const uint8_t*>(reference) + operand.m_Value + instruction.m_Size);
+				stream << std::setfill(L'0') << std::setw(16) << std::hex << std::uppercase << (reinterpret_cast<const uint8_t*>(reference) + operand.m_Relative.m_Value + instruction.m_Size);
 			} break;
 			case ILOperandType_MemoryRelative:
 			{
@@ -452,7 +454,7 @@ std::vector<std::wstring> Visualizer::ToStrings(const std::vector<ILInstruction>
 					stream << segment[operand.m_Relative.m_Segment] << L':';
 				}
 
-				stream << L'[' << std::setfill(L'0') << std::setw(16) << std::hex << std::uppercase << (reinterpret_cast<const uint8_t*>(reference) + operand.m_Value + instruction.m_Size) << L']';
+				stream << L'[' << std::setfill(L'0') << std::setw(16) << std::hex << std::uppercase << (reinterpret_cast<const uint8_t*>(reference) + operand.m_Relative.m_Value + instruction.m_Size) << L']';
 			} break;
 			case ILOperandType_MemoryAbsolute:
 			{
@@ -467,6 +469,8 @@ std::vector<std::wstring> Visualizer::ToStrings(const std::vector<ILInstruction>
 		}
 
 		strings.push_back(stream.str());
+
+		reference = reinterpret_cast<const uint8_t*>(reference) + instruction.m_Size;
 	}
 
 	return strings;

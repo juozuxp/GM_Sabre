@@ -99,10 +99,10 @@ public:
 	Visualizer(const Options& options);
 
 public:
-	void PrintToConsole(const std::vector<ILInstruction>& instructions, void* reference);
+	void PrintToConsole(const std::vector<ILInstruction>& instructions, const void* reference);
 
-	std::vector<Visual> ToVisuals(const std::vector<ILInstruction>& instructions, void* reference);
-	std::vector<std::wstring> ToStrings(const std::vector<ILInstruction>& instructions, void* reference);
+	std::vector<Visual> ToVisuals(const std::vector<ILInstruction>& instructions, const void* reference);
+	std::vector<std::wstring> ToStrings(const std::vector<ILInstruction>& instructions, const void* reference);
 
 private:
 	Options m_Options;
