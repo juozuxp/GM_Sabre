@@ -1,12 +1,13 @@
 #pragma once
 #include "ManagedObject.hpp"
+#include <utility>
 #include <vector>
 
 template<typename T>
-class ManagedArray : public ManagedObject
+class ManagedGenericArray : public ManagedObject
 {
 public:
-	ManagedArray(uint32_t capacity = 0)
+	ManagedGenericArray(uint32_t capacity = 0)
 	{
 		if (capacity == 0)
 		{
@@ -16,22 +17,25 @@ public:
 		Reserve(capacity);
 	}
 
-	ManagedArray(const std::vector<T*>& array)
+	ManagedGenericArray(const std::vector<T>& array)
 	{
 		m_Size = array.size();
 
 		Reserve(m_Size);
 
-		memcpy(m_Array, array.data(), m_Size * sizeof(T*));
+		for (uint32_t i = 0; i < array.size(); i++)
+		{
+			m_Array[i] = array[i];
+		}
 	}
 
 public:
-	ManagedArray(ManagedArray&& move)
+	ManagedGenericArray(ManagedGenericArray&& move)
 	{
 		operator=(std::move(move));
 	}
 
-	~ManagedArray() override
+	~ManagedGenericArray() override
 	{
 		if (m_Array == nullptr)
 		{
@@ -40,13 +44,13 @@ public:
 
 		for (uint32_t i = 0; i < m_Size; i++)
 		{
-			delete m_Array[i];
+			m_Array[i].~T();
 		}
 
 		free(m_Array);
 	}
 
-	ManagedArray& operator=(ManagedArray&& move)
+	ManagedGenericArray& operator=(ManagedGenericArray&& move)
 	{
 		m_Size = move.m_Size;
 		m_Array = move.m_Array;
@@ -60,7 +64,7 @@ public:
 	}
 
 public:
-	void Add(T* element)
+	void Add(const T& element)
 	{
 		if (m_Size >= m_Capacity)
 		{
@@ -77,21 +81,24 @@ public:
 			return;
 		}
 
-		T** preAlloc = m_Array;
+		T* preAlloc = m_Array;
 
-		m_Array = reinterpret_cast<T**>(realloc(m_Array, (capacity * sizeof(T*))));
+		m_Array = reinterpret_cast<T*>(realloc(m_Array, (capacity * sizeof(T))));
 		if (m_Array == nullptr)
 		{
 			m_Array = preAlloc;
 			return;
 		}
 
+		memset(m_Array + m_Capacity, 0, ((capacity - m_Capacity) * sizeof(T)));
+
 		m_Capacity = capacity;
 	}
 
 private:
-	T** m_Array = nullptr;
+	T* m_Array = nullptr;
 
 	uint32_t m_Size = 0;
 	uint32_t m_Capacity = 0;
 };
+

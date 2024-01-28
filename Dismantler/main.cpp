@@ -2,9 +2,7 @@
 #include <Visualizer.hpp>
 #include <Windows.h>
 
-#include "managed/ManagedObject.hpp"
-#include "managed/ManagedArray.hpp"
-#include "managed/ManagedString.hpp"
+#include "disassembler/DisassemblyInterface.hpp"
 
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 {
@@ -68,8 +66,7 @@ int main()
 		0xD4, 0xC9, 0x23, 0x00, 0xCC, 0xCC, 0xCC, 0xCC
 	};
 
-	Disassembler dis = Disassembler();
-	Visualizer vis = Visualizer();
+	DisassemblyInterface inter = DisassemblyInterface();
 
-	vis.PrintToConsole(dis.Disassemble(rawData, sizeof(rawData)), Visualizer::Options());
+	inter.Disassemble(rawData, sizeof(rawData), 0);
 }

@@ -13,6 +13,11 @@ namespace Saber.Native
 		[DllImport("Dismantler.dll")]
 		private static extern void Managed_Destroy(IntPtr handle);
 
+		public static implicit operator IntPtr(ManagedObject obj)
+		{
+			return obj.m_Handle;
+		}
+
 		public void Dispose()
 		{
 			Managed_Destroy(m_Handle);

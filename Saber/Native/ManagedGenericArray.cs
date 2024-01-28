@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.Threading;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -9,7 +8,7 @@ using System.Threading.Tasks;
 namespace Saber.Native
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal readonly struct ManagedArray : IDisposable
+	internal struct ManagedGenericArray : IDisposable
 	{
 		private readonly ManagedObject m_Base;
 
@@ -27,9 +26,11 @@ namespace Saber.Native
 			T[] array = new T[m_Size];
 
 			IntPtr address = m_Array;
-			for (int i = 0; i < m_Size; i++, address += IntPtr.Size)
+			int size = Marshal.SizeOf<T>();
+
+			for (int i = 0; i < m_Size; i++, address += size)
 			{
-				array[i] = Marshal.PtrToStructure<T>(Marshal.ReadIntPtr(address));
+				array[i] = Marshal.PtrToStructure<T>(address);
 			}
 
 			return array;

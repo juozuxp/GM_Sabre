@@ -18,7 +18,13 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="managed\ManagedInterface.cpp">
+    <ClCompile Include="managed\ManagedExportInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="disassembler\DisassemblyExportInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="disassembler\DisassemblyInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,7 +38,10 @@
     <ClInclude Include="managed\ManagedString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="managed\ManagedWrapper.hpp">
+    <ClInclude Include="disassembler\DisassemblyInterface.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="managed\ManagedGenericArray.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

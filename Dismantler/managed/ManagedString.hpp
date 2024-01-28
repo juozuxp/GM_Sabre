@@ -13,12 +13,32 @@ public:
 		memcpy(m_Buffer, string.data(), m_Size * sizeof(wchar_t));
 	}
 
+public:
 	~ManagedString() override
 	{
+		if (m_Buffer == nullptr)
+		{
+			return;
+		}
+
 		delete[] m_Buffer;
 	}
 
+	ManagedString(ManagedString&& move)
+	{
+		operator=(std::move(move));
+	}
+
+	ManagedString& operator=(ManagedString&& move)
+	{
+		m_Size = move.m_Size;
+		m_Buffer = move.m_Buffer;
+
+		move.m_Size = 0;
+		move.m_Buffer = nullptr;
+	}
+
 private:
-	wchar_t* m_Buffer;
-	uint32_t m_Size;
+	wchar_t* m_Buffer = nullptr;
+	uint32_t m_Size = 0;
 };

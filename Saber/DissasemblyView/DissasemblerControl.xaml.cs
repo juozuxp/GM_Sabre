@@ -3,6 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Controls;
 using Saber.Native;
+using Saber.Dismantler;
+using System.Windows.Documents;
+using System.Text.RegularExpressions;
+using Saber.Utility;
+using Saber.Dismantler.Visuals;
+using System.Windows.Media;
 
 namespace Saber.DissasemblyView
 {
@@ -11,13 +17,24 @@ namespace Saber.DissasemblyView
 	/// </summary>
 	public partial class DissasemblerControl : UserControl
 	{
-		ScrollViewer m_DissasemblyViewer;
+		TextBlock m_DismBytes;
+		TextBlock m_DismAddresses;
+		TextBlock m_DismInstructions;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DissasemblerControl"/> class.
-		/// </summary>
+		static readonly MatchTree c_Registers = new MatchTree(new string[] { "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+																		"eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi", "r8d", "r9d", "r10d", "r11d", "r12d", "r13d", "r14d", "r15d",
+																		"ax", "cx", "dx", "bx", "sp", "bp", "si", "di", "r8w", "r9w", "r10w", "r11w", "r12w", "r13w", "r14w", "r15w",
+																		"ah", "ch", "dh", "bh",
+																		"xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15",
+																		"mm0", "mm1", "mm2", "mm3", "mm4", "mm5", "mm6", "mm7", "mm8", "mm9", "mm10", "mm11", "mm12", "mm13", "mm14", "mm15",
+																		"bnd0", "bnd1", "bnd2", "bnd3",
+																		"st(0)", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)", "st(8)", "st(9)", "st(10)", "st(11)", "st(12)", "st(13)", "st(14)", "st(15)",
+																		"cr0", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7", "cr8", "cr9", "cr10", "cr11", "cr12", "cr13", "cr14", "cr15",
+																		"dr0", "dr1", "dr2", "dr3", "dr4", "dr5", "dr6", "dr7", "dr8", "dr9", "dr10", "dr11", "dr12", "dr13", "dr14", "dr15" });
+
 		public DissasemblerControl()
 		{
+
 			byte[] rawData = {
 				0x48, 0x8D, 0x0D, 0x19, 0xCC, 0x24, 0x00, 0xE9, 0xC4, 0xCB, 0x23, 0x00,
 				0xCC, 0xCC, 0xCC, 0xCC, 0x48, 0x83, 0xEC, 0x38, 0x48, 0xC7, 0x44, 0x24,
@@ -64,17 +81,34 @@ namespace Saber.DissasemblyView
 				0xD4, 0xC9, 0x23, 0x00, 0xCC, 0xCC, 0xCC, 0xCC
 			};
 
+
 			this.InitializeComponent();
 
-			m_DissasemblyViewer = (ScrollViewer)FindName("dism_view");
-			
-			ListBox list = new ListBox();
-			foreach (string element in ManagedInterface.Disassemble(rawData))
-			{
-				list.Items.Add(element);
-			}
+			m_DismBytes = FindName("dism_bytes") as TextBlock;
+			m_DismAddresses = FindName("dism_addresses") as TextBlock;
+			m_DismInstructions = FindName("dism_instructions") as TextBlock;
 
-			m_DissasemblyViewer.Content = list;
+			Disassembler disassembler = new Disassembler();
+			NativeVisual[] visuals = disassembler.Disassemble(rawData, IntPtr.Zero);
+
+			Visualizer.Inlines inlines = new Visualizer.Inlines();
+			Visualizer.Options options = new Visualizer.Options();
+
+			inlines.m_Bytes = m_DismBytes.Inlines;
+			inlines.m_Addresses = m_DismAddresses.Inlines;
+			inlines.m_Instructions = m_DismInstructions.Inlines;
+
+			options.m_Bytes = rawData;
+
+			options.m_AddressBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x6B, 0xFB, 0x60));
+			options.m_OffsetBrush = options.m_AddressBrush;
+			options.m_ValueBrush = options.m_AddressBrush;
+
+			options.m_RegisterBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0x00, 0xFF));
+
+			options.m_Reference = IntPtr.Zero;
+
+			Visualizer.ToInlineElements(visuals, inlines, options);
 		}
 	}
 }

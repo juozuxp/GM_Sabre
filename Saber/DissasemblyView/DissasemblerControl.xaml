@@ -7,13 +7,23 @@
 			 Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
 			 Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"
 			 mc:Ignorable="d"
-			 d:DesignHeight="300" d:DesignWidth="300"
+			 d:DesignHeight="300" d:DesignWidth="627.493"
 			 Name="MyToolWindow">
 	<Grid>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="*"/>
-		</Grid.RowDefinitions>
-		<ScrollViewer x:Name="dism_view" VerticalScrollBarVisibility="Auto">
+		<ScrollViewer VerticalScrollBarVisibility="Auto">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="2*"/>
+					<ColumnDefinition Width="3*"/>
+					<ColumnDefinition Width="5*"/>
+				</Grid.ColumnDefinitions>
+				<TextBlock Name="dism_addresses" Grid.Column="0" Foreground="#FF808080">
+				</TextBlock>
+				<TextBlock Name="dism_bytes" Grid.Column="1" Foreground="#FF008080">
+				</TextBlock>
+				<TextBlock Name="dism_instructions" Grid.Column="2" Foreground="White">
+				</TextBlock>
+			</Grid>
 		</ScrollViewer>
 	</Grid>
 </UserControl>
