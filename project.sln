@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Dismantler", "Dismantler\Di
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Architect", "Architect\Architect.vcxproj", "{06C0D1BC-D2AB-49CF-BAEE-AC2DC1D352A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Saber", "Saber\Saber.csproj", "{45A2A26B-67C1-415E-9EAE-3F3EFACA3BCD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sabre", "Sabre\Sabre.csproj", "{45A2A26B-67C1-415E-9EAE-3F3EFACA3BCD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
