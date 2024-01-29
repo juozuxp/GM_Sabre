@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Saber.DissasemblyView
+namespace Saber.DisassemblyView
 {
 	/// <summary>
 	/// This class implements the tool window exposed by this package and hosts a user control.
@@ -16,14 +16,14 @@ namespace Saber.DissasemblyView
 	/// </para>
 	/// </remarks>
 	[Guid("69e6c853-8c18-463a-814f-6287d756aa47")]
-	public class Dissasembler : ToolWindowPane
+	public class Disassembler : ToolWindowPane
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="Dissasembler"/> class.
+		/// Initializes a new instance of the <see cref="Disassembler"/> class.
 		/// </summary>
-		public Dissasembler() : base(null)
+		public Disassembler() : base(null)
 		{
-			this.Caption = "Dissasembler";
+			this.Caption = "Disassembler";
 
 			// This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
 			// we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on

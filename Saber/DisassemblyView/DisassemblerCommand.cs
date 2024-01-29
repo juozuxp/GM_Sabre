@@ -7,12 +7,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
-namespace Saber.DissasemblyView
+namespace Saber.DisassemblyView
 {
     /// <summary>
     /// Command handler
     /// </summary>
-    internal sealed class DissasemblerCommand
+    internal sealed class DisassemblerCommand
     {
         /// <summary>
         /// Command ID.
@@ -30,12 +30,12 @@ namespace Saber.DissasemblyView
         private readonly AsyncPackage package;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DissasemblerCommand"/> class.
+        /// Initializes a new instance of the <see cref="DisassemblerCommand"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file)
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         /// <param name="commandService">Command service to add command to, not null.</param>
-        private DissasemblerCommand(AsyncPackage package, OleMenuCommandService commandService)
+        private DisassemblerCommand(AsyncPackage package, OleMenuCommandService commandService)
         {
             this.package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
@@ -48,7 +48,7 @@ namespace Saber.DissasemblyView
         /// <summary>
         /// Gets the instance of the command.
         /// </summary>
-        public static DissasemblerCommand Instance
+        public static DisassemblerCommand Instance
         {
             get;
             private set;
@@ -76,7 +76,7 @@ namespace Saber.DissasemblyView
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
-            Instance = new DissasemblerCommand(package, commandService);
+            Instance = new DisassemblerCommand(package, commandService);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace Saber.DissasemblyView
             // Get the instance number 0 of this tool window. This window is single instance so this instance
             // is actually the only one.
             // The last flag is set to true so that if the tool window does not exists it will be created.
-            ToolWindowPane window = this.package.FindToolWindow(typeof(Dissasembler), 0, true);
+            ToolWindowPane window = this.package.FindToolWindow(typeof(Disassembler), 0, true);
             if ((null == window) || (null == window.Frame))
             {
                 throw new NotSupportedException("Cannot create tool window");

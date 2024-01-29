@@ -10,7 +10,7 @@ using Saber.Utility;
 using Saber.Dismantler.Visuals;
 using System.Windows.Media;
 
-namespace Saber.DissasemblyView
+namespace Saber.DisassemblyView
 {
 	/// <summary>
 	/// Interaction logic for DissasemblerControl.
@@ -77,7 +77,7 @@ namespace Saber.DissasemblyView
 			m_DismAddresses = FindName("dism_addresses") as TextBlock;
 			m_DismInstructions = FindName("dism_instructions") as TextBlock;
 
-			Disassembler disassembler = new Disassembler();
+			Dismantler.Disassembler disassembler = new Dismantler.Disassembler();
 			NativeVisual[] visuals = disassembler.Disassemble(rawData, IntPtr.Zero);
 
 			Visualizer.Inlines inlines = new Visualizer.Inlines();
@@ -94,6 +94,8 @@ namespace Saber.DissasemblyView
 			options.m_ValueBrush = options.m_AddressBrush;
 
 			options.m_RegisterBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0x00, 0xFF));
+
+			options.m_InstructionBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xAF, 0x00));
 
 			options.m_Reference = IntPtr.Zero;
 

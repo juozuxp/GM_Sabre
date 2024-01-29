@@ -54,10 +54,10 @@
     <Compile Include="Dismantler\Visuals\Value.cs" />
     <Compile Include="Dismantler\Visuals\Visual.cs" />
     <Compile Include="Dismantler\Visuals\Visualizer.cs" />
-    <Compile Include="DissasemblyView\Dissasembler.cs" />
-    <Compile Include="DissasemblyView\DissasemblerCommand.cs" />
-    <Compile Include="DissasemblyView\DissasemblerControl.xaml.cs">
-      <DependentUpon>DissasemblerControl.xaml</DependentUpon>
+    <Compile Include="DisassemblyView\Disassembler.cs" />
+    <Compile Include="DisassemblyView\DisassemblerCommand.cs" />
+    <Compile Include="DisassemblyView\DisassemblerControl.xaml.cs">
+      <DependentUpon>DisassemblerControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Native\ManagedArray.cs" />
     <Compile Include="Native\ManagedGenericArray.cs" />
@@ -90,7 +90,7 @@
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.8.2367" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="DissasemblyView\DissasemblerControl.xaml">
+    <Page Include="DisassemblyView\DisassemblerControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
