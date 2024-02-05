@@ -73,6 +73,16 @@ public:
 
 		m_Array[m_Size++] = element;
 	}
+	
+	void Add(T&& element)
+	{
+		if (m_Size >= m_Capacity)
+		{
+			Reserve(m_Size + 1);
+		}
+
+		m_Array[m_Size++] = std::move(element);
+	}
 
 	void Reserve(uint32_t capacity)
 	{

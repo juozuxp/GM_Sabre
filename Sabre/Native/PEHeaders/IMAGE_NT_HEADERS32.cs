@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.OLE.Interop;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -10,10 +9,10 @@ using System.Threading.Tasks;
 namespace Sabre.Native.PEHeaders
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct IMAGE_NT_HEADERS64
+	internal struct IMAGE_NT_HEADERS32
 	{
 		public readonly uint Signature;
 		public readonly IMAGE_FILE_HEADER FileHeader;
-		public readonly IMAGE_OPTIONAL_HEADER64 OptionalHeader;
+		public readonly IMAGE_OPTIONAL_HEADER32 OptionalHeader;
 	}
 }

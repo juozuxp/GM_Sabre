@@ -3,7 +3,7 @@
 namespace Sabre.Native.PEHeaders
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct IMAGE_OPTIONAL_HEADER64
+	internal struct IMAGE_OPTIONAL_HEADER32
 	{
 		const int IMAGE_NUMBEROF_DIRECTORY_ENTRIES = 16;
 
@@ -31,7 +31,8 @@ namespace Sabre.Native.PEHeaders
 		public readonly uint SizeOfUninitializedData;
 		public readonly uint AddressOfEntryPoint;
 		public readonly uint BaseOfCode;
-		public readonly ulong ImageBase;
+		public readonly uint BaseOfData;
+		public readonly uint ImageBase;
 		public readonly uint SectionAlignment;
 		public readonly uint FileAlignment;
 		public readonly ushort MajorOperatingSystemVersion;
@@ -46,10 +47,10 @@ namespace Sabre.Native.PEHeaders
 		public readonly uint CheckSum;
 		public readonly ushort Subsystem;
 		public readonly ushort DllCharacteristics;
-		public readonly ulong SizeOfStackReserve;
-		public readonly ulong SizeOfStackCommit;
-		public readonly ulong SizeOfHeapReserve;
-		public readonly ulong SizeOfHeapCommit;
+		public readonly uint SizeOfStackReserve;
+		public readonly uint SizeOfStackCommit;
+		public readonly uint SizeOfHeapReserve;
+		public readonly uint SizeOfHeapCommit;
 		public readonly uint LoaderFlags;
 		public readonly uint NumberOfRvaAndSizes;
 

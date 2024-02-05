@@ -5,6 +5,8 @@
 class ManagedString : public ManagedObject
 {
 public:
+	ManagedString() = default;
+
 	ManagedString(const std::wstring_view& string)
 	{
 		m_Size = string.size();

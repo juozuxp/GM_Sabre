@@ -13,6 +13,9 @@ namespace Sabre.Native.Managed
 		[DllImport("Dismantler.dll")]
 		private static extern void Managed_Destroy(IntPtr handle);
 
+		private readonly IntPtr m_Vtable;
+		private readonly IntPtr m_Handle;
+
 		public static implicit operator IntPtr(ManagedObject obj)
 		{
 			return obj.m_Handle;
@@ -22,8 +25,5 @@ namespace Sabre.Native.Managed
 		{
 			Managed_Destroy(m_Handle);
 		}
-
-		private readonly IntPtr m_Vtable;
-		private readonly IntPtr m_Handle;
 	}
 }

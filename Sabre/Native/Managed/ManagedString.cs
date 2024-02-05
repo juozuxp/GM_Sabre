@@ -11,7 +11,7 @@ namespace Sabre.Native.Managed
 	[StructLayout(LayoutKind.Sequential)]
 	internal readonly struct ManagedString : IDisposable
 	{
-		public readonly ManagedObject m_Base;
+		private readonly ManagedObject m_Base;
 
 		private readonly IntPtr m_Buffer;
 		private readonly int m_Length;

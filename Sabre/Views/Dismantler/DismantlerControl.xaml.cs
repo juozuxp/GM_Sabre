@@ -1,6 +1,5 @@
 ﻿using Microsoft.Win32;
-using Sabre.Image;
-using System.Diagnostics.CodeAnalysis;
+using Sabre.Explorer;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,11 +22,21 @@ namespace Sabre.Views.Dismantler
 			dialog.RestoreDirectory = true;
 			dialog.Filter = "Executable file|*.exe;*.dll;*.sys|All files|*.*";
 
-			dialog.ShowDialog();
+			if (dialog.ShowDialog() == false)
+			{
+				return;
+			}
 
-			m_Bytes = File.ReadAllBytes(dialog.FileName);
+			ExecutableExplorer explorer = new ExecutableExplorer(dialog.FileName);
 
-			PEDissector.Dissect(m_Bytes);
+			PEHeaders headers = explorer.GetHeaders();
+
+			headers.ToTreeView(m_HeaderView);
+
+			m_LoadedLabel.Content = "Loaded: " + dialog.FileName;
+
+			m_LoadedLabel.Visibility = Visibility.Visible;
+			m_HeaderView.Visibility = Visibility.Visible;
 		}
 	}
 }

@@ -12,27 +12,12 @@ namespace Sabre.Native.PEHeaders
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct IMAGE_FILE_HEADER
 	{
-		public IMAGE_FILE_HEADER(MemoryStream stream)
-		{
-			BinaryReader reader = new BinaryReader(stream);
-
-			Machine = reader.ReadUInt16();
-			NumberOfSections = reader.ReadUInt16();
-
-			TimeDateStamp = reader.ReadUInt32();
-			PointerToSymbolTable = reader.ReadUInt32();
-			NumberOfSymbols = reader.ReadUInt32();
-
-			SizeOfOptionalHeader = reader.ReadUInt16();
-			Characteristics = reader.ReadUInt16();
-		}
-
-		public ushort Machine;
-		public ushort NumberOfSections;
-		public uint TimeDateStamp;
-		public uint PointerToSymbolTable;
-		public uint NumberOfSymbols;
-		public ushort SizeOfOptionalHeader;
-		public ushort Characteristics;
+		public readonly ushort Machine;
+		public readonly ushort NumberOfSections;
+		public readonly uint TimeDateStamp;
+		public readonly uint PointerToSymbolTable;
+		public readonly uint NumberOfSymbols;
+		public readonly ushort SizeOfOptionalHeader;
+		public readonly ushort Characteristics;
 	}
 }

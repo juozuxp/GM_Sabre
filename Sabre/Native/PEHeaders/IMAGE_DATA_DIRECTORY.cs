@@ -12,15 +12,7 @@ namespace Sabre.Native.PEHeaders
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct IMAGE_DATA_DIRECTORY
 	{
-		public IMAGE_DATA_DIRECTORY(MemoryStream stream)
-		{
-			BinaryReader reader = new BinaryReader(stream);
-
-			VirtualAddress = reader.ReadUInt32();
-			Size = reader.ReadUInt32();
-		}
-
-		public uint VirtualAddress;
-		public uint Size;
+		public readonly uint VirtualAddress;
+		public readonly uint Size;
 	}
 }
