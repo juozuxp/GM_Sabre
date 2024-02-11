@@ -23,6 +23,45 @@ namespace Sabre.Explorer
 
 			public readonly ManagedGenericArray m_Sections; // IMAGE_SECTION_HEADER
 
+			public PEHeaders ToData()
+			{
+				PEHeaders data = new PEHeaders();
+
+				data.m_Dos = m_Dos;
+				data.m_NT32 = m_NT32;
+				data.m_NT64 = m_NT64;
+				data.m_Sections = m_Sections.ToArray<IMAGE_SECTION_HEADER>();
+
+				return data;
+			}
+
+			public void Dispose()
+			{
+				m_Base.Dispose();
+			}
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		internal struct NativeExecutableView : IDisposable
+		{
+			private readonly ManagedObject m_Base;
+
+			public readonly IntPtr m_BaseAddress; // image base address
+			public readonly IntPtr m_DataAddress; // actual mapped address
+
+			public readonly uint m_SizeOfView; // size of the data
+
+			public ExecutableView ToData()
+			{
+				ExecutableView data = new ExecutableView();
+
+				data.m_DataAddress = m_DataAddress;
+				data.m_SizeOfView = m_SizeOfView;
+				data.m_BaseAddress = m_BaseAddress;
+
+				return data;
+			}
+
 			public void Dispose()
 			{
 				m_Base.Dispose();
@@ -34,6 +73,9 @@ namespace Sabre.Explorer
 
 		[DllImport("Dismantler.dll")]
 		private static extern IntPtr ExecutableExplorer_GetHeaders(IntPtr instance);
+
+		[DllImport("Dismantler.dll")]
+		private static extern IntPtr ExecutableExplorer_GetExecutableView(IntPtr instance);
 
 		private readonly ManagedObject m_Instance;
 
@@ -47,20 +89,32 @@ namespace Sabre.Explorer
 			m_Instance.Dispose();
 		}
 
-		public PEHeaders GetHeaders()
+		public PEHeaders? GetHeaders()
 		{
-			using (NativeHeaders native = Marshal.PtrToStructure<NativeHeaders>(ExecutableExplorer_GetHeaders(m_Instance)))
+			IntPtr pointer = ExecutableExplorer_GetHeaders(m_Instance);
+			if (pointer == IntPtr.Zero)
 			{
-				PEHeaders headers = new PEHeaders();
-
-				headers.m_Dos = native.m_Dos;
-				headers.m_NT32 = native.m_NT32;
-				headers.m_NT64 = native.m_NT64;
-				headers.m_Sections = native.m_Sections.ToArray<IMAGE_SECTION_HEADER>();
-
-				return headers;
+				return null;
 			}
 
+			using (NativeHeaders native = Marshal.PtrToStructure<NativeHeaders>(pointer))
+			{
+				return native.ToData();
+			}
+		}
+
+		public ExecutableView? GetExecutableView()
+		{
+			IntPtr pointer = ExecutableExplorer_GetExecutableView(m_Instance);
+			if (pointer == IntPtr.Zero)
+			{
+				return null;
+			}
+
+			using (NativeExecutableView native = Marshal.PtrToStructure<NativeExecutableView>(pointer))
+			{
+				return native.ToData();
+			}
 		}
 	}
 }

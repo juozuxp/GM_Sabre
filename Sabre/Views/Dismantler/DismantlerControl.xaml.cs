@@ -1,5 +1,9 @@
-﻿using Microsoft.Win32;
+﻿using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.Win32;
+using Sabre.Controller;
 using Sabre.Explorer;
+using Sabre.Views.Disassembly;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,8 +12,6 @@ namespace Sabre.Views.Dismantler
 {
 	public partial class DismantlerControl : UserControl
 	{
-		private byte[] m_Bytes;
-
 		public DismantlerControl()
 		{
 			this.InitializeComponent();
@@ -27,13 +29,17 @@ namespace Sabre.Views.Dismantler
 				return;
 			}
 
-			ExecutableExplorer explorer = new ExecutableExplorer(dialog.FileName);
-
-			PEHeaders headers = explorer.GetHeaders();
-
-			headers.ToTreeView(m_HeaderView);
-
 			m_LoadedLabel.Content = "Loaded: " + dialog.FileName;
+
+			SabreController.LoadExecutable(dialog.FileName);
+
+			PEHeaders? headers = SabreController.GetHeaders();
+			if (headers == null)
+			{
+				return;
+			}
+
+			headers.Value.ToTreeView(m_HeaderView);
 
 			m_LoadedLabel.Visibility = Visibility.Visible;
 			m_HeaderView.Visibility = Visibility.Visible;

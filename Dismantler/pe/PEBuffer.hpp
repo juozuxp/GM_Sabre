@@ -18,7 +18,8 @@ public:
 	PEBuffer& operator=(const PEBuffer&) = delete;
 
 public:
-	PEHeaders* GetHeaders();
+	const void* GetBuffer() const;
+	PEHeaders* GetHeaders() const;
 
 private:
 	void* m_Buffer = nullptr;

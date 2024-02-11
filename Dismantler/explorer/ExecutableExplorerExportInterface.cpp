@@ -9,7 +9,14 @@ ExecutableExplorer* ExecutableExplorer_Init(const wchar_t* path)
 
 extern "C"
 __declspec(dllexport)
-PEHeaders* ExecutableExplorer_GetHeaders(ExecutableExplorer* instance)
+PEHeaders* ExecutableExplorer_GetHeaders(const ExecutableExplorer* instance)
 {
 	return instance->GetHeaders();
+}
+
+extern "C"
+__declspec(dllexport)
+ExecutableView* ExecutableExplorer_GetExecutableView(const ExecutableExplorer* instance)
+{
+	return instance->GetExecutableView();
 }

@@ -15,21 +15,89 @@ PEBuffer::PEBuffer(const std::wstring_view& path)
 		return;
 	}
 
-	m_Buffer = malloc(size);
-	if (m_Buffer == nullptr)
+	void* buffer = malloc(size);
+	if (buffer == nullptr)
 	{
 		CloseHandle(handle);
 		return;
 	}
 
-	if (!ReadFile(handle, m_Buffer, size, nullptr, nullptr))
+	if (!ReadFile(handle, buffer, size, nullptr, nullptr))
 	{
 		CloseHandle(handle);
-		free(m_Buffer);
+		free(buffer);
 		return;
 	}
 
 	CloseHandle(handle);
+
+	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(buffer);
+	const IMAGE_NT_HEADERS32* nt = reinterpret_cast<const IMAGE_NT_HEADERS32*>(reinterpret_cast<intptr_t>(dos) + dos->e_lfanew);
+	const IMAGE_FILE_HEADER* file = &nt->FileHeader;
+
+	if (dos->e_magic != 'ZM')
+	{
+		free(buffer);
+		return;
+	}
+
+	if (file->SizeOfOptionalHeader == sizeof(IMAGE_OPTIONAL_HEADER32))
+	{
+		const IMAGE_OPTIONAL_HEADER32* optional = &nt->OptionalHeader;
+
+		m_Buffer = malloc(optional->SizeOfImage);
+		if (m_Buffer == nullptr)
+		{
+			free(buffer);
+			return;
+		}
+
+		memset(m_Buffer, 0, optional->SizeOfImage);
+	}
+	else
+	{
+		const IMAGE_OPTIONAL_HEADER64* optional = &reinterpret_cast<const IMAGE_NT_HEADERS64*>(nt)->OptionalHeader;
+
+		m_Buffer = malloc(optional->SizeOfImage);
+		if (m_Buffer == nullptr)
+		{
+			free(buffer);
+			return;
+		}
+
+		memset(m_Buffer, 0, optional->SizeOfImage);
+	}
+
+	uint32_t headerSize = ~0;
+
+	const IMAGE_SECTION_HEADER* section = IMAGE_FIRST_SECTION(nt);
+	for (uint32_t i = 0; i < file->NumberOfSections; i++, section++)
+	{
+		if (section->SizeOfRawData == 0)
+		{
+			continue;
+		}
+
+		memcpy(reinterpret_cast<char*>(m_Buffer) + section->VirtualAddress, reinterpret_cast<const char*>(buffer) + section->PointerToRawData, section->SizeOfRawData);
+
+		if (section->PointerToRawData < headerSize)
+		{
+			headerSize = section->PointerToRawData;
+		}
+	}
+
+	if (headerSize == ~0) // Impossibility but VS won't shut up
+	{
+		free(m_Buffer);
+		free(buffer);
+
+		m_Buffer = nullptr;
+		return;
+	}
+
+	memcpy(m_Buffer, buffer, headerSize);
+
+	free(buffer);
 }
 
 PEBuffer::~PEBuffer()
@@ -50,7 +118,17 @@ PEBuffer& PEBuffer::operator=(PEBuffer&& move)
 	return *this;
 }
 
-PEHeaders* PEBuffer::GetHeaders()
+const void* PEBuffer::GetBuffer() const
 {
+	return m_Buffer;
+}
+
+PEHeaders* PEBuffer::GetHeaders() const
+{
+	if (m_Buffer == nullptr)
+	{
+		return nullptr;
+	}
+
 	return new PEHeaders(m_Buffer);
 }

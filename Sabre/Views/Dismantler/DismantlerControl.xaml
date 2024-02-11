@@ -18,9 +18,8 @@
 
 		<Button Grid.Row="0" Click="LoadFile">Load</Button>
 		<Label Grid.Row="1"  x:Name="m_LoadedLabel" Visibility="Hidden"/>
-		
+
 		<TreeView x:Name="m_HeaderView" Visibility="Hidden" Grid.Row="2">
-			
 		</TreeView>
 	</Grid>
 </UserControl>

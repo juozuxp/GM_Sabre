@@ -1,10 +1,8 @@
 #include "Disassembler.hpp"
 #include "Utility.hpp"
 
-std::vector<ILInstruction> Disassembler::Disassemble(const void* base, uint32_t size)
+void Disassembler::Disassemble(const void* base, uint32_t size, std::vector<ILInstruction>& instructions) const
 {
-	std::vector<ILInstruction> instructions;
-
 	ILInstruction instruction = {};
 
 	uint8_t instructionSize = 0;
@@ -13,11 +11,9 @@ std::vector<ILInstruction> Disassembler::Disassemble(const void* base, uint32_t 
 		instruction = Disassemble(reinterpret_cast<const uint8_t*>(base) + i);
 		instructions.push_back(instruction);
 	}
-
-	return instructions;
 }
 
-ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
+ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 {
 	const Package* core = reinterpret_cast<const Package*>(CompiledPackage);
 	const uint8_t* bytes = instruction;

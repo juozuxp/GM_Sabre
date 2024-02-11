@@ -10,21 +10,14 @@
 			 d:DesignHeight="300" d:DesignWidth="627.493"
 			 Name="MyToolWindow">
 	<Grid>
-		<ScrollViewer VerticalScrollBarVisibility="Auto">
-			<Grid>
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="2*"/>
-					<ColumnDefinition Width="3*"/>
-					<ColumnDefinition Width="5*"/>
-				</Grid.ColumnDefinitions>
-				<TextBlock Name="dism_addresses" Grid.Column="0" Foreground="#FF808080">
-				</TextBlock>
-				<TextBlock Name="dism_bytes" Grid.Column="1" Foreground="#FF008080">
-				</TextBlock>
-				<TextBlock Name="dism_instructions" Grid.Column="2" Foreground="White">
-					<!-- <Run Foreground="#FFFFAF00">mov</Run> <Run Foreground="#FFFF00FF">rax</Run>, [<Run Foreground="#FFFF00FF">rax</Run> + <Run Foreground="#FF6BFB60">10</Run>]-->
-				</TextBlock>
-			</Grid>
-		</ScrollViewer>
+		<ListView x:Name="m_DismView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True">
+			<ListView.View>
+				<GridView AllowsColumnReorder="true" >
+					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Address}" Width="200"/>
+					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Bytes}" Width="200"/>
+					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Info}" Width="100"/>
+				</GridView>
+			</ListView.View>
+		</ListView>
 	</Grid>
 </UserControl>

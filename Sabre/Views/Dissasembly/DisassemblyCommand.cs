@@ -17,17 +17,14 @@ namespace Sabre.Views.Disassembly
         /// <summary>
         /// Command ID.
         /// </summary>
-        public const int CommandId = 0x0100;
+        public const int CommandId = 0x0101;
 
-        /// <summary>
-        /// Command menu group (command set GUID).
-        /// </summary>
-        public static readonly Guid CommandSet = new Guid("9bcfc063-3dbc-405a-b5f3-cf7cc224a5f5");
+		public static readonly Guid CommandSet = new Guid("fa4c2f58-3039-42e9-84b9-eca29e509d36");
 
-        /// <summary>
-        /// VS Package that provides this command, not null.
-        /// </summary>
-        private readonly AsyncPackage package;
+		/// <summary>
+		/// VS Package that provides this command, not null.
+		/// </summary>
+		private readonly AsyncPackage package;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DisassemblyCommand"/> class.

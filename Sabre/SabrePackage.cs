@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.Shell;
+using Sabre.Views.Disassembly;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -27,12 +28,15 @@ namespace Sabre
     [Guid(SabrePackage.PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(Sabre.Views.Dismantler.DismantlerView))]
-    public sealed class SabrePackage : AsyncPackage
+	[ProvideToolWindow(typeof(Sabre.Views.Disassembly.DisassemblyView))]
+	public sealed class SabrePackage : AsyncPackage
     {
         /// <summary>
         /// SaberPackage GUID string.
         /// </summary>
         public const string PackageGuidString = "0b1f213b-3690-4155-8722-d31177fdb5cb";
+
+        public static SabrePackage s_Instance { get; private set; }
 
         #region Package Members
 
@@ -45,10 +49,14 @@ namespace Sabre
         /// <returns>A task representing the async work of package initialization, or an already completed task if there is none. Do not return null from this method.</returns>
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            // When initialized asynchronously, the current thread may be a background thread at this point.
-            // Do any initialization that requires the UI thread after switching to the UI thread.
-            await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-            await Sabre.Views.Dismantler.DismantlerCommand.InitializeAsync(this);
+            s_Instance = this;
+
+			// When initialized asynchronously, the current thread may be a background thread at this point.
+			// Do any initialization that requires the UI thread after switching to the UI thread.
+			await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+            await Views.Dismantler.DismantlerCommand.InitializeAsync(this);
+            await Views.Disassembly.DisassemblyCommand.InitializeAsync(this);
         }
 
         #endregion

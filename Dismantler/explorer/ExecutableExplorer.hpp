@@ -4,6 +4,9 @@
 #include "pe/PEBuffer.hpp"
 #include "managed/ManagedObject.hpp"
 
+#include "FunctionExplorer.hpp"
+#include "ExecutableView.hpp"
+
 class ExecutableExplorer : public ManagedObject
 {
 public:
@@ -11,8 +14,10 @@ public:
 	ExecutableExplorer(const std::wstring_view& path);
 
 public:
-	PEHeaders* GetHeaders();
+	PEHeaders* GetHeaders() const;
+	ExecutableView* GetExecutableView() const;
 
 private:
 	PEBuffer m_Buffer;
+	FunctionExplorer m_FunctionExplorer;
 };

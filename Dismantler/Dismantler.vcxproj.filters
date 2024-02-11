@@ -21,12 +21,6 @@
     <ClCompile Include="managed\ManagedExportInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="disassembler\DisassemblyExportInterface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="disassembler\DisassemblyInterface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="explorer\ExecutableExplorer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -37,6 +31,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pe\PEHeaders.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="explorer\ExecutableView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="explorer\ExecutableViewSection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="explorer\FunctionExplorer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,9 +53,6 @@
     <ClInclude Include="managed\ManagedString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="disassembler\DisassemblyInterface.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="managed\ManagedGenericArray.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -63,6 +63,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pe\PEHeaders.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="explorer\ExecutableView.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="explorer\ExecutableViewSection.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="explorer\FunctionExplorer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

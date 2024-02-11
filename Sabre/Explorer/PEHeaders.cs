@@ -1,11 +1,8 @@
 ﻿using Sabre.Native.PEHeaders;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -121,9 +118,11 @@ namespace Sabre.Explorer
 
 			item.Header = "optional header";
 
-			ListView view = NewListView();
+			IMAGE_DATA_DIRECTORY[] directories;
 			if (m_NT32.FileHeader.SizeOfOptionalHeader == Marshal.SizeOf<IMAGE_OPTIONAL_HEADER32>())
 			{
+				ListView view = NewListView();
+
 				view.Items.Add(new { m_Name = "Magic", m_Value = m_NT32.OptionalHeader.Magic.ToString("X4") });
 				view.Items.Add(new { m_Name = "Major Linker Version", m_Value = m_NT32.OptionalHeader.MajorLinkerVersion.ToString("X2") });
 				view.Items.Add(new { m_Name = "Minor Linker Version", m_Value = m_NT32.OptionalHeader.MinorLinkerVersion.ToString("X2") });
@@ -154,9 +153,15 @@ namespace Sabre.Explorer
 				view.Items.Add(new { m_Name = "Size Of Heap Commit", m_Value = m_NT32.OptionalHeader.SizeOfHeapCommit.ToString("X8") });
 				view.Items.Add(new { m_Name = "Loader Flags", m_Value = m_NT32.OptionalHeader.LoaderFlags.ToString("X8") });
 				view.Items.Add(new { m_Name = "Number Of Rva And Sizes", m_Value = m_NT32.OptionalHeader.NumberOfRvaAndSizes.ToString("X8") });
+
+				item.Items.Add(view);
+
+				directories = m_NT32.OptionalHeader.DataDirectory;
 			}
 			else
 			{
+				ListView view = NewListView();
+
 				view.Items.Add(new { m_Name = "Magic", m_Value = m_NT64.OptionalHeader.Magic.ToString("X4") });
 				view.Items.Add(new { m_Name = "Major Linker Version", m_Value = m_NT64.OptionalHeader.MajorLinkerVersion.ToString("X2") });
 				view.Items.Add(new { m_Name = "Minor Linker Version", m_Value = m_NT64.OptionalHeader.MinorLinkerVersion.ToString("X2") });
@@ -186,9 +191,221 @@ namespace Sabre.Explorer
 				view.Items.Add(new { m_Name = "Size Of Heap Commit", m_Value = m_NT64.OptionalHeader.SizeOfHeapCommit.ToString("X16") });
 				view.Items.Add(new { m_Name = "Loader Flags", m_Value = m_NT64.OptionalHeader.LoaderFlags.ToString("X8") });
 				view.Items.Add(new { m_Name = "Number Of Rva And Sizes", m_Value = m_NT64.OptionalHeader.NumberOfRvaAndSizes.ToString("X8") });
+
+				item.Items.Add(view);
+
+				directories = m_NT64.OptionalHeader.DataDirectory;
 			}
 
-			item.Items.Add(view);
+			TreeViewItem directoryItem = new TreeViewItem();
+			IMAGE_DATA_DIRECTORY directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_EXPORT];
+
+			directoryItem.Header = "export directory";
+
+			ListView directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
+
+			directoryItem = new TreeViewItem();
+			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_IMPORT];
+
+			directoryItem.Header = "import directory";
+
+			directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
+
+			directoryItem = new TreeViewItem();
+			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_RESOURCE];
+
+			directoryItem.Header = "resource directory";
+
+			directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
+
+			directoryItem = new TreeViewItem();
+			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_EXCEPTION];
+
+			directoryItem.Header = "exception directory";
+
+			directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
+
+			directoryItem = new TreeViewItem();
+			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_SECURITY];
+
+			directoryItem.Header = "security directory";
+
+			directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
+
+			directoryItem = new TreeViewItem();
+			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_BASERELOC];
+
+			directoryItem.Header = "base relocation directory";
+
+			directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
+
+			directoryItem = new TreeViewItem();
+			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_DEBUG];
+
+			directoryItem.Header = "debug directory";
+
+			directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
+
+			directoryItem = new TreeViewItem();
+			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_ARCHITECTURE];
+
+			directoryItem.Header = "architecture directory";
+
+			directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
+
+			directoryItem = new TreeViewItem();
+			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_GLOBALPTR];
+
+			directoryItem.Header = "global directory";
+
+			directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
+
+			directoryItem = new TreeViewItem();
+			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_TLS];
+
+			directoryItem.Header = "thread local storage directory";
+
+			directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
+
+			directoryItem = new TreeViewItem();
+			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG];
+
+			directoryItem.Header = "load config directory";
+
+			directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
+
+			directoryItem = new TreeViewItem();
+			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT];
+
+			directoryItem.Header = "bound import directory";
+
+			directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
+
+			directoryItem = new TreeViewItem();
+			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_IAT];
+
+			directoryItem.Header = "import address table directory";
+
+			directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
+
+			directoryItem = new TreeViewItem();
+			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT];
+
+			directoryItem.Header = "delay import directory";
+
+			directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
+
+			directoryItem = new TreeViewItem();
+			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR];
+
+			directoryItem.Header = "com descriptor directory";
+
+			directoryView = NewListView();
+
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
+
+			directoryItem.Items.Add(directoryView);
+
+			item.Items.Add(directoryItem);
 
 			return item;
 		}
@@ -226,6 +443,7 @@ namespace Sabre.Explorer
 
 				view.Items.Add(new { m_Name = "Name", m_Value = section.Name });
 				view.Items.Add(new { m_Name = "Virtual Size", m_Value = section.VirtualSize.ToString("X8") });
+				view.Items.Add(new { m_Name = "Virtual Address", m_Value = section.VirtualAddress.ToString("X8") });
 				view.Items.Add(new { m_Name = "Size Of Raw Data", m_Value = section.SizeOfRawData.ToString("X8") });
 				view.Items.Add(new { m_Name = "Pointer To Raw Data", m_Value = section.PointerToRawData.ToString("X8") });
 				view.Items.Add(new { m_Name = "Pointer To Relocations", m_Value = section.PointerToRelocations.ToString("X8") });

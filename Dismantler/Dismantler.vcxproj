@@ -27,26 +27,26 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -135,10 +135,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="disassembler\DisassemblyInterface.cpp" />
-    <ClCompile Include="disassembler\DisassemblyExportInterface.cpp" />
+    <ClCompile Include="explorer\ExecutableViewSection.cpp" />
+    <ClCompile Include="explorer\ExecutableView.cpp" />
     <ClCompile Include="explorer\ExecutableExplorerExportInterface.cpp" />
     <ClCompile Include="explorer\ExecutableExplorer.cpp" />
+    <ClCompile Include="explorer\FunctionExplorer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="managed\ManagedExportInterface.cpp" />
     <ClCompile Include="pe\PEBuffer.cpp" />
@@ -150,8 +151,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="disassembler\DisassemblyInterface.hpp" />
+    <ClInclude Include="explorer\ExecutableViewSection.hpp" />
+    <ClInclude Include="explorer\ExecutableView.hpp" />
     <ClInclude Include="explorer\ExecutableExplorer.hpp" />
+    <ClInclude Include="explorer\FunctionExplorer.hpp" />
     <ClInclude Include="managed\ManagedGenericArray.hpp" />
     <ClInclude Include="managed\ManagedString.hpp" />
     <ClInclude Include="managed\ManagedObject.hpp" />
