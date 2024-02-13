@@ -30,10 +30,16 @@ public:
 	std::vector<Function> ExplorePEFunctions(const PEBuffer& buffer) const;
 
 private:
-	std::vector<Function> ExploreBranch(const void* branch, State state, std::unordered_set<const void*>& explored, uint32_t& size) const;
+	std::vector<Function> ExploreBranch(const void* base, const void* branch, State state, std::unordered_set<const void*>& explored, uint32_t& size) const;
 
 private:
 	static void HandleMov(const ILInstruction& instruction, State& state);
+	static void HandleAdd(const ILInstruction& instruction, State& state);
+	static void HandleSub(const ILInstruction& instruction, State& state);
+	static void HandleXor(const ILInstruction& instruction, State& state);
+	static void HandleAnd(const ILInstruction& instruction, State& state);
+	static void HandleOr(const ILInstruction& instruction, State& state);
+	static void HandleNot(const ILInstruction& instruction, State& state);
 
 private:
 	Disassembler m_Disassembler;
