@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sabre.Native.Managed;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -9,9 +10,21 @@ namespace Sabre.Explorer
 {
 	internal struct ExecutableView
 	{
+		public IntPtr m_BaseAddress; // image base address
 		public IntPtr m_DataAddress; // actual mapped address
 
-		public uint m_SizeOfView; // size of the data
-		public IntPtr m_BaseAddress; // image base address
+		public ExecutableViewSection[] m_Sections;
+
+		public object[] ToListElements()
+		{
+			List<object> elements = new List<object>();
+
+			foreach (ExecutableViewSection section in m_Sections)
+			{
+				elements.AddRange(section.ToListElements(this));
+			}
+
+			return elements.ToArray();
+		}
 	}
 }

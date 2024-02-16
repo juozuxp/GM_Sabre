@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 using Microsoft.Win32;
+using EnvDTE80;
 
 namespace Sabre.Dismantler.Visuals
 {
@@ -16,22 +17,6 @@ namespace Sabre.Dismantler.Visuals
 			public byte[] m_Bytes;
 
 			public IntPtr m_Reference;
-
-			public Brush m_ValueBrush;
-			public Brush m_OffsetBrush;
-			public Brush m_AddressBrush;
-
-			public Brush m_RegisterBrush;
-
-			public Brush m_ArithmeticBrush;
-			public Brush m_InstructionBrush;
-		}
-
-		public struct Inlines
-		{
-			public InlineCollection m_Bytes;
-			public InlineCollection m_Addresses;
-			public InlineCollection m_Instructions;
 		}
 
 		private static readonly string[] c_InstructionName = new string[]
@@ -96,32 +81,33 @@ namespace Sabre.Dismantler.Visuals
 			"cs", "ss", "ds", "es", "gs", "fs" // Segments
 		};
 
-		public static void ToInlineElements(NativeVisual[] visuals, Inlines inlines, Options options)
+		public static object[] ToListElements(NativeVisual[] visuals, Options options)
 		{
 			int offset = 0;
 			IntPtr address = options.m_Reference;
 
 			bool operand = false;
-			bool insturction = false;
+
+			List<object> elements = new List<object>();
+
+			string bytesStr = null;
+			string addressStr = null;
 
 			StringBuilder builder = new StringBuilder();
 			foreach (NativeVisual visual in visuals)
 			{
 				if (visual.m_Type != NativeVisual.Type.Instruction)
 				{
-					if (inlines.m_Instructions != null)
+					if (operand)
 					{
-						if (operand)
-						{
-							inlines.m_Instructions.Add(", ");
-						}
-						else
-						{
-							inlines.m_Instructions.Add(" ");
-						}
-
-						operand = true;
+						builder.Append(", ");
 					}
+					else
+					{
+						builder.Append(' ');
+					}
+
+					operand = true;
 				}
 				else
 				{
@@ -132,169 +118,62 @@ namespace Sabre.Dismantler.Visuals
 				{
 					case NativeVisual.Type.Instruction:
 
-						if (inlines.m_Addresses != null)
+						if (builder.Length != 0)
 						{
-							inlines.m_Addresses.Add(address.ToString("X16"));
-							inlines.m_Addresses.Add(new LineBreak());
-
-							address += visual.m_Instruction.m_Size;
+							elements.Add(new { m_Address = addressStr, m_Bytes = bytesStr, m_Info = builder.ToString() });
 						}
 
-						if (inlines.m_Bytes != null)
+						addressStr = address.ToString("X16");
+						address += visual.m_Instruction.m_Size;
+
+						builder.Clear();
+
+						for (int i = 0; i < visual.m_Instruction.m_Size; i++)
 						{
-							builder.Clear();
-
-							for (int i = 0; i < visual.m_Instruction.m_Size; i++)
+							if (i != 0)
 							{
-								if (i != 0)
-								{
-									builder.Append(' ');
-								}
-
-								builder.Append(options.m_Bytes[i + offset].ToString("X2"));
+								builder.Append(' ');
 							}
 
-							builder.Append('\n');
-
-							inlines.m_Bytes.Add(builder.ToString());
-
-							offset += visual.m_Instruction.m_Size;
+							builder.Append(options.m_Bytes[i + offset].ToString("X2"));
 						}
 
-						if (inlines.m_Instructions != null)
-						{
-							if (!insturction)
-							{
-								insturction = true;
-							}
-							else
-							{
-								inlines.m_Instructions.Add(new LineBreak());
-							}
+						bytesStr = builder.ToString();
+						offset += visual.m_Instruction.m_Size;
 
-							string name = c_InstructionName[visual.m_Instruction.m_Type];
+						builder.Clear();
 
-							if (options.m_InstructionBrush != null)
-							{
-								Run run = new Run(name);
-
-								run.Foreground = options.m_InstructionBrush;
-
-								inlines.m_Instructions.Add(run);
-							}
-							else
-							{
-								inlines.m_Instructions.Add(name);
-							}
-						}
-
+						builder.Append(c_InstructionName[visual.m_Instruction.m_Type]);
 						break;
-					case NativeVisual.Type.OperandMemory:
 
-						if (inlines.m_Instructions == null)
-						{
-							continue;
-						}
+					case NativeVisual.Type.OperandMemory:
 
 						if (visual.m_Memory.m_Segment != NativeVisual.c_IvalidRegister)
 						{
-							string name = c_Registers[visual.m_Memory.m_Segment];
-							if (options.m_RegisterBrush != null)
-							{
-								Run run = new Run(name);
-
-								run.Foreground = options.m_RegisterBrush;
-
-								inlines.m_Instructions.Add(run);
-							}
-							else
-							{
-								inlines.m_Instructions.Add(name);
-							}
-
-							inlines.m_Instructions.Add(":[");
+							builder.Append($"{c_Registers[visual.m_Memory.m_Segment]}:[");
 						}
 						else
 						{
-							inlines.m_Instructions.Add("[");
+							builder.Append('[');
 						}
 
 						if (visual.m_Memory.m_Base != NativeVisual.c_IvalidRegister)
 						{
-							string name = c_Registers[visual.m_Memory.m_Base];
-							if (options.m_RegisterBrush != null)
-							{
-								Run run = new Run(name);
-
-								run.Foreground = options.m_RegisterBrush;
-
-								inlines.m_Instructions.Add(run);
-							}
-							else
-							{
-								inlines.m_Instructions.Add(name);
-							}
+							builder.Append(c_Registers[visual.m_Memory.m_Base]);
 						}
 
 						if (visual.m_Memory.m_Index != NativeVisual.c_IvalidRegister)
 						{
 							if (visual.m_Memory.m_Base != NativeVisual.c_IvalidRegister)
 							{
-								if (options.m_ArithmeticBrush != null)
-								{
-									Run run = new Run(" + ");
-
-									run.Foreground = options.m_ArithmeticBrush;
-
-									inlines.m_Instructions.Add(run);
-								}
-								else
-								{
-									inlines.m_Instructions.Add(" + ");
-								}
+								builder.Append(" + ");
 							}
 
-							string name = c_Registers[visual.m_Memory.m_Index];
-							if (options.m_RegisterBrush != null)
-							{
-								Run run = new Run(name);
-
-								run.Foreground = options.m_RegisterBrush;
-
-								inlines.m_Instructions.Add(run);
-							}
-							else
-							{
-								inlines.m_Instructions.Add(name);
-							}
+							builder.Append(c_Registers[visual.m_Memory.m_Index]);
 
 							if (visual.m_Memory.m_Multiplier != 0)
 							{
-								if (options.m_ArithmeticBrush != null)
-								{
-									Run run = new Run(" * ");
-
-									run.Foreground = options.m_ArithmeticBrush;
-
-									inlines.m_Instructions.Add(run);
-								}
-								else
-								{
-									inlines.m_Instructions.Add(" * ");
-								}
-
-								if (options.m_OffsetBrush != null)
-								{
-									Run run = new Run(name);
-
-									run.Foreground = options.m_OffsetBrush;
-
-									inlines.m_Instructions.Add(visual.m_Memory.m_Multiplier.ToString());
-								}
-								else
-								{
-									inlines.m_Instructions.Add(visual.m_Memory.m_Multiplier.ToString());
-								}
+								builder.Append($" * {visual.m_Memory.m_Multiplier}");
 							}
 						}
 
@@ -308,89 +187,28 @@ namespace Sabre.Dismantler.Visuals
 							{
 								value = sign ? -value : value;
 
-								string name = sign ? " - " : " + ";
-								if (options.m_ArithmeticBrush != null)
-								{
-									Run run = new Run(name);
-
-									run.Foreground = options.m_ArithmeticBrush;
-
-									inlines.m_Instructions.Add(run);
-								}
-								else
-								{
-									inlines.m_Instructions.Add(name);
-								}
+								builder.Append(sign ? " - " : " + ");
 							}
 
-							if (options.m_OffsetBrush != null)
-							{
-								Run run = new Run(value.ToString("X8"));
-
-								run.Foreground = options.m_OffsetBrush;
-
-								inlines.m_Instructions.Add(run);
-							}
-							else
-							{
-								inlines.m_Instructions.Add(value.ToString("X8"));
-							}
+							builder.Append(value.ToString("X8"));
 						}
 
-						inlines.m_Instructions.Add("]");
+						builder.Append(']');
 						break;
 
 					case NativeVisual.Type.OperandRegister:
 
-						if (options.m_RegisterBrush != null)
-						{
-							Run run = new Run(c_Registers[visual.m_Register]);
-
-							run.Foreground = options.m_RegisterBrush;
-
-							inlines.m_Instructions.Add(run);
-						}
-						else
-						{
-							inlines.m_Instructions.Add(c_Registers[visual.m_Register]);
-						}
-
+						builder.Append(c_Registers[visual.m_Register]);
 						break;
 
 					case NativeVisual.Type.OperandMemoryValue:
 
-						inlines.m_Instructions.Add("[");
-						if (options.m_AddressBrush != null)
-						{
-							Run run = new Run(visual.m_Value.m_Value.ToString("X16"));
-
-							run.Foreground = options.m_AddressBrush;
-
-							inlines.m_Instructions.Add(run);
-						}
-						else
-						{
-							inlines.m_Instructions.Add(visual.m_Value.m_Value.ToString("X16"));
-						}
-
-						inlines.m_Instructions.Add("]");
+						builder.Append($"[{visual.m_Value.m_Value.ToString("X16")}]");
 						break;
 
 					case NativeVisual.Type.OperandAddressValue:
 
-						if (options.m_AddressBrush != null)
-						{
-							Run run = new Run(visual.m_Value.m_Value.ToString("X16"));
-
-							run.Foreground = options.m_AddressBrush;
-
-							inlines.m_Instructions.Add(run);
-						}
-						else
-						{
-							inlines.m_Instructions.Add(visual.m_Value.m_Value.ToString("X16"));
-						}
-
+						builder.Append(visual.m_Value.m_Value.ToString("X16"));
 						break;
 
 					case NativeVisual.Type.OperandValue:
@@ -420,23 +238,17 @@ namespace Sabre.Dismantler.Visuals
 								break;
 						}
 
-						if (options.m_ValueBrush != null)
-						{
-							Run run = new Run(local.ToString(size));
-
-							run.Foreground = options.m_ValueBrush;
-
-							inlines.m_Instructions.Add(run);
-						}
-						else
-						{
-							inlines.m_Instructions.Add(local.ToString(size));
-						}
-
+						builder.Append(local.ToString(size));
 						break;
-
 				}
 			}
+
+			if (builder.Length != 0)
+			{
+				elements.Add(new { m_Address = addressStr, m_Bytes = bytesStr, m_Info = builder.ToString() });
+			}
+
+			return elements.ToArray();
 		}
 	}
 }

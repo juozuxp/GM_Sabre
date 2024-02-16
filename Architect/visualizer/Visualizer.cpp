@@ -9,7 +9,7 @@ Visualizer::Visualizer(const Options& options) :
 {
 }
 
-void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions, const void* reference)
+void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions, const void* reference) const
 {
 	for (const std::wstring& instruction : ToStrings(instructions, reference))
 	{
@@ -17,7 +17,7 @@ void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions, 
 	}
 }
 
-std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstruction>& instructions, const void* reference)
+std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstruction>& instructions, const void* reference) const
 {
 	std::vector<Visual> visuals;
 
@@ -243,7 +243,7 @@ std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstru
 	return visuals;
 }
 
-std::vector<std::wstring> Visualizer::ToStrings(const std::vector<ILInstruction>& instructions, const void* reference)
+std::vector<std::wstring> Visualizer::ToStrings(const std::vector<ILInstruction>& instructions, const void* reference) const
 {
 	constexpr std::wstring_view general64[] = { L"rax", L"rcx", L"rdx", L"rbx", L"rsp", L"rbp", L"rsi", L"rdi", L"r8", L"r9", L"r10", L"r11", L"r12", L"r13", L"r14", L"r15" };
 	constexpr std::wstring_view general32[] = { L"eax", L"ecx", L"edx", L"ebx", L"esp", L"ebp", L"esi", L"edi", L"r8d", L"r9d", L"r10d", L"r11d", L"r12d", L"r13d", L"r14d", L"r15d" };

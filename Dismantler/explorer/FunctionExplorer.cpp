@@ -51,7 +51,14 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreBranch(const vo
 	size = 0;
 	explored.insert(branch);
 
+	uint32_t maxSize = 0;
+
 	uint64_t enterSP = state.m_General[REG_RSP];
+	if (base == branch)
+	{
+		enterSP = 0;
+	}
+
 	while (true)
 	{
 		instructions.clear();
@@ -90,6 +97,11 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreBranch(const vo
 				const ILOperand& dest = instruction.m_Operands[0];
 				if (dest.m_Type != ILOperandType_ValueRelative)
 				{
+					if (size < maxSize)
+					{
+						size = maxSize;
+					}
+
 					return functions;
 				}
 
@@ -101,17 +113,32 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreBranch(const vo
 					base = branch;
 					if (explored.contains(base))
 					{
+						if (size < maxSize)
+						{
+							size = maxSize;
+						}
+
 						return functions;
 					}
 
-					explored.insert(branch);
 					size = 0;
 				}
 				else
 				{
+					if (explored.contains(branch))
+					{
+						if (size < maxSize)
+						{
+							size = maxSize;
+						}
+
+						return functions;
+					}
+
 					size += dest.m_Relative.m_Value;
 				}
 
+				explored.insert(branch);
 
 				breakout = true;
 			} break;
@@ -127,14 +154,60 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreBranch(const vo
 
 				if (!explored.contains(function))
 				{
-					std::vector<Function> result = ExploreBranch(function, function, state, explored, size);
+					uint32_t funcSize;
+
+					std::vector<Function> result = ExploreBranch(function, function, state, explored, funcSize);
 
 					functions.insert(functions.end(), result.begin(), result.end());
-					functions.push_back(Function(function, size));
+					functions.push_back(Function(function, funcSize));
+				}
+			} break;
+			case InsType_ja:
+			case InsType_jae:
+			case InsType_jb:
+			case InsType_jbe:
+			case InsType_je:
+			case InsType_jg:
+			case InsType_jge:
+			case InsType_jl:
+			case InsType_jle:
+			case InsType_jne:
+			case InsType_jno:
+			case InsType_jns:
+			case InsType_jo:
+			case InsType_jpe:
+			case InsType_jpo:
+			case InsType_jrcxz:
+			case InsType_js:
+			{
+				const ILOperand& dest = instruction.m_Operands[0];
+				if (dest.m_Type != ILOperandType_ValueRelative)
+				{
+					continue;
+				}
+
+				const void* jump = reinterpret_cast<const uint8_t*>(branch) + dest.m_Relative.m_Value;
+				if (!explored.contains(jump))
+				{
+					uint32_t branchSize;
+
+					std::vector<Function> result = ExploreBranch(base, jump, state, explored, branchSize);
+
+					functions.insert(functions.end(), result.begin(), result.end());
+
+					if (maxSize < branchSize)
+					{
+						maxSize = branchSize;
+					}
 				}
 			} break;
 			case InsType_ret:
 			{
+				if (size < maxSize)
+				{
+					size = maxSize;
+				}
+
 				return functions;
 			} break;
 			}
@@ -145,8 +218,6 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreBranch(const vo
 			}
 		}
 	}
-
-	return {};
 }
 
 void FunctionExplorer::HandleMov(const ILInstruction& instruction, State& state)

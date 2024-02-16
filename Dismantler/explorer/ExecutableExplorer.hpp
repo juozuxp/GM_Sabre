@@ -19,5 +19,7 @@ public:
 
 private:
 	PEBuffer m_Buffer;
-	FunctionExplorer m_FunctionExplorer;
+
+	Visualizer m_Visualizer;
+	Disassembler m_Disassembler;
 };

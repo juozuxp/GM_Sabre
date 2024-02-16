@@ -12,5 +12,5 @@ PEHeaders* ExecutableExplorer::GetHeaders() const
 
 ExecutableView* ExecutableExplorer::GetExecutableView() const
 {
-	return new ExecutableView(m_Buffer, m_FunctionExplorer);
+	return new ExecutableView(m_Buffer, m_Disassembler, m_Visualizer);
 }

@@ -10,12 +10,12 @@
 			 d:DesignHeight="300" d:DesignWidth="627.493"
 			 Name="MyToolWindow">
 	<Grid>
-		<ListView x:Name="m_DismView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True">
+		<ListView x:Name="m_DismView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SizeChanged="DismView_SizeChanged">
 			<ListView.View>
 				<GridView AllowsColumnReorder="true" >
 					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Address}" Width="200"/>
 					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Bytes}" Width="200"/>
-					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Info}" Width="100"/>
+					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Info}" Width="Auto"/>
 				</GridView>
 			</ListView.View>
 		</ListView>

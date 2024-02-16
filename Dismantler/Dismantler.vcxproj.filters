@@ -36,9 +36,6 @@
     <ClCompile Include="explorer\ExecutableView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="explorer\ExecutableViewSection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="explorer\FunctionExplorer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

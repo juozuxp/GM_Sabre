@@ -13,16 +13,21 @@ namespace Sabre.Native.Managed
 		private readonly ManagedObject m_Base;
 
 		private readonly IntPtr m_Array;
-		private readonly int m_Size;
-		private readonly int m_Capacity;
+		public readonly int m_Size;
+		public readonly int m_Capacity;
 
 		public void Dispose()
 		{
 			m_Base.Dispose();
 		}
 
-		public T[] ToArray<T>()
+		public T[] ToArray<T>() where T : struct
 		{
+			if (m_Size == 0)
+			{
+				return null;
+			}
+
 			T[] array = new T[m_Size];
 
 			IntPtr address = m_Array;

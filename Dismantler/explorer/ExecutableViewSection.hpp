@@ -1,5 +1,6 @@
 #pragma once
 #include "managed/ManagedGenericArray.hpp"
+#include <Disassembler.hpp>
 #include <Visualizer.hpp>
 
 struct ExecutableViewSection
@@ -7,21 +8,13 @@ struct ExecutableViewSection
 	enum class Type
 	{
 		Bytes,
-		Function
+		Code
 	};
 
-	union
-	{
-		struct
-		{
-			uint32_t m_Start;
-			uint32_t m_Size;
-		} m_Bytes;
+	Type m_Type = Type::Bytes;
 
-		struct
-		{
-			uint32_t m_Start;
-			ManagedGenericArray<Visualizer::Visual> m_Visuals;
-		} m_Function;
-	};
+	uint32_t m_Start;
+	uint32_t m_Size;
+
+	ManagedGenericArray<Visualizer::Visual> m_Visuals;
 };

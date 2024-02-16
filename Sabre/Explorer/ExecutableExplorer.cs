@@ -1,4 +1,5 @@
-﻿using Sabre.Native.Managed;
+﻿using Sabre.Dismantler.Visuals;
+using Sabre.Native.Managed;
 using Sabre.Native.PEHeaders;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,31 @@ namespace Sabre.Explorer
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
+		internal struct NativeExecutableViewSection
+		{
+			public readonly ExecutableViewSection.Type m_Type;
+
+			public readonly uint m_Start;
+			public readonly uint m_Size;
+
+			public readonly ManagedGenericArray m_Visuals;
+
+			public ExecutableViewSection ToData()
+			{
+				ExecutableViewSection data = new ExecutableViewSection();
+
+				data.m_Type = m_Type;
+
+				data.m_Size = m_Size;
+				data.m_Start = m_Start;
+
+				data.m_Visuals = m_Visuals.ToArray<NativeVisual>();
+
+				return data;
+			}
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
 		internal struct NativeExecutableView : IDisposable
 		{
 			private readonly ManagedObject m_Base;
@@ -49,15 +75,22 @@ namespace Sabre.Explorer
 			public readonly IntPtr m_BaseAddress; // image base address
 			public readonly IntPtr m_DataAddress; // actual mapped address
 
-			public readonly uint m_SizeOfView; // size of the data
+			public readonly ManagedGenericArray m_Sections;
 
 			public ExecutableView ToData()
 			{
 				ExecutableView data = new ExecutableView();
 
 				data.m_DataAddress = m_DataAddress;
-				data.m_SizeOfView = m_SizeOfView;
 				data.m_BaseAddress = m_BaseAddress;
+
+				data.m_Sections = new ExecutableViewSection[m_Sections.m_Size];
+
+				NativeExecutableViewSection[] sections = m_Sections.ToArray<NativeExecutableViewSection>();
+				for (int i = 0; i < sections.Length; i++)
+				{
+					data.m_Sections[i] = sections[i].ToData();
+				}
 
 				return data;
 			}
