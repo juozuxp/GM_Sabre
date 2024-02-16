@@ -38,18 +38,14 @@ namespace Sabre.Explorer
 
 					IntPtr address = view.m_BaseAddress + (int)m_Start;
 
-					object[] list = new object[m_Size / 8 + ((m_Size % 8) != 0 ? 1 : 0) + ((m_Start % 8) != 0 ? 1 : 0)];
+					object[] list = new object[m_Size / 8 + (((m_Size - (8 - (m_Start % 8))) % 8) != 0 ? 1 : 0) + ((m_Start % 8) != 0 ? 1 : 0)];
 
 					int listIndex = 0;
 					if (m_Start % 8 != 0)
 					{
-						for (int i = 0; i < m_Start % 8; i++)
+						for (int i = 0; i < 8 - (m_Start % 8); i++)
 						{
 							if (i != 0)
-							{
-								builder.Append(' ');
-							}
-							else
 							{
 								builder.Append(' ');
 							}
@@ -57,20 +53,18 @@ namespace Sabre.Explorer
 							builder.Append(bytes[i].ToString("X2"));
 						}
 
-						list[listIndex++] = new { m_Address = address, m_Bytes = builder.ToString(), m_Info = string.Empty };
+						list[listIndex++] = new { m_Address = address.ToString("X16"), m_Bytes = builder.ToString(), m_Info = string.Empty };
+
+						address += (int)(8 - (m_Start % 8));
 					}
 
-					for (uint i = m_Start % 8; i < m_Size; i += 8, address += 8)
+					for (uint i = (m_Start % 8) != 0 ? (8 - (m_Start % 8)) : 0; i < m_Size; i += 8, address += 8)
 					{
 						if (m_Size - i < 8)
 						{
 							for (int j = 0; j < bytes.Length - i; j++)
 							{
 								if (j != 0)
-								{
-									builder.Append(' ');
-								}
-								else
 								{
 									builder.Append(' ');
 								}
