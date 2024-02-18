@@ -4,11 +4,11 @@ using System.Windows.Controls;
 using Sabre.Controller;
 using Sabre.Explorer;
 
-namespace Sabre.Views.Disassembly
+namespace Sabre.Views.ByteView
 {
-	public partial class DisassemblyControl : UserControl
+	public partial class ByteViewControl : UserControl
 	{
-		public DisassemblyControl()
+		public ByteViewControl()
 		{
 			this.InitializeComponent();
 

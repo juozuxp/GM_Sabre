@@ -7,12 +7,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
-namespace Sabre.Views.Dismantler
+namespace Sabre.Views.Loader
 {
 	/// <summary>
 	/// Command handler
 	/// </summary>
-	internal sealed class DismantlerCommand
+	internal sealed class LoaderCommand
 	{
 		public const int CommandId = 256;
 
@@ -20,7 +20,7 @@ namespace Sabre.Views.Dismantler
 
 		private readonly AsyncPackage package;
 
-		private DismantlerCommand(AsyncPackage package, OleMenuCommandService commandService)
+		private LoaderCommand(AsyncPackage package, OleMenuCommandService commandService)
 		{
 			this.package = package ?? throw new ArgumentNullException(nameof(package));
 			commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
@@ -30,7 +30,7 @@ namespace Sabre.Views.Dismantler
 			commandService.AddCommand(menuItem);
 		}
 
-		public static DismantlerCommand Instance
+		public static LoaderCommand Instance
 		{
 			get;
 			private set;
@@ -49,14 +49,14 @@ namespace Sabre.Views.Dismantler
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
 			OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
-			Instance = new DismantlerCommand(package, commandService);
+			Instance = new LoaderCommand(package, commandService);
 		}
 
 		private void Execute(object sender, EventArgs e)
 		{
 			ThreadHelper.ThrowIfNotOnUIThread();
 
-			ToolWindowPane window = this.package.FindToolWindow(typeof(DismantlerView), 0, true);
+			ToolWindowPane window = this.package.FindToolWindow(typeof(LoaderView), 0, true);
 			if ((null == window) || (null == window.Frame))
 			{
 				throw new NotSupportedException("Cannot create tool window");

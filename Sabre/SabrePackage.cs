@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.Shell;
-using Sabre.Views.Disassembly;
+using Sabre.Views.ByteView;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -27,8 +27,8 @@ namespace Sabre
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(SabrePackage.PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [ProvideToolWindow(typeof(Sabre.Views.Dismantler.DismantlerView))]
-	[ProvideToolWindow(typeof(Sabre.Views.Disassembly.DisassemblyView))]
+    [ProvideToolWindow(typeof(Sabre.Views.Loader.LoaderView))]
+	[ProvideToolWindow(typeof(Sabre.Views.ByteView.ByteViewView))]
 	public sealed class SabrePackage : AsyncPackage
     {
         /// <summary>
@@ -55,8 +55,8 @@ namespace Sabre
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-            await Views.Dismantler.DismantlerCommand.InitializeAsync(this);
-            await Views.Disassembly.DisassemblyCommand.InitializeAsync(this);
+            await Views.Loader.LoaderCommand.InitializeAsync(this);
+            await Views.ByteView.ByteViewCommand.InitializeAsync(this);
         }
 
         #endregion

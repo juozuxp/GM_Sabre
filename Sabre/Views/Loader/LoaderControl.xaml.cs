@@ -3,16 +3,16 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
 using Sabre.Controller;
 using Sabre.Explorer;
-using Sabre.Views.Disassembly;
+using Sabre.Views.ByteView;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Sabre.Views.Dismantler
+namespace Sabre.Views.Loader
 {
-	public partial class DismantlerControl : UserControl
+	public partial class LoaderControl : UserControl
 	{
-		public DismantlerControl()
+		public LoaderControl()
 		{
 			this.InitializeComponent();
 		}

@@ -74,15 +74,15 @@
     <Compile Include="Native\PEHeaders\IMAGE_OPTIONAL_HEADER64.cs" />
     <Compile Include="Native\PEHeaders\IMAGE_SECTION_HEADER.cs" />
     <Compile Include="Utility\VsTheme.cs" />
-    <Compile Include="Views\Dismantler\DismantlerView.cs" />
-    <Compile Include="Views\Dismantler\DismantlerCommand.cs" />
-    <Compile Include="Views\Dismantler\DismantlerControl.xaml.cs">
-      <DependentUpon>DismantlerControl.xaml</DependentUpon>
+    <Compile Include="Views\Loader\LoaderView.cs" />
+    <Compile Include="Views\Loader\LoaderCommand.cs" />
+    <Compile Include="Views\Loader\LoaderControl.xaml.cs">
+      <DependentUpon>LoaderControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Dissasembly\DisassemblyView.cs" />
-    <Compile Include="Views\Dissasembly\DisassemblyCommand.cs" />
-    <Compile Include="Views\Dissasembly\DisassemblyControl.xaml.cs">
-      <DependentUpon>DisassemblyControl.xaml</DependentUpon>
+    <Compile Include="Views\ByteView\ByteViewView.cs" />
+    <Compile Include="Views\ByteView\ByteViewCommand.cs" />
+    <Compile Include="Views\ByteView\ByteViewControl.xaml.cs">
+      <DependentUpon>ByteViewControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Native\Managed\ManagedArray.cs" />
     <Compile Include="Native\Managed\ManagedGenericArray.cs" />
@@ -119,11 +119,11 @@
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.8.2367" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Views\Dismantler\DismantlerControl.xaml">
+    <Page Include="Views\Loader\LoaderControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Dissasembly\DisassemblyControl.xaml">
+    <Page Include="Views\ByteView\ByteViewControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -142,10 +142,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <Content Include="Views\Dismantler\Resources\DismantlerCommand.png" />
-    <Content Include="Views\Dissasembly\Resources\DisassemblyCommand.png" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
