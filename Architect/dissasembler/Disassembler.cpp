@@ -5,7 +5,6 @@ void Disassembler::Disassemble(const void* base, uint32_t size, std::vector<ILIn
 {
 	ILInstruction instruction = {};
 
-	uint8_t instructionSize = 0;
 	for (uint32_t i = 0; i < size; i += instruction.m_Size)
 	{
 		instruction = Disassemble(reinterpret_cast<const uint8_t*>(base) + i);

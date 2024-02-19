@@ -11,6 +11,7 @@ Visualizer::Visualizer(const Options& options) :
 
 void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions, const void* reference) const
 {
+	uint32_t index = 0;
 	for (const std::wstring& instruction : ToStrings(instructions, reference))
 	{
 		wprintf(L"%s\n", instruction.c_str());
@@ -24,6 +25,8 @@ std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstru
 	visuals.reserve(instructions.size());
 	for (const ILInstruction& instruction : instructions)
 	{
+		reference = reinterpret_cast<const uint8_t*>(reference) + instruction.m_Size;
+
 		Visual visualInstruction;
 
 		visualInstruction.m_Type = VisType::Instruction;
@@ -170,6 +173,11 @@ std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstru
 				} break;
 				}
 
+				if (visual.m_Register == 0x97)
+				{
+					printf("tf");
+				}
+
 				visuals.push_back(visual);
 			} break;
 			case ILOperandType_Value:
@@ -190,7 +198,7 @@ std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstru
 				visual.m_Type = VisType::OperandAddressValue;
 
 				visual.m_Value.m_Size = operand.m_Scale;
-				visual.m_Value.m_Value = reinterpret_cast<int64_t>(reference) + operand.m_Relative.m_Value + instruction.m_Size;
+				visual.m_Value.m_Value = reinterpret_cast<int64_t>(reference) + operand.m_Relative.m_Value;
 
 				visuals.push_back(visual);
 			} break;
@@ -210,7 +218,7 @@ std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstru
 				}
 
 				visual.m_Value.m_Size = operand.m_Scale;
-				visual.m_Value.m_Value = reinterpret_cast<int64_t>(reference) + operand.m_Relative.m_Value + instruction.m_Size;
+				visual.m_Value.m_Value = reinterpret_cast<int64_t>(reference) + operand.m_Relative.m_Value;
 
 				visuals.push_back(visual);
 			} break;
@@ -236,8 +244,6 @@ std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstru
 			} break;
 			}
 		}
-
-		reference = reinterpret_cast<const uint8_t*>(reference) + instruction.m_Size;
 	}
 
 	return visuals;
@@ -266,16 +272,18 @@ std::vector<std::wstring> Visualizer::ToStrings(const std::vector<ILInstruction>
 	strings.reserve(instructions.size());
 	for (const ILInstruction& instruction : instructions)
 	{
-		if (instruction.m_Type == InsType_invalid)
-		{
-			stream << L"invalid";
-			continue;
-		}
+		reference = reinterpret_cast<const uint8_t*>(reference) + instruction.m_Size;
 
 		stream.str(std::wstring());
 		stream.clear();
 
 		stream << TypeToName[instruction.m_Type];
+
+		if (instruction.m_Type == InsType_invalid)
+		{
+			strings.push_back(stream.str());
+			continue;
+		}
 
 		for (uint8_t i = 0; i < ARRAY_SIZE(instruction.m_Operands); i++)
 		{
@@ -445,7 +453,7 @@ std::vector<std::wstring> Visualizer::ToStrings(const std::vector<ILInstruction>
 			} break;
 			case ILOperandType_ValueRelative:
 			{
-				stream << std::setfill(L'0') << std::setw(16) << std::hex << std::uppercase << (reinterpret_cast<const uint8_t*>(reference) + operand.m_Relative.m_Value + instruction.m_Size);
+				stream << std::setfill(L'0') << std::setw(16) << std::hex << std::uppercase << (reinterpret_cast<const uint8_t*>(reference) + operand.m_Relative.m_Value);
 			} break;
 			case ILOperandType_MemoryRelative:
 			{
@@ -454,7 +462,7 @@ std::vector<std::wstring> Visualizer::ToStrings(const std::vector<ILInstruction>
 					stream << segment[operand.m_Relative.m_Segment] << L':';
 				}
 
-				stream << L'[' << std::setfill(L'0') << std::setw(16) << std::hex << std::uppercase << (reinterpret_cast<const uint8_t*>(reference) + operand.m_Relative.m_Value + instruction.m_Size) << L']';
+				stream << L'[' << std::setfill(L'0') << std::setw(16) << std::hex << std::uppercase << (reinterpret_cast<const uint8_t*>(reference) + operand.m_Relative.m_Value) << L']';
 			} break;
 			case ILOperandType_MemoryAbsolute:
 			{
@@ -469,8 +477,6 @@ std::vector<std::wstring> Visualizer::ToStrings(const std::vector<ILInstruction>
 		}
 
 		strings.push_back(stream.str());
-
-		reference = reinterpret_cast<const uint8_t*>(reference) + instruction.m_Size;
 	}
 
 	return strings;

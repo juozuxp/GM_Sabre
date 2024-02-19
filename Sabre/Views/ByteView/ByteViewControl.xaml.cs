@@ -25,7 +25,7 @@ namespace Sabre.Views.ByteView
 
 			m_DismView.ItemsSource = view.Value.ToListElements();
 		}
-
+		
 		private void DismView_SizeChanged(object sender, SizeChangedEventArgs e)
 		{
 			ListView listView = sender as ListView;
@@ -35,6 +35,11 @@ namespace Sabre.Views.ByteView
 			for (int i = 0; i < (gridView.Columns.Count - 1); i++)
 			{
 				width = width - gridView.Columns[i].ActualWidth;
+			}
+
+			if (width < 0)
+			{
+				return;
 			}
 
 			gridView.Columns[gridView.Columns.Count - 1].Width = width;
