@@ -78,7 +78,19 @@ namespace Sabre.Dismantler.Visuals
 			"st(0)", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)", // FPU 80 bit
 			"cr0", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7", "cr8", "cr9", "cr10", "cr11", "cr12", "cr13", "cr14", "cr15", // Control registers
 			"dr0", "dr1", "dr2", "dr3", "dr4", "dr5", "dr6", "dr7", "dr8", "dr9", "dr10", "dr11", "dr12", "dr13", "dr14", "dr15", // Debug registers
-			"cs", "ss", "ds", "es", "gs", "fs", "s6", "s7" // Segments
+			"es", "cs", "ss", "fs", "ds", "gs" // Segments
+		};
+
+		private static readonly string[] c_MemoryScale = new string[]
+		{
+			"",
+			"byte ptr ",
+			"word ptr ",
+			"dword ptr ",
+			"qword ptr ",
+			"tbyte ptr ",
+			"tbyte ptr ",
+			"oword ptr "
 		};
 
 		public static object[] ToListElements(NativeVisual[] visuals, Options options)
@@ -148,6 +160,8 @@ namespace Sabre.Dismantler.Visuals
 
 					case NativeVisual.Type.OperandMemory:
 
+						builder.Append($"{c_MemoryScale[(byte)visual.m_Memory.m_Size]}");
+
 						if (visual.m_Memory.m_Segment != NativeVisual.c_IvalidRegister)
 						{
 							builder.Append($"{c_Registers[visual.m_Memory.m_Segment]}:[");
@@ -203,7 +217,7 @@ namespace Sabre.Dismantler.Visuals
 
 					case NativeVisual.Type.OperandMemoryValue:
 
-						builder.Append($"[{visual.m_Value.m_Value.ToString("X16")}]");
+						builder.Append($"{c_MemoryScale[(byte)visual.m_Value.m_Size]}[{visual.m_Value.m_Value.ToString("X16")}]");
 						break;
 
 					case NativeVisual.Type.OperandAddressValue:

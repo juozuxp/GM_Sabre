@@ -19,7 +19,7 @@ class Visualizer
 		//											"st(0)", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)", // FPU 80 bit
 		//											"cr0", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7", "cr8", "cr9", "cr10", "cr11", "cr12", "cr13", "cr14", "cr15", // Control registers
 		//											"dr0", "dr1", "dr2", "dr3", "dr4", "dr5", "dr6", "dr7", "dr8", "dr9", "dr10", "dr11", "dr12", "dr13", "dr14", "dr15", // Debug registers
-		//											"cs", "ss", "ds", "es", "gs", "fs", "s6", "s7" // Segments
+		//											"es", "cs", "ss", "fs", "ds", "gs" // Segments
 		//											};
 	
 

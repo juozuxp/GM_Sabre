@@ -173,11 +173,6 @@ std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstru
 				} break;
 				}
 
-				if (visual.m_Register == 0x97)
-				{
-					printf("tf");
-				}
-
 				visuals.push_back(visual);
 			} break;
 			case ILOperandType_Value:
