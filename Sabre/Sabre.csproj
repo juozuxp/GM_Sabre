@@ -67,6 +67,7 @@
     <Compile Include="Explorer\PEHeaders.cs" />
     <Compile Include="Explorer\PEImportEntry.cs" />
     <Compile Include="Explorer\PEImportTable.cs" />
+    <Compile Include="ListItems\ByteViewItem.cs" />
     <Compile Include="Native\PEHeaders\IMAGE_DATA_DIRECTORY.cs" />
     <Compile Include="Native\PEHeaders\IMAGE_DOS_HEADER.cs" />
     <Compile Include="Native\PEHeaders\IMAGE_FILE_HEADER.cs" />

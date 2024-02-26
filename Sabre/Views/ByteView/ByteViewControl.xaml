@@ -10,10 +10,15 @@
 			 d:DesignHeight="300" d:DesignWidth="627.493"
 			 Name="MyToolWindow">
 	<Grid>
-		<ListView x:Name="m_DismView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SizeChanged="DismView_SizeChanged">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="20"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<TextBox Grid.Row="0" x:Name="m_AddressField" TextWrapping="NoWrap" AcceptsReturn="False" KeyDown="AddressField_KeyDown"/>
+		<ListView Grid.Row="1" x:Name="m_DismView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="DismView_SizeChanged" SelectionChanged="m_DismView_SelectionChanged">
 			<ListView.View>
 				<GridView AllowsColumnReorder="true" >
-					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Address}" Width="200"/>
+					<GridViewColumn DisplayMemberBinding="{Binding Path=m_DisplayAddress}" Width="200"/>
 					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Bytes}" Width="200"/>
 					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Info}" Width="Auto"/>
 				</GridView>

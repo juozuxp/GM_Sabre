@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Markup;
 using Sabre.Dismantler.Visuals;
+using Sabre.ListItems;
 
 namespace Sabre.Explorer
 {
@@ -25,7 +26,7 @@ namespace Sabre.Explorer
 
 		public NativeVisual[] m_Visuals;
 
-		public object[] ToListElements(ExecutableView view)
+		public ByteViewItem[] ToListElements(ExecutableView view)
 		{
 			switch (m_Type)
 			{
@@ -38,7 +39,7 @@ namespace Sabre.Explorer
 
 					IntPtr address = view.m_BaseAddress + (int)m_Start;
 
-					object[] list = new object[m_Size / 8 + (((m_Size - (8 - (m_Start % 8))) % 8) != 0 ? 1 : 0) + ((m_Start % 8) != 0 ? 1 : 0)];
+					ByteViewItem[] list = new ByteViewItem[m_Size / 8 + (((m_Size - (8 - (m_Start % 8))) % 8) != 0 ? 1 : 0) + ((m_Start % 8) != 0 ? 1 : 0)];
 
 					int listIndex = 0;
 					if (m_Start % 8 != 0)
@@ -53,7 +54,7 @@ namespace Sabre.Explorer
 							builder.Append(bytes[i].ToString("X2"));
 						}
 
-						list[listIndex++] = new { m_Address = address.ToString("X16"), m_Bytes = builder.ToString(), m_Info = string.Empty };
+						list[listIndex++] = new ByteViewItem(address, builder.ToString(), null);
 
 						address += (int)(8 - (m_Start % 8));
 					}
@@ -75,7 +76,7 @@ namespace Sabre.Explorer
 							break;
 						}
 
-						list[listIndex++] = new { m_Address = address.ToString("X16"), m_Bytes = $"{bytes[i].ToString("X2")} {bytes[i + 1].ToString("X2")} {bytes[i + 2].ToString("X2")} {bytes[i + 3].ToString("X2")} {bytes[i + 4].ToString("X2")} {bytes[i + 5].ToString("X2")} {bytes[i + 6].ToString("X2")} {bytes[i + 7].ToString("X2")}", m_Info = string.Empty };
+						list[listIndex++] = new ByteViewItem(address, $"{bytes[i].ToString("X2")} {bytes[i + 1].ToString("X2")} {bytes[i + 2].ToString("X2")} {bytes[i + 3].ToString("X2")} {bytes[i + 4].ToString("X2")} {bytes[i + 5].ToString("X2")} {bytes[i + 6].ToString("X2")} {bytes[i + 7].ToString("X2")}", null);
 					}
 
 					return list;

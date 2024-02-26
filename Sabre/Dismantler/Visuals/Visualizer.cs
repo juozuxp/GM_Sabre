@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Documents;
 using Microsoft.Win32;
 using EnvDTE80;
+using Sabre.ListItems;
 
 namespace Sabre.Dismantler.Visuals
 {
@@ -93,17 +94,17 @@ namespace Sabre.Dismantler.Visuals
 			"oword ptr "
 		};
 
-		public static object[] ToListElements(NativeVisual[] visuals, Options options)
+		public static ByteViewItem[] ToListElements(NativeVisual[] visuals, Options options)
 		{
 			int offset = 0;
 			IntPtr address = options.m_Reference;
 
 			bool operand = false;
 
-			List<object> elements = new List<object>();
+			List<ByteViewItem> elements = new List<ByteViewItem>();
 
 			string bytesStr = null;
-			string addressStr = null;
+			IntPtr currentAddress = IntPtr.Zero;
 
 			StringBuilder builder = new StringBuilder();
 			foreach (NativeVisual visual in visuals)
@@ -132,10 +133,10 @@ namespace Sabre.Dismantler.Visuals
 
 						if (builder.Length != 0)
 						{
-							elements.Add(new { m_Address = addressStr, m_Bytes = bytesStr, m_Info = builder.ToString() });
+							elements.Add(new ByteViewItem(currentAddress, bytesStr, builder.ToString()));
 						}
 
-						addressStr = address.ToString("X16");
+						currentAddress = address;
 						address += visual.m_Instruction.m_Size;
 
 						builder.Clear();
@@ -259,7 +260,7 @@ namespace Sabre.Dismantler.Visuals
 
 			if (builder.Length != 0)
 			{
-				elements.Add(new { m_Address = addressStr, m_Bytes = bytesStr, m_Info = builder.ToString() });
+				elements.Add(new ByteViewItem(address, bytesStr, builder.ToString()));
 			}
 
 			return elements.ToArray();

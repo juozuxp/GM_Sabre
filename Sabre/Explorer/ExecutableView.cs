@@ -1,4 +1,5 @@
-﻿using Sabre.Native.Managed;
+﻿using Sabre.ListItems;
+using Sabre.Native.Managed;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,9 @@ namespace Sabre.Explorer
 
 		public ExecutableViewSection[] m_Sections;
 
-		public object[] ToListElements()
+		public ByteViewItem[] ToListElements()
 		{
-			List<object> elements = new List<object>();
+			List<ByteViewItem> elements = new List<ByteViewItem>();
 
 			foreach (ExecutableViewSection section in m_Sections)
 			{
