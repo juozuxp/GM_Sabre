@@ -39,18 +39,21 @@
     <ClCompile Include="explorer\FunctionExplorer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="pe\PEImportTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pe\PEImportEntry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="managed\ManagedArray.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="managed\ManagedObject.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="managed\ManagedString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="managed\ManagedGenericArray.hpp">
+    <ClInclude Include="managed\ManagedArray.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="explorer\ExecutableExplorer.hpp">
@@ -69,6 +72,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="explorer\FunctionExplorer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pe\PEImportTable.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pe\PEImportEntry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

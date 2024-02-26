@@ -63,7 +63,7 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreBranch(const vo
 	{
 		instructions.clear();
 
-		uint32_t chunkSize = ((1 << 12) - reinterpret_cast<intptr_t>(branch) & ((1 << 12) - 1));
+		uint32_t chunkSize = ((1 << 12) - reinterpret_cast<uintptr_t>(branch) & ((1 << 12) - 1));
 		if (CHUNK_SIZE < chunkSize ||
 			chunkSize == 0)
 		{

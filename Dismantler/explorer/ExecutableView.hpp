@@ -13,8 +13,8 @@ struct ExecutableView : public ManagedObject
 {
 	ExecutableView(const PEBuffer& buffer, const Disassembler& disassembler, const Visualizer& visualizer);
 
-	intptr_t m_BaseAddress; // image base address
+	uintptr_t m_BaseAddress; // image base address
 	const void* m_DataAddress; // actual mapped address
 
-	ManagedGenericArray<ExecutableViewSection> m_Sections;
+	ManagedArray<ExecutableViewSection> m_Sections;
 };

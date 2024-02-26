@@ -10,8 +10,11 @@ public:
 
 	virtual ~ManagedObject() = default;
 
-	ManagedObject(ManagedObject&&) = delete;
-	ManagedObject& operator=(ManagedObject&&) = delete;
+	ManagedObject(ManagedObject&&) = default;
+	ManagedObject(const ManagedObject&) = delete;
+
+	ManagedObject& operator=(ManagedObject&&) = default;
+	ManagedObject& operator=(const ManagedObject&) = delete;
 
 private:
 	ManagedObject* m_Handle;

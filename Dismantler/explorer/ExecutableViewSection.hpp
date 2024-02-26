@@ -1,9 +1,9 @@
 #pragma once
-#include "managed/ManagedGenericArray.hpp"
+#include "managed/ManagedArray.hpp"
 #include <Disassembler.hpp>
 #include <Visualizer.hpp>
 
-struct ExecutableViewSection
+struct ExecutableViewSection : public ManagedObject
 {
 	enum class Type
 	{
@@ -16,5 +16,5 @@ struct ExecutableViewSection
 	uint32_t m_Start;
 	uint32_t m_Size;
 
-	ManagedGenericArray<Visualizer::Visual> m_Visuals;
+	ManagedArray<Visualizer::Visual> m_Visuals;
 };

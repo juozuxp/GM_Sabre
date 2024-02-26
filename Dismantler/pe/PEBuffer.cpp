@@ -32,7 +32,7 @@ PEBuffer::PEBuffer(const std::wstring_view& path)
 	CloseHandle(handle);
 
 	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(buffer);
-	const IMAGE_NT_HEADERS32* nt = reinterpret_cast<const IMAGE_NT_HEADERS32*>(reinterpret_cast<intptr_t>(dos) + dos->e_lfanew);
+	const IMAGE_NT_HEADERS32* nt = reinterpret_cast<const IMAGE_NT_HEADERS32*>(reinterpret_cast<uintptr_t>(dos) + dos->e_lfanew);
 	const IMAGE_FILE_HEADER* file = &nt->FileHeader;
 
 	if (dos->e_magic != 'ZM')

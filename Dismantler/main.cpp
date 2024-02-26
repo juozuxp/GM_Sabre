@@ -17,7 +17,8 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 
 int main()
 {
-	ExecutableExplorer explorer = ExecutableExplorer(L"dxgi.dll");
-	
-	explorer.GetExecutableView();
+	ExecutableExplorer explorer = ExecutableExplorer(L"actxprxy.dll");
+
+	delete explorer.GetHeaders();
+	delete explorer.GetExecutableView();
 }

@@ -3,6 +3,7 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -13,11 +14,14 @@ namespace Sabre.Explorer
 	{
 		private static Style s_ContainerStyle = null;
 
+		public IntPtr m_Base;
+
 		public IMAGE_DOS_HEADER m_Dos;
 
 		public IMAGE_NT_HEADERS32 m_NT32;
 		public IMAGE_NT_HEADERS64 m_NT64;
 
+		public PEImportTable[] m_Imports;
 		public IMAGE_SECTION_HEADER[] m_Sections;
 
 		private static ListView NewListView()
@@ -32,7 +36,7 @@ namespace Sabre.Explorer
 				setter.Property = DependencyPropertyDescriptor.FromName("Focusable", typeof(UIElement), typeof(UIElement)).DependencyProperty;
 
 				s_ContainerStyle = new Style();
-
+				
 				s_ContainerStyle.Setters.Add(setter);
 			}
 
@@ -52,6 +56,13 @@ namespace Sabre.Explorer
 
 			gridView.Columns.Add(column);
 
+			column = new GridViewColumn();
+
+			column.Header = "info";
+			column.DisplayMemberBinding = new Binding("m_Info");
+
+			gridView.Columns.Add(column);
+
 			view.View = gridView;
 			view.ItemContainerStyle = s_ContainerStyle;
 
@@ -66,7 +77,7 @@ namespace Sabre.Explorer
 
 			ListView view = NewListView();
 
-			view.Items.Add(new { m_Name = "Magic number", m_Value = m_Dos.e_magic.ToString("X4") });
+			view.Items.Add(new { m_Name = "Magic number", m_Value = m_Dos.e_magic.ToString("X4"), m_Info = Encoding.UTF8.GetString(BitConverter.GetBytes(m_Dos.e_magic), 0, 2) });
 			view.Items.Add(new { m_Name = "Bytes on last page of file", m_Value = m_Dos.e_cblp.ToString("X4") });
 			view.Items.Add(new { m_Name = "Pages in file", m_Value = m_Dos.e_cp.ToString("X4") });
 			view.Items.Add(new { m_Name = "Relocations", m_Value = m_Dos.e_crlc.ToString("X4") });
@@ -84,7 +95,7 @@ namespace Sabre.Explorer
 			view.Items.Add(new { m_Name = "OEM identifier", m_Value = m_Dos.e_oemid.ToString("X4") });
 			view.Items.Add(new { m_Name = "OEM information", m_Value = m_Dos.e_oeminfo.ToString("X4") });
 			view.Items.Add(new { m_Name = "Reserved words", m_Value = $"{{{string.Join(", ", m_Dos.e_res2.Select(x => x.ToString("X4")))}}}" });
-			view.Items.Add(new { m_Name = "File address of new exe header", m_Value = m_Dos.e_lfanew.ToString("X8") });
+			view.Items.Add(new { m_Name = "File address of new exe header", m_Value = m_Dos.e_lfanew.ToString("X8"), m_Info = m_Dos.e_lfanew != 0 ? (m_Base + m_Dos.e_lfanew).ToString("X16") : 0.ToString("X16") });
 
 			item.Items.Add(view);
 
@@ -101,8 +112,8 @@ namespace Sabre.Explorer
 
 			view.Items.Add(new { m_Name = "Machine", m_Value = m_NT32.FileHeader.Machine.ToString("X4") });
 			view.Items.Add(new { m_Name = "Number Of Sections", m_Value = m_NT32.FileHeader.NumberOfSections.ToString("X4") });
-			view.Items.Add(new { m_Name = "Time Date Stamp", m_Value = DateTimeOffset.FromUnixTimeSeconds(m_NT32.FileHeader.TimeDateStamp).ToString("F") });
-			view.Items.Add(new { m_Name = "Pointer To Symbol Table", m_Value = m_NT32.FileHeader.PointerToSymbolTable.ToString("X8") });
+			view.Items.Add(new { m_Name = "Time Date Stamp", m_Value = m_NT32.FileHeader.TimeDateStamp.ToString("X8"), m_Info = DateTimeOffset.FromUnixTimeSeconds(m_NT32.FileHeader.TimeDateStamp).ToString("F") });
+			view.Items.Add(new { m_Name = "Pointer To Symbol Table", m_Value = m_NT32.FileHeader.PointerToSymbolTable.ToString("X8"), m_Info = m_NT32.FileHeader.PointerToSymbolTable != 0 ? (m_Base + (int)m_NT32.FileHeader.PointerToSymbolTable).ToString("X16") : 0.ToString("X16") });
 			view.Items.Add(new { m_Name = "Number Of Symbols", m_Value = m_NT32.FileHeader.NumberOfSymbols.ToString("X8") });
 			view.Items.Add(new { m_Name = "Size Of Optional Header", m_Value = m_NT32.FileHeader.SizeOfOptionalHeader.ToString("X4") });
 			view.Items.Add(new { m_Name = "Characteristics", m_Value = m_NT32.FileHeader.Characteristics.ToString("X4") });
@@ -129,10 +140,10 @@ namespace Sabre.Explorer
 				view.Items.Add(new { m_Name = "Size Of Code", m_Value = m_NT32.OptionalHeader.SizeOfCode.ToString("X8") });
 				view.Items.Add(new { m_Name = "Size Of Initialized Data", m_Value = m_NT32.OptionalHeader.SizeOfInitializedData.ToString("X8") });
 				view.Items.Add(new { m_Name = "Size Of Uninitialized Data", m_Value = m_NT32.OptionalHeader.SizeOfUninitializedData.ToString("X8") });
-				view.Items.Add(new { m_Name = "Address Of Entry Point", m_Value = m_NT32.OptionalHeader.AddressOfEntryPoint.ToString("X8") });
-				view.Items.Add(new { m_Name = "Base Of Code", m_Value = m_NT32.OptionalHeader.BaseOfCode.ToString("X8") });
-				view.Items.Add(new { m_Name = "Base Of Data", m_Value = m_NT32.OptionalHeader.BaseOfData.ToString("X8") });
-				view.Items.Add(new { m_Name = "Image Base", m_Value = m_NT32.OptionalHeader.ImageBase.ToString("X8") });
+				view.Items.Add(new { m_Name = "Address Of Entry Point", m_Value = m_NT32.OptionalHeader.AddressOfEntryPoint.ToString("X8"), m_Info = m_NT32.OptionalHeader.AddressOfEntryPoint != 0 ? (m_Base + (int)m_NT32.OptionalHeader.AddressOfEntryPoint).ToString("X16") : 0.ToString("X16") });
+				view.Items.Add(new { m_Name = "Base Of Code", m_Value = m_NT32.OptionalHeader.BaseOfCode.ToString("X8"), m_Info = m_NT32.OptionalHeader.BaseOfCode != 0 ? (m_Base + (int)m_NT32.OptionalHeader.BaseOfCode).ToString("X16") : 0.ToString("X16") });
+				view.Items.Add(new { m_Name = "Base Of Data", m_Value = m_NT32.OptionalHeader.BaseOfData.ToString("X8"), m_Info = m_NT32.OptionalHeader.BaseOfData != 0 ? (m_Base + (int)m_NT32.OptionalHeader.BaseOfData).ToString("X16") : 0.ToString("X16") });
+				view.Items.Add(new { m_Name = "Image Base", m_Value = m_NT32.OptionalHeader.ImageBase.ToString("X16") });
 				view.Items.Add(new { m_Name = "Section Alignment", m_Value = m_NT32.OptionalHeader.SectionAlignment.ToString("X8") });
 				view.Items.Add(new { m_Name = "File Alignment", m_Value = m_NT32.OptionalHeader.FileAlignment.ToString("X8") });
 				view.Items.Add(new { m_Name = "Major Operating System Version", m_Value = m_NT32.OptionalHeader.MajorOperatingSystemVersion.ToString("X4") });
@@ -168,8 +179,8 @@ namespace Sabre.Explorer
 				view.Items.Add(new { m_Name = "Size Of Code", m_Value = m_NT64.OptionalHeader.SizeOfCode.ToString("X8") });
 				view.Items.Add(new { m_Name = "Size Of Initialized Data", m_Value = m_NT64.OptionalHeader.SizeOfInitializedData.ToString("X8") });
 				view.Items.Add(new { m_Name = "Size Of Uninitialized Data", m_Value = m_NT64.OptionalHeader.SizeOfUninitializedData.ToString("X8") });
-				view.Items.Add(new { m_Name = "Address Of Entry Point", m_Value = m_NT64.OptionalHeader.AddressOfEntryPoint.ToString("X8") });
-				view.Items.Add(new { m_Name = "Base Of Code", m_Value = m_NT64.OptionalHeader.BaseOfCode.ToString("X8") });
+				view.Items.Add(new { m_Name = "Address Of Entry Point", m_Value = m_NT64.OptionalHeader.AddressOfEntryPoint.ToString("X8"), m_Info = m_NT64.OptionalHeader.AddressOfEntryPoint != 0 ? (m_Base + (int)m_NT64.OptionalHeader.AddressOfEntryPoint).ToString("X16") : 0.ToString("X16") });
+				view.Items.Add(new { m_Name = "Base Of Code", m_Value = m_NT64.OptionalHeader.BaseOfCode.ToString("X8"), m_Info = m_NT64.OptionalHeader.BaseOfCode != 0 ? (m_Base + (int)m_NT64.OptionalHeader.BaseOfCode).ToString("X16") : 0.ToString("X16") });
 				view.Items.Add(new { m_Name = "Image Base", m_Value = m_NT64.OptionalHeader.ImageBase.ToString("X16") });
 				view.Items.Add(new { m_Name = "Section Alignment", m_Value = m_NT64.OptionalHeader.SectionAlignment.ToString("X8") });
 				view.Items.Add(new { m_Name = "File Alignment", m_Value = m_NT64.OptionalHeader.FileAlignment.ToString("X8") });
@@ -200,11 +211,11 @@ namespace Sabre.Explorer
 			TreeViewItem directoryItem = new TreeViewItem();
 			IMAGE_DATA_DIRECTORY directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_EXPORT];
 
-			directoryItem.Header = "export directory";
+			directoryItem.Header = "export table";
 
 			ListView directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -214,11 +225,11 @@ namespace Sabre.Explorer
 			directoryItem = new TreeViewItem();
 			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_IMPORT];
 
-			directoryItem.Header = "import directory";
+			directoryItem.Header = "import table";
 
 			directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -228,11 +239,11 @@ namespace Sabre.Explorer
 			directoryItem = new TreeViewItem();
 			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_RESOURCE];
 
-			directoryItem.Header = "resource directory";
+			directoryItem.Header = "resource table";
 
 			directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -242,11 +253,11 @@ namespace Sabre.Explorer
 			directoryItem = new TreeViewItem();
 			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_EXCEPTION];
 
-			directoryItem.Header = "exception directory";
+			directoryItem.Header = "exception table";
 
 			directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -256,11 +267,11 @@ namespace Sabre.Explorer
 			directoryItem = new TreeViewItem();
 			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_SECURITY];
 
-			directoryItem.Header = "security directory";
+			directoryItem.Header = "certificate table";
 
 			directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -270,11 +281,11 @@ namespace Sabre.Explorer
 			directoryItem = new TreeViewItem();
 			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_BASERELOC];
 
-			directoryItem.Header = "base relocation directory";
+			directoryItem.Header = "base relocation table";
 
 			directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -284,11 +295,11 @@ namespace Sabre.Explorer
 			directoryItem = new TreeViewItem();
 			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_DEBUG];
 
-			directoryItem.Header = "debug directory";
+			directoryItem.Header = "debug";
 
 			directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -298,11 +309,11 @@ namespace Sabre.Explorer
 			directoryItem = new TreeViewItem();
 			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_ARCHITECTURE];
 
-			directoryItem.Header = "architecture directory";
+			directoryItem.Header = "architecture";
 
 			directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -312,11 +323,11 @@ namespace Sabre.Explorer
 			directoryItem = new TreeViewItem();
 			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_GLOBALPTR];
 
-			directoryItem.Header = "global directory";
+			directoryItem.Header = "global ptr";
 
 			directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -326,11 +337,11 @@ namespace Sabre.Explorer
 			directoryItem = new TreeViewItem();
 			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_TLS];
 
-			directoryItem.Header = "thread local storage directory";
+			directoryItem.Header = "thread local storage table";
 
 			directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -340,11 +351,11 @@ namespace Sabre.Explorer
 			directoryItem = new TreeViewItem();
 			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG];
 
-			directoryItem.Header = "load config directory";
+			directoryItem.Header = "load config table";
 
 			directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -354,11 +365,11 @@ namespace Sabre.Explorer
 			directoryItem = new TreeViewItem();
 			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT];
 
-			directoryItem.Header = "bound import directory";
+			directoryItem.Header = "bound import";
 
 			directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -368,11 +379,11 @@ namespace Sabre.Explorer
 			directoryItem = new TreeViewItem();
 			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_IAT];
 
-			directoryItem.Header = "import address table directory";
+			directoryItem.Header = "import address table";
 
 			directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -382,11 +393,11 @@ namespace Sabre.Explorer
 			directoryItem = new TreeViewItem();
 			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT];
 
-			directoryItem.Header = "delay import directory";
+			directoryItem.Header = "delay import descriptor";
 
 			directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -396,11 +407,11 @@ namespace Sabre.Explorer
 			directoryItem = new TreeViewItem();
 			directory = directories[IMAGE_OPTIONAL_HEADER32.IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR];
 
-			directoryItem.Header = "com descriptor directory";
+			directoryItem.Header = "clr runtime header";
 
 			directoryView = NewListView();
 
-			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8") });
+			directoryView.Items.Add(new { m_Name = "Virtual Address", m_Value = directory.VirtualAddress.ToString("X8"), m_Info = directory.VirtualAddress != 0 ? (m_Base + (int)directory.VirtualAddress).ToString("X16") : 0.ToString("X16") });
 			directoryView.Items.Add(new { m_Name = "Size", m_Value = directory.Size.ToString("X8") });
 
 			directoryItem.Items.Add(directoryView);
@@ -418,7 +429,7 @@ namespace Sabre.Explorer
 
 			ListView view = NewListView();
 
-			view.Items.Add(new { m_Name = "Signature", m_Value = m_NT32.Signature.ToString("X8") });
+			view.Items.Add(new { m_Name = "Signature", m_Value = m_NT32.Signature.ToString("X8"), m_Info = Encoding.UTF8.GetString(BitConverter.GetBytes(m_NT32.Signature), 0, 4) });
 
 			item.Items.Add(view);
 			item.Items.Add(FileToView());
@@ -437,23 +448,80 @@ namespace Sabre.Explorer
 			{
 				TreeViewItem sectionItem = new TreeViewItem();
 
-				sectionItem.Header = section.Name;
+				sectionItem.Header = Encoding.UTF8.GetString(section.Name, 0, 8);
 
 				ListView view = NewListView();
 
-				view.Items.Add(new { m_Name = "Name", m_Value = section.Name });
+				view.Items.Add(new { m_Name = "Name", m_Value = $"{{{string.Join(", ", section.Name.Select(x => x.ToString("X2")))}}}", m_Info = Encoding.UTF8.GetString(section.Name, 0, 8) });
 				view.Items.Add(new { m_Name = "Virtual Size", m_Value = section.VirtualSize.ToString("X8") });
-				view.Items.Add(new { m_Name = "Virtual Address", m_Value = section.VirtualAddress.ToString("X8") });
+
+				view.Items.Add(new { m_Name = "Virtual Address", m_Value = section.VirtualAddress.ToString("X8"), m_Info = section.VirtualAddress != 0 ? (m_Base + (int)section.VirtualAddress).ToString("X16") : 0.ToString("X16") });
+
 				view.Items.Add(new { m_Name = "Size Of Raw Data", m_Value = section.SizeOfRawData.ToString("X8") });
 				view.Items.Add(new { m_Name = "Pointer To Raw Data", m_Value = section.PointerToRawData.ToString("X8") });
-				view.Items.Add(new { m_Name = "Pointer To Relocations", m_Value = section.PointerToRelocations.ToString("X8") });
-				view.Items.Add(new { m_Name = "Pointer To Line Numbers", m_Value = section.PointerToLinenumbers.ToString("X8") });
+
+				view.Items.Add(new { m_Name = "Pointer To Relocations", m_Value = section.PointerToRelocations.ToString("X8"), m_Info = section.PointerToRelocations != 0 ? (m_Base + (int)section.PointerToRelocations).ToString("X16") : 0.ToString("X16") });
+				view.Items.Add(new { m_Name = "Pointer To Line Numbers", m_Value = section.PointerToLinenumbers.ToString("X8"), m_Info = section.PointerToLinenumbers != 0 ? (m_Base + (int)section.PointerToLinenumbers).ToString("X16") : 0.ToString("X16") });
+
 				view.Items.Add(new { m_Name = "Number Of Relocations", m_Value = section.NumberOfRelocations.ToString("X4") });
 				view.Items.Add(new { m_Name = "Number Of Line Numbers", m_Value = section.NumberOfLinenumbers.ToString("X4") });
 				view.Items.Add(new { m_Name = "Characteristics", m_Value = section.Characteristics.ToString("X8") });
 
 				sectionItem.Items.Add(view);
 				item.Items.Add(sectionItem);
+			}
+
+			return item;
+		}
+
+		private TreeViewItem ImportsToView()
+		{
+			TreeViewItem item = new TreeViewItem();
+
+			item.Header = "imports";
+
+			foreach (PEImportTable table in m_Imports)
+			{
+				TreeViewItem tableItem = new TreeViewItem();
+
+				tableItem.Header = table.m_Name;
+
+				ListView descriptorView = NewListView();
+
+				descriptorView.Items.Add(new { m_Name = "RVA of the import lookup table", m_Value = table.m_Descriptor.OriginalFirstThunk.ToString("X8"), m_Info = table.m_Descriptor.OriginalFirstThunk != 0 ? (m_Base + (int)table.m_Descriptor.OriginalFirstThunk).ToString("X16") : 0.ToString("X16") });
+				descriptorView.Items.Add(new { m_Name = "Time date stamp", m_Value = table.m_Descriptor.TimeDateStamp.ToString("X8"), m_Info = DateTimeOffset.FromUnixTimeSeconds(table.m_Descriptor.TimeDateStamp).ToString("F") });
+				descriptorView.Items.Add(new { m_Name = "Forwarder Chain", m_Value = table.m_Descriptor.ForwarderChain.ToString("X8") });
+				descriptorView.Items.Add(new { m_Name = "Name", m_Value = table.m_Descriptor.Name.ToString("X8"), m_Info = table.m_Name });
+				descriptorView.Items.Add(new { m_Name = "RVA of the import address table", m_Value = table.m_Descriptor.FirstThunk.ToString("X8"), m_Info = table.m_Descriptor.FirstThunk != 0 ? (m_Base + (int)table.m_Descriptor.FirstThunk).ToString("X16") : 0.ToString("X16") });
+
+				tableItem.Items.Add(descriptorView);
+
+				foreach (PEImportEntry import in table.m_Entries)
+				{
+					TreeViewItem importItem = new TreeViewItem();
+
+					importItem.Header = import.m_Name.Length != 0 ? import.m_Name : import.m_Ordinal.ToString("X4");
+
+					ListView importView = NewListView();
+
+					if (import.m_Name.Length == 0)
+					{
+						importView.Items.Add(new { m_Name = "Ordinal", m_Value = import.m_Ordinal.ToString("X4") });
+					}
+					else
+					{
+						importView.Items.Add(new { m_Name = "Name", m_Value = import.m_Name });
+						importView.Items.Add(new { m_Name = "Hint", m_Value = import.m_Ordinal.ToString("X4") });
+					}
+
+					importView.Items.Add(new { m_Name = "RVA of the import address", m_Value = import.m_FirstThunk.ToString("X8"), m_Info = import.m_FirstThunk != 0 ? (m_Base + (int)import.m_FirstThunk).ToString("X16") : 0.ToString("X16") });
+					importView.Items.Add(new { m_Name = "RVA of the import lookup", m_Value = import.m_OriginalFirstThunk.ToString("X8"), m_Info = import.m_OriginalFirstThunk != 0 ? (m_Base + (int)import.m_OriginalFirstThunk).ToString("X16") : 0.ToString("X16") });
+
+					importItem.Items.Add(importView);
+					tableItem.Items.Add(importItem);
+				}
+
+				item.Items.Add(tableItem);
 			}
 
 			return item;
@@ -466,6 +534,7 @@ namespace Sabre.Explorer
 			view.Items.Add(DosToView());
 			view.Items.Add(NTToView());
 			view.Items.Add(SectionsToView());
+			view.Items.Add(ImportsToView());
 		}
 	}
 }

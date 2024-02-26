@@ -1,5 +1,6 @@
 #pragma once
 #include "ManagedObject.hpp"
+#include <utility>
 #include <vector>
 
 template<typename T>
@@ -16,13 +17,16 @@ public:
 		Reserve(capacity);
 	}
 
-	ManagedArray(const std::vector<T*>& array)
+	ManagedArray(const std::vector<T>& array)
 	{
 		m_Size = array.size();
 
 		Reserve(m_Size);
 
-		memcpy(m_Array, array.data(), m_Size * sizeof(T*));
+		for (uint32_t i = 0; i < array.size(); i++)
+		{
+			m_Array[i] = array[i];
+		}
 	}
 
 public:
@@ -38,12 +42,7 @@ public:
 			return;
 		}
 
-		for (uint32_t i = 0; i < m_Size; i++)
-		{
-			delete m_Array[i];
-		}
-
-		free(m_Array);
+		delete[] m_Array;
 	}
 
 	ManagedArray& operator=(ManagedArray&& move)
@@ -60,7 +59,7 @@ public:
 	}
 
 public:
-	void Add(T* element)
+	void Add(const T& element)
 	{
 		if (m_Size >= m_Capacity)
 		{
@@ -68,6 +67,16 @@ public:
 		}
 
 		m_Array[m_Size++] = element;
+	}
+	
+	void Add(T&& element)
+	{
+		if (m_Size >= m_Capacity)
+		{
+			Reserve(m_Size + 1);
+		}
+
+		m_Array[m_Size++] = std::move(element);
 	}
 
 	void Reserve(uint32_t capacity)
@@ -77,21 +86,34 @@ public:
 			return;
 		}
 
-		T** preAlloc = m_Array;
-
-		m_Array = reinterpret_cast<T**>(realloc(m_Array, (capacity * sizeof(T*))));
-		if (m_Array == nullptr)
+		T* newArray = new T[capacity];
+		if (newArray == nullptr)
 		{
-			m_Array = preAlloc;
 			return;
 		}
 
 		m_Capacity = capacity;
+		if (m_Array != nullptr)
+		{
+			for (uint32_t i = 0; i < m_Size; i++)
+			{
+				newArray[i] = std::move(m_Array[i]);
+			}
+
+			std::swap(newArray, m_Array);
+
+			delete[] newArray;
+		}
+		else
+		{
+			m_Array = newArray;
+		}
 	}
 
 private:
-	T** m_Array = nullptr;
+	T* m_Array = nullptr;
 
 	uint32_t m_Size = 0;
 	uint32_t m_Capacity = 0;
 };
+

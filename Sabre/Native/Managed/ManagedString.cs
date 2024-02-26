@@ -23,6 +23,11 @@ namespace Sabre.Native.Managed
 
 		public override string ToString()
 		{
+			if (m_Length == 0)
+			{
+				return string.Empty;
+			}
+
 			return Marshal.PtrToStringUni(m_Buffer, m_Length);
 		}
 	}

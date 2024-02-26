@@ -13,15 +13,81 @@ namespace Sabre.Explorer
 {
 	internal class ExecutableExplorer
 	{
+		internal struct NativePEImportEntry : IDisposable
+		{
+			private readonly ManagedObject m_Base;
+
+			public readonly ushort m_Ordinal;
+			public readonly uint m_FirstThunk;
+			public readonly uint m_OriginalFirstThunk;
+
+			public readonly ManagedString m_Name;
+
+			public PEImportEntry ToData()
+			{
+				PEImportEntry data = new PEImportEntry();
+
+				data.m_Ordinal = m_Ordinal;
+				data.m_FirstThunk = m_FirstThunk;
+				data.m_OriginalFirstThunk = m_OriginalFirstThunk;
+
+				data.m_Name = m_Name.ToString();
+
+				return data;
+			}
+
+			public void Dispose()
+			{
+				m_Base.Dispose();
+			}
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		internal struct NativePEImportTable : IDisposable
+		{
+			private readonly ManagedObject m_Base;
+
+			public readonly IMAGE_IMPORT_DESCRIPTOR m_Descriptor;
+
+			public readonly ManagedString m_Name;
+			public readonly ManagedGenericArray m_Entries; // NativePEImportEntry
+
+			public PEImportTable ToData()
+			{
+				PEImportTable data = new PEImportTable();
+
+				data.m_Descriptor = m_Descriptor;
+				data.m_Name = m_Name.ToString();
+
+				NativePEImportEntry[] entries = m_Entries.ToArray<NativePEImportEntry>();
+
+				data.m_Entries = new PEImportEntry[entries.Length];
+				for (int i = 0; i < entries.Length; i++)
+				{
+					data.m_Entries[i] = entries[i].ToData();
+				}
+
+				return data;
+			}
+
+			public void Dispose()
+			{
+				m_Base.Dispose();
+			}
+		}
+
 		[StructLayout(LayoutKind.Sequential)]
 		internal struct NativeHeaders : IDisposable
 		{
 			private readonly ManagedObject m_Base;
 
+			public readonly IntPtr m_BaseAddress;
+
 			public readonly IMAGE_DOS_HEADER m_Dos;
 			public readonly IMAGE_NT_HEADERS32 m_NT32;
 			public readonly IMAGE_NT_HEADERS64 m_NT64;
 
+			public readonly ManagedGenericArray m_Imports; // NativePEImportTable
 			public readonly ManagedGenericArray m_Sections; // IMAGE_SECTION_HEADER
 
 			public PEHeaders ToData()
@@ -31,6 +97,17 @@ namespace Sabre.Explorer
 				data.m_Dos = m_Dos;
 				data.m_NT32 = m_NT32;
 				data.m_NT64 = m_NT64;
+
+				data.m_Base = m_BaseAddress;
+
+				NativePEImportTable[] imports = m_Imports.ToArray<NativePEImportTable>();
+
+				data.m_Imports = new PEImportTable[imports.Length];
+				for (int i = 0; i < imports.Length; i++)
+				{
+					data.m_Imports[i] = imports[i].ToData();
+				}
+
 				data.m_Sections = m_Sections.ToArray<IMAGE_SECTION_HEADER>();
 
 				return data;
@@ -43,8 +120,10 @@ namespace Sabre.Explorer
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		internal struct NativeExecutableViewSection
+		internal struct NativeExecutableViewSection : IDisposable
 		{
+			private readonly ManagedObject m_Base;
+
 			public readonly ExecutableViewSection.Type m_Type;
 
 			public readonly uint m_Start;
@@ -64,6 +143,11 @@ namespace Sabre.Explorer
 				data.m_Visuals = m_Visuals.ToArray<NativeVisual>();
 
 				return data;
+			}
+
+			public void Dispose()
+			{
+				m_Base.Dispose();
 			}
 		}
 

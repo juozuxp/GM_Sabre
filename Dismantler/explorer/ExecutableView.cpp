@@ -5,7 +5,7 @@ ExecutableView::ExecutableView(const PEBuffer& buffer, const Disassembler& disas
 	m_DataAddress = buffer.GetBuffer();
 
 	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(m_DataAddress);
-	const IMAGE_NT_HEADERS32* nt = reinterpret_cast<const IMAGE_NT_HEADERS32*>(reinterpret_cast<intptr_t>(dos) + dos->e_lfanew);
+	const IMAGE_NT_HEADERS32* nt = reinterpret_cast<const IMAGE_NT_HEADERS32*>(reinterpret_cast<uintptr_t>(dos) + dos->e_lfanew);
 	const IMAGE_FILE_HEADER* file = &nt->FileHeader;
 
 	if (file->SizeOfOptionalHeader == sizeof(IMAGE_OPTIONAL_HEADER32))
@@ -72,7 +72,7 @@ ExecutableView::ExecutableView(const PEBuffer& buffer, const Disassembler& disas
 
 			codeSection.m_Size = size;
 			codeSection.m_Start = section->VirtualAddress;
-			codeSection.m_Visuals = ManagedGenericArray<Visualizer::Visual>(visualizer.ToVisuals(instructions, reinterpret_cast<const void*>(m_BaseAddress + section->VirtualAddress)));
+			codeSection.m_Visuals = ManagedArray<Visualizer::Visual>(visualizer.ToVisuals(instructions, reinterpret_cast<const void*>(m_BaseAddress + section->VirtualAddress)));
 
 			m_Sections.Add(std::move(codeSection));
 

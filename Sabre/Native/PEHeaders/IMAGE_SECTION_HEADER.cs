@@ -13,8 +13,8 @@ namespace Sabre.Native.PEHeaders
 	{
 		const int IMAGE_SIZEOF_SHORT_NAME = 8;
 
-		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = IMAGE_SIZEOF_SHORT_NAME)]
-		public readonly string Name;
+		[MarshalAs(UnmanagedType.ByValArray, SizeConst = IMAGE_SIZEOF_SHORT_NAME)]
+		public readonly byte[] Name;
 
 		public readonly uint VirtualSize;
 		public readonly uint VirtualAddress;

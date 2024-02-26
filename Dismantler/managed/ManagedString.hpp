@@ -15,6 +15,14 @@ public:
 		memcpy(m_Buffer, string.data(), m_Size * sizeof(wchar_t));
 	}
 
+	ManagedString(const char* string)
+	{
+		m_Size = strlen(string);
+		m_Buffer = new wchar_t[m_Size + 1];
+
+		mbstowcs_s(nullptr, m_Buffer, m_Size + 1, string, m_Size);
+	}
+
 public:
 	~ManagedString() override
 	{
@@ -38,6 +46,8 @@ public:
 
 		move.m_Size = 0;
 		move.m_Buffer = nullptr;
+
+		return *this;
 	}
 
 private:
