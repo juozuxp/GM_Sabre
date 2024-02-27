@@ -90,7 +90,6 @@ namespace Sabre.Dismantler.Visuals
 			"dword ptr ",
 			"qword ptr ",
 			"tbyte ptr ",
-			"tbyte ptr ",
 			"oword ptr "
 		};
 

@@ -82,6 +82,11 @@ namespace Sabre.Views.ByteView
 
 		private void m_DismView_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
+			if (e.AddedItems.Count == 0)
+			{
+				return;
+			}
+
 			ByteViewItem obj = e.AddedItems[0] as ByteViewItem;
 
 			m_AddressField.Text = obj.m_DisplayAddress;
