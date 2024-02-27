@@ -222,7 +222,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 
 				resolved.m_Operands[i].m_Type = ILOperandType_Register;
 
-				resolved.m_Operands[i].m_Register.m_Base = mem - (high ? 4 : 0) + rexExtendable[static_cast<uint8_t>(operand.m_Register)] ? base_extend : 0;
+				resolved.m_Operands[i].m_Register.m_Base = mem - (high ? 4 : 0) + (rexExtendable[static_cast<uint8_t>(operand.m_Register)] ? base_extend : 0);
 				resolved.m_Operands[i].m_Register.m_Type = operand.m_Register;
 
 				resolved.m_Operands[i].m_Register.m_BaseHigh = high;
@@ -362,7 +362,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 
 			bool high = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && (operand.m_Register == Register::general) && reg >= 4;
 
-			resolved.m_Operands[i].m_Register.m_Base = reg - (high ? 4 : 0) + rexExtendable[static_cast<uint8_t>(operand.m_Register)] ? reg_extend : 0;
+			resolved.m_Operands[i].m_Register.m_Base = reg - (high ? 4 : 0) + (rexExtendable[static_cast<uint8_t>(operand.m_Register)] ? reg_extend : 0);
 			resolved.m_Operands[i].m_Register.m_BaseHigh = high;
 
 			if (resolved.m_Operands[i].m_Register.m_Base >= registerCount[static_cast<uint8_t>(operand.m_Register)])
