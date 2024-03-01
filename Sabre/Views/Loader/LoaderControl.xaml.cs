@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
 using Sabre.Controller;
 using Sabre.Explorer;
+using Sabre.Explorer.PE;
 using Sabre.Views.ByteView;
 using System.IO;
 using System.Windows;

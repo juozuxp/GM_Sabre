@@ -1,4 +1,5 @@
 ﻿using Sabre.Explorer;
+using Sabre.Explorer.PE;
 using System;
 using System.Collections.Generic;
 using System.Linq;

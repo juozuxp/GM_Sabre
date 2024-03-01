@@ -17,7 +17,7 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 
 int main()
 {
-	ExecutableExplorer explorer = ExecutableExplorer(L"DiscordHook64.dll");
+	ExecutableExplorer explorer = ExecutableExplorer(L"kernel32.dll");
 
 	delete explorer.GetHeaders();
 	delete explorer.GetExecutableView();

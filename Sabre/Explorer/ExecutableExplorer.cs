@@ -1,25 +1,21 @@
 ﻿using Sabre.Dismantler.Visuals;
+using Sabre.Explorer.PE;
 using Sabre.Native.Managed;
-using Sabre.Native.PEHeaders;
+using Sabre.Native.PE;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sabre.Explorer
 {
 	internal class ExecutableExplorer
 	{
+		[StructLayout(LayoutKind.Sequential)]
 		internal struct NativePEImportEntry : IDisposable
 		{
 			private readonly ManagedObject m_Base;
 
 			public readonly ushort m_Ordinal;
-			public readonly uint m_FirstThunk;
-			public readonly uint m_OriginalFirstThunk;
+			public readonly uint m_FunctionAddressBase;
 
 			public readonly ManagedString m_Name;
 
@@ -28,10 +24,73 @@ namespace Sabre.Explorer
 				PEImportEntry data = new PEImportEntry();
 
 				data.m_Ordinal = m_Ordinal;
-				data.m_FirstThunk = m_FirstThunk;
-				data.m_OriginalFirstThunk = m_OriginalFirstThunk;
+				data.m_FunctionAddressBase = m_FunctionAddressBase;
 
 				data.m_Name = m_Name.ToString();
+
+				return data;
+			}
+
+			public void Dispose()
+			{
+				m_Base.Dispose();
+			}
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		struct NativePEExportEntry : IDisposable
+		{
+			private readonly ManagedObject m_Base;
+
+			public readonly ushort m_Ordinal;
+			public readonly uint m_Function;
+
+			public readonly ManagedString m_Name;
+			public readonly ManagedString m_Forwarder;
+
+			public PEExportEntry ToData()
+			{
+				PEExportEntry data = new PEExportEntry();
+
+				data.m_Ordinal = m_Ordinal;
+				data.m_Function = m_Function;
+
+				data.m_Name = m_Name.ToString();
+				data.m_Forwarder = m_Forwarder.ToString();
+
+				return data;
+			}
+
+			public void Dispose()
+			{
+				m_Base.Dispose();
+			}
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		internal struct NativePEExportTable : IDisposable
+		{
+			private readonly ManagedObject m_Base;
+
+			public readonly IMAGE_EXPORT_DIRECTORY m_Descriptor;
+
+			public readonly ManagedString m_Name;
+			public readonly ManagedArray m_Entries; // NativePEExportEntry
+
+			public PEExportTable ToData()
+			{
+				PEExportTable data = new PEExportTable();
+
+				data.m_Descriptor = m_Descriptor;
+				data.m_Name = m_Name.ToString();
+
+				NativePEExportEntry[] entries = m_Entries.ToArray<NativePEExportEntry>();
+
+				data.m_Entries = new PEExportEntry[entries.Length];
+				for (int i = 0; i < entries.Length; i++)
+				{
+					data.m_Entries[i] = entries[i].ToData();
+				}
 
 				return data;
 			}
@@ -50,11 +109,45 @@ namespace Sabre.Explorer
 			public readonly IMAGE_IMPORT_DESCRIPTOR m_Descriptor;
 
 			public readonly ManagedString m_Name;
-			public readonly ManagedGenericArray m_Entries; // NativePEImportEntry
+			public readonly ManagedArray m_Entries; // NativePEImportEntry
 
 			public PEImportTable ToData()
 			{
 				PEImportTable data = new PEImportTable();
+
+				data.m_Descriptor = m_Descriptor;
+				data.m_Name = m_Name.ToString();
+
+				NativePEImportEntry[] entries = m_Entries.ToArray<NativePEImportEntry>();
+
+				data.m_Entries = new PEImportEntry[entries.Length];
+				for (int i = 0; i < entries.Length; i++)
+				{
+					data.m_Entries[i] = entries[i].ToData();
+				}
+
+				return data;
+			}
+
+			public void Dispose()
+			{
+				m_Base.Dispose();
+			}
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		struct NativePEDelayImportTable : IDisposable
+		{
+			private readonly ManagedObject m_Base;
+
+			private readonly IMAGE_DELAYLOAD_DESCRIPTOR m_Descriptor;
+
+			private readonly ManagedString m_Name;
+			private readonly ManagedArray m_Entries; // NativePEImportEntry
+
+			public PEDelayImportTable ToData()
+			{
+				PEDelayImportTable data = new PEDelayImportTable();
 
 				data.m_Descriptor = m_Descriptor;
 				data.m_Name = m_Name.ToString();
@@ -87,8 +180,12 @@ namespace Sabre.Explorer
 			public readonly IMAGE_NT_HEADERS32 m_NT32;
 			public readonly IMAGE_NT_HEADERS64 m_NT64;
 
-			public readonly ManagedGenericArray m_Imports; // NativePEImportTable
-			public readonly ManagedGenericArray m_Sections; // IMAGE_SECTION_HEADER
+			public readonly ManagedArray m_Sections; // IMAGE_SECTION_HEADER
+
+			public readonly NativePEExportTable m_Exports;
+
+			public readonly ManagedArray m_Imports; // NativePEImportTable
+			public readonly ManagedArray m_DelayImports; // NativePEDelayImportTable
 
 			public PEHeaders ToData()
 			{
@@ -100,6 +197,9 @@ namespace Sabre.Explorer
 
 				data.m_Base = m_BaseAddress;
 
+				data.m_Exports = m_Exports.ToData();
+				data.m_Sections = m_Sections.ToArray<IMAGE_SECTION_HEADER>();
+
 				NativePEImportTable[] imports = m_Imports.ToArray<NativePEImportTable>();
 
 				data.m_Imports = new PEImportTable[imports.Length];
@@ -108,7 +208,13 @@ namespace Sabre.Explorer
 					data.m_Imports[i] = imports[i].ToData();
 				}
 
-				data.m_Sections = m_Sections.ToArray<IMAGE_SECTION_HEADER>();
+				NativePEDelayImportTable[] delayImports = m_DelayImports.ToArray<NativePEDelayImportTable>();
+
+				data.m_DelayImports = new PEDelayImportTable[delayImports.Length];
+				for (int i = 0; i < delayImports.Length; i++)
+				{
+					data.m_DelayImports[i] = delayImports[i].ToData();
+				}
 
 				return data;
 			}
@@ -129,7 +235,7 @@ namespace Sabre.Explorer
 			public readonly uint m_Start;
 			public readonly uint m_Size;
 
-			public readonly ManagedGenericArray m_Visuals;
+			public readonly ManagedArray m_Visuals;
 
 			public ExecutableViewSection ToData()
 			{
@@ -159,7 +265,7 @@ namespace Sabre.Explorer
 			public readonly IntPtr m_BaseAddress; // image base address
 			public readonly IntPtr m_DataAddress; // actual mapped address
 
-			public readonly ManagedGenericArray m_Sections;
+			public readonly ManagedArray m_Sections;
 
 			public ExecutableView ToData()
 			{

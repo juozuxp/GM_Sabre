@@ -4,7 +4,9 @@
 #include "managed/ManagedObject.hpp"
 #include "managed/ManagedArray.hpp"
 
+#include "PEDelayImportTable.hpp"
 #include "PEImportTable.hpp"
+#include "PEExportTable.hpp"
 
 struct PEHeaders : public ManagedObject
 {
@@ -17,6 +19,10 @@ struct PEHeaders : public ManagedObject
 	IMAGE_NT_HEADERS32 m_NT32;
 	IMAGE_NT_HEADERS64 m_NT64;
 
-	ManagedArray<PEImportTable> m_Imports;
 	ManagedArray<IMAGE_SECTION_HEADER> m_Sections;
+
+	PEExportTable m_Exports;
+
+	ManagedArray<PEImportTable> m_Imports;
+	ManagedArray<PEDelayImportTable> m_DelayImports;
 };

@@ -1,19 +1,18 @@
 ﻿using Sabre.Native.Managed;
-using Sabre.Native.PEHeaders;
+using Sabre.Native.PE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sabre.Explorer
+namespace Sabre.Explorer.PE
 {
-	internal struct PEImportTable
+	internal struct PEDelayImportTable
 	{
-		public string m_Name;
+		public IMAGE_DELAYLOAD_DESCRIPTOR m_Descriptor;
 
+		public string m_Name;
 		public PEImportEntry[] m_Entries;
-		public IMAGE_IMPORT_DESCRIPTOR m_Descriptor;
 	}
 }

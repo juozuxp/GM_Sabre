@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Sabre.Native.PEHeaders
+namespace Sabre.Native.PE
 {
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct IMAGE_OPTIONAL_HEADER64

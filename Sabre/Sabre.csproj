@@ -64,19 +64,24 @@
     <Compile Include="Explorer\ExecutableExplorer.cs" />
     <Compile Include="Explorer\ExecutableView.cs" />
     <Compile Include="Explorer\ExecutableViewSection.cs" />
-    <Compile Include="Explorer\PEHeaders.cs" />
-    <Compile Include="Explorer\PEImportEntry.cs" />
-    <Compile Include="Explorer\PEImportTable.cs" />
+    <Compile Include="Explorer\PE\PEDelayImportTable.cs" />
+    <Compile Include="Explorer\PE\PEExportTable.cs" />
+    <Compile Include="Explorer\PE\PEHeaders.cs" />
+    <Compile Include="Explorer\PE\PEImportEntry.cs" />
+    <Compile Include="Explorer\PE\PEImportTable.cs" />
+    <Compile Include="Explorer\PE\PEExportEntry.cs" />
     <Compile Include="ListItems\ByteViewItem.cs" />
-    <Compile Include="Native\PEHeaders\IMAGE_DATA_DIRECTORY.cs" />
-    <Compile Include="Native\PEHeaders\IMAGE_DOS_HEADER.cs" />
-    <Compile Include="Native\PEHeaders\IMAGE_FILE_HEADER.cs" />
-    <Compile Include="Native\PEHeaders\IMAGE_IMPORT_DESCRIPTOR.cs" />
-    <Compile Include="Native\PEHeaders\IMAGE_NT_HEADERS32.cs" />
-    <Compile Include="Native\PEHeaders\IMAGE_NT_HEADERS64.cs" />
-    <Compile Include="Native\PEHeaders\IMAGE_OPTIONAL_HEADER32.cs" />
-    <Compile Include="Native\PEHeaders\IMAGE_OPTIONAL_HEADER64.cs" />
-    <Compile Include="Native\PEHeaders\IMAGE_SECTION_HEADER.cs" />
+    <Compile Include="Native\PE\IMAGE_DATA_DIRECTORY.cs" />
+    <Compile Include="Native\PE\IMAGE_DELAYLOAD_DESCRIPTOR.cs" />
+    <Compile Include="Native\PE\IMAGE_DOS_HEADER.cs" />
+    <Compile Include="Native\PE\IMAGE_EXPORT_DIRECTORY.cs" />
+    <Compile Include="Native\PE\IMAGE_FILE_HEADER.cs" />
+    <Compile Include="Native\PE\IMAGE_IMPORT_DESCRIPTOR.cs" />
+    <Compile Include="Native\PE\IMAGE_NT_HEADERS32.cs" />
+    <Compile Include="Native\PE\IMAGE_NT_HEADERS64.cs" />
+    <Compile Include="Native\PE\IMAGE_OPTIONAL_HEADER32.cs" />
+    <Compile Include="Native\PE\IMAGE_OPTIONAL_HEADER64.cs" />
+    <Compile Include="Native\PE\IMAGE_SECTION_HEADER.cs" />
     <Compile Include="Utility\VsTheme.cs" />
     <Compile Include="Views\Loader\LoaderView.cs" />
     <Compile Include="Views\Loader\LoaderCommand.cs" />
@@ -89,7 +94,6 @@
       <DependentUpon>ByteViewControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Native\Managed\ManagedArray.cs" />
-    <Compile Include="Native\Managed\ManagedGenericArray.cs" />
     <Compile Include="Native\Managed\ManagedObject.cs" />
     <Compile Include="Native\Managed\ManagedString.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

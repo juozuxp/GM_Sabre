@@ -1,4 +1,4 @@
-﻿using Sabre.Native.PEHeaders;
+﻿using Sabre.Native.PE;
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -7,8 +7,9 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Documents;
 
-namespace Sabre.Explorer
+namespace Sabre.Explorer.PE
 {
 	internal struct PEHeaders
 	{
@@ -21,7 +22,11 @@ namespace Sabre.Explorer
 		public IMAGE_NT_HEADERS32 m_NT32;
 		public IMAGE_NT_HEADERS64 m_NT64;
 
+		public PEExportTable m_Exports;
+
 		public PEImportTable[] m_Imports;
+		public PEDelayImportTable[] m_DelayImports;
+
 		public IMAGE_SECTION_HEADER[] m_Sections;
 
 		private static ListView NewListView()
@@ -514,14 +519,123 @@ namespace Sabre.Explorer
 						importView.Items.Add(new { m_Name = "Hint", m_Value = import.m_Ordinal.ToString("X4") });
 					}
 
-					importView.Items.Add(new { m_Name = "RVA of the import address", m_Value = import.m_FirstThunk.ToString("X8"), m_Info = import.m_FirstThunk != 0 ? (m_Base + (int)import.m_FirstThunk).ToString("X16") : 0.ToString("X16") });
-					importView.Items.Add(new { m_Name = "RVA of the import lookup", m_Value = import.m_OriginalFirstThunk.ToString("X8"), m_Info = import.m_OriginalFirstThunk != 0 ? (m_Base + (int)import.m_OriginalFirstThunk).ToString("X16") : 0.ToString("X16") });
+					importView.Items.Add(new { m_Name = "RVA of the import address", m_Value = import.m_FunctionAddressBase.ToString("X8"), m_Info = import.m_FunctionAddressBase != 0 ? (m_Base + (int)import.m_FunctionAddressBase).ToString("X16") : 0.ToString("X16") });
 
 					importItem.Items.Add(importView);
 					tableItem.Items.Add(importItem);
 				}
 
 				item.Items.Add(tableItem);
+			}
+
+			return item;
+		}
+
+		private TreeViewItem DelayImportsToView()
+		{
+			TreeViewItem item = new TreeViewItem();
+
+			item.Header = "delay imports";
+
+			foreach (PEDelayImportTable table in m_DelayImports)
+			{
+				TreeViewItem tableItem = new TreeViewItem();
+
+				tableItem.Header = table.m_Name;
+
+				ListView descriptorView = NewListView();
+
+				descriptorView.Items.Add(new { m_Name = "Attributes", m_Value = table.m_Descriptor.AllAttributes.ToString("X8") });
+				descriptorView.Items.Add(new { m_Name = "Name", m_Value = table.m_Descriptor.DllNameRVA.ToString("X8"), m_Info = table.m_Name });
+				descriptorView.Items.Add(new { m_Name = "Module Handle", m_Value = table.m_Descriptor.ModuleHandleRVA.ToString("X8"), m_Info = table.m_Descriptor.ModuleHandleRVA != 0 ? (m_Base + (int)table.m_Descriptor.ModuleHandleRVA).ToString("X16") : 0.ToString("X16") });
+				descriptorView.Items.Add(new { m_Name = "Delay Import Address Table", m_Value = table.m_Descriptor.ImportAddressTableRVA.ToString("X8"), m_Info = table.m_Descriptor.ImportAddressTableRVA != 0 ? (m_Base + (int)table.m_Descriptor.ImportAddressTableRVA).ToString("X16") : 0.ToString("X16") });
+				descriptorView.Items.Add(new { m_Name = "Delay Import Name Table", m_Value = table.m_Descriptor.ImportNameTableRVA.ToString("X8"), m_Info = table.m_Descriptor.ImportNameTableRVA != 0 ? (m_Base + (int)table.m_Descriptor.ImportNameTableRVA).ToString("X16") : 0.ToString("X16") });
+				descriptorView.Items.Add(new { m_Name = "Bound Delay Import Table", m_Value = table.m_Descriptor.BoundImportAddressTableRVA.ToString("X8"), m_Info = table.m_Descriptor.BoundImportAddressTableRVA != 0 ? (m_Base + (int)table.m_Descriptor.BoundImportAddressTableRVA).ToString("X16") : 0.ToString("X16") });
+				descriptorView.Items.Add(new { m_Name = "Unload Delay Import Table", m_Value = table.m_Descriptor.UnloadInformationTableRVA.ToString("X8"), m_Info = table.m_Descriptor.UnloadInformationTableRVA != 0 ? (m_Base + (int)table.m_Descriptor.UnloadInformationTableRVA).ToString("X16") : 0.ToString("X16") });
+				descriptorView.Items.Add(new { m_Name = "Time Stamp", m_Value = table.m_Descriptor.TimeDateStamp.ToString("X8"), m_Info = DateTimeOffset.FromUnixTimeSeconds(table.m_Descriptor.TimeDateStamp).ToString("F") });
+
+				tableItem.Items.Add(descriptorView);
+
+				foreach (PEImportEntry import in table.m_Entries)
+				{
+					TreeViewItem importItem = new TreeViewItem();
+
+					importItem.Header = import.m_Name.Length != 0 ? import.m_Name : import.m_Ordinal.ToString("X4");
+
+					ListView importView = NewListView();
+
+					if (import.m_Name.Length == 0)
+					{
+						importView.Items.Add(new { m_Name = "Ordinal", m_Value = import.m_Ordinal.ToString("X4") });
+					}
+					else
+					{
+						importView.Items.Add(new { m_Name = "Name", m_Value = import.m_Name });
+						importView.Items.Add(new { m_Name = "Hint", m_Value = import.m_Ordinal.ToString("X4") });
+					}
+
+					importView.Items.Add(new { m_Name = "RVA of the import address", m_Value = import.m_FunctionAddressBase.ToString("X8"), m_Info = import.m_FunctionAddressBase != 0 ? (m_Base + (int)import.m_FunctionAddressBase).ToString("X16") : 0.ToString("X16") });
+
+					importItem.Items.Add(importView);
+					tableItem.Items.Add(importItem);
+				}
+
+				item.Items.Add(tableItem);
+			}
+
+			return item;
+		}
+
+		public TreeViewItem ExportsToView()
+		{
+			TreeViewItem item = new TreeViewItem();
+
+			item.Header = "exports";
+
+			if (m_Exports.m_Entries.Length == 0)
+			{
+				return item;
+			}
+
+			ListView descriptorView = NewListView();
+
+			descriptorView.Items.Add(new { m_Name = "Attributes", m_Value = m_Exports.m_Descriptor.Characteristics.ToString("X8") });
+			descriptorView.Items.Add(new { m_Name = "Time Date Stamp", m_Value = m_Exports.m_Descriptor.TimeDateStamp.ToString("X8"), m_Info = DateTimeOffset.FromUnixTimeSeconds(m_Exports.m_Descriptor.TimeDateStamp).ToString("F") });
+			descriptorView.Items.Add(new { m_Name = "Major Version", m_Value = m_Exports.m_Descriptor.MajorVersion.ToString("X4") });
+			descriptorView.Items.Add(new { m_Name = "Minor Version", m_Value = m_Exports.m_Descriptor.MinorVersion.ToString("X4") });
+			descriptorView.Items.Add(new { m_Name = "Name", m_Value = m_Exports.m_Descriptor.Name.ToString("X8"), m_Info = m_Exports.m_Name });
+			descriptorView.Items.Add(new { m_Name = "Base", m_Value = m_Exports.m_Descriptor.Base.ToString("X8") });
+			descriptorView.Items.Add(new { m_Name = "Number Of Functions", m_Value = m_Exports.m_Descriptor.NumberOfFunctions.ToString("X8") });
+			descriptorView.Items.Add(new { m_Name = "Number Of Names", m_Value = m_Exports.m_Descriptor.NumberOfNames.ToString("X8") });
+			descriptorView.Items.Add(new { m_Name = "Address Of Functions", m_Value = m_Exports.m_Descriptor.AddressOfFunctions.ToString("X8"), m_Info = m_Exports.m_Descriptor.AddressOfFunctions != 0 ? (m_Base + (int)m_Exports.m_Descriptor.AddressOfFunctions).ToString("X16") : 0.ToString("X16") });
+			descriptorView.Items.Add(new { m_Name = "Address Of Names", m_Value = m_Exports.m_Descriptor.AddressOfNames.ToString("X8"), m_Info = m_Exports.m_Descriptor.AddressOfNames != 0 ? (m_Base + (int)m_Exports.m_Descriptor.AddressOfNames).ToString("X16") : 0.ToString("X16") });
+			descriptorView.Items.Add(new { m_Name = "Address Of Name Ordinals", m_Value = m_Exports.m_Descriptor.AddressOfNameOrdinals.ToString("X8"), m_Info = m_Exports.m_Descriptor.AddressOfNameOrdinals != 0 ? (m_Base + (int)m_Exports.m_Descriptor.AddressOfNameOrdinals).ToString("X16") : 0.ToString("X16") });
+
+			item.Items.Add(descriptorView);
+
+			foreach (PEExportEntry entry in m_Exports.m_Entries)
+			{
+				TreeViewItem entryItem = new TreeViewItem();
+
+				entryItem.Header = entry.m_Name.Length != 0 ? entry.m_Name : entry.m_Ordinal.ToString("X4");
+
+				ListView entryView = NewListView();
+
+				entryView.Items.Add(new { m_Name = "Ordinal", m_Value = entry.m_Ordinal.ToString("X4") });
+				entryView.Items.Add(new { m_Name = "Function", m_Value = entry.m_Function.ToString("X8"), m_Info = entry.m_Function != 0 ? (m_Base + (int)entry.m_Function).ToString("X16") : 0.ToString("X16") });
+
+				if (entry.m_Name.Length != 0 )
+				{
+					entryView.Items.Add(new { m_Name = "Name", m_Value = entry.m_Name });
+				}
+
+				if (entry.m_Forwarder.Length != 0 )
+				{
+					entryView.Items.Add(new { m_Name = "Forwarder", m_Value = entry.m_Forwarder });
+				}
+
+				entryItem.Items.Add(entryView);
+				item.Items.Add(entryItem);
 			}
 
 			return item;
@@ -535,6 +649,8 @@ namespace Sabre.Explorer
 			view.Items.Add(NTToView());
 			view.Items.Add(SectionsToView());
 			view.Items.Add(ImportsToView());
+			view.Items.Add(DelayImportsToView());
+			view.Items.Add(ExportsToView());
 		}
 	}
 }

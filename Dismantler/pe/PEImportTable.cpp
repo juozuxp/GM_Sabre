@@ -11,39 +11,39 @@ PEImportTable::PEImportTable(const void* base, const IMAGE_IMPORT_DESCRIPTOR* de
 
 	if (nt->FileHeader.SizeOfOptionalHeader == sizeof(IMAGE_OPTIONAL_HEADER64))
 	{
-		const uint64_t* firstThunk = reinterpret_cast<const uint64_t*>(reinterpret_cast<uintptr_t>(base) + descriptor->FirstThunk);
+		const IMAGE_THUNK_DATA64* firstThunk = reinterpret_cast<const IMAGE_THUNK_DATA64*>(reinterpret_cast<uintptr_t>(base) + descriptor->FirstThunk);
 		const IMAGE_THUNK_DATA64* originalFirstThunk = reinterpret_cast<const IMAGE_THUNK_DATA64*>(reinterpret_cast<uintptr_t>(base) + descriptor->OriginalFirstThunk);
 
-		for (; *firstThunk != 0; firstThunk++, originalFirstThunk++)
+		for (; firstThunk->u1.AddressOfData != 0; firstThunk++, originalFirstThunk++)
 		{
-			if (IMAGE_SNAP_BY_ORDINAL64(*firstThunk))
+			if (IMAGE_SNAP_BY_ORDINAL64(firstThunk->u1.AddressOfData))
 			{
-				m_Entries.Add(PEImportEntry(IMAGE_ORDINAL64(*firstThunk), reinterpret_cast<uintptr_t>(firstThunk) - reinterpret_cast<uintptr_t>(base), reinterpret_cast<uintptr_t>(originalFirstThunk) - reinterpret_cast<uintptr_t>(base)));
+				m_Entries.Add(PEImportEntry(IMAGE_ORDINAL64(firstThunk->u1.Ordinal), reinterpret_cast<uintptr_t>(originalFirstThunk) - reinterpret_cast<uintptr_t>(base)));
 			}
 			else
 			{
-				const IMAGE_IMPORT_BY_NAME* name = reinterpret_cast<const IMAGE_IMPORT_BY_NAME*>(reinterpret_cast<uintptr_t>(base) + *firstThunk);
+				const IMAGE_IMPORT_BY_NAME* name = reinterpret_cast<const IMAGE_IMPORT_BY_NAME*>(reinterpret_cast<uintptr_t>(base) + firstThunk->u1.AddressOfData);
 
-				m_Entries.Add(PEImportEntry(name, reinterpret_cast<uintptr_t>(firstThunk) - reinterpret_cast<uintptr_t>(base), reinterpret_cast<uintptr_t>(originalFirstThunk) - reinterpret_cast<uintptr_t>(base)));
+				m_Entries.Add(PEImportEntry(name, reinterpret_cast<uintptr_t>(originalFirstThunk) - reinterpret_cast<uintptr_t>(base)));
 			}
 		}
 	}
 	else
 	{
-		const uint32_t* firstThunk = reinterpret_cast<const uint32_t*>(reinterpret_cast<uintptr_t>(base) + descriptor->FirstThunk);
+		const IMAGE_THUNK_DATA32* firstThunk = reinterpret_cast<const IMAGE_THUNK_DATA32*>(reinterpret_cast<uintptr_t>(base) + descriptor->FirstThunk);
 		const IMAGE_THUNK_DATA32* originalFirstThunk = reinterpret_cast<const IMAGE_THUNK_DATA32*>(reinterpret_cast<uintptr_t>(base) + descriptor->OriginalFirstThunk);
 
-		for (; *firstThunk != 0; firstThunk++, originalFirstThunk++)
+		for (; firstThunk->u1.AddressOfData != 0; firstThunk++, originalFirstThunk++)
 		{
-			if (IMAGE_SNAP_BY_ORDINAL32(*firstThunk))
+			if (IMAGE_SNAP_BY_ORDINAL32(firstThunk->u1.AddressOfData))
 			{
-				m_Entries.Add(PEImportEntry(IMAGE_ORDINAL32(*firstThunk), reinterpret_cast<uintptr_t>(firstThunk) - reinterpret_cast<uintptr_t>(base), reinterpret_cast<uintptr_t>(originalFirstThunk) - reinterpret_cast<uintptr_t>(base)));
+				m_Entries.Add(PEImportEntry(IMAGE_ORDINAL32(firstThunk->u1.Ordinal), reinterpret_cast<uintptr_t>(originalFirstThunk) - reinterpret_cast<uintptr_t>(base)));
 			}
 			else
 			{
-				const IMAGE_IMPORT_BY_NAME* name = reinterpret_cast<const IMAGE_IMPORT_BY_NAME*>(reinterpret_cast<uintptr_t>(base) + *firstThunk);
+				const IMAGE_IMPORT_BY_NAME* name = reinterpret_cast<const IMAGE_IMPORT_BY_NAME*>(reinterpret_cast<uintptr_t>(base) + firstThunk->u1.AddressOfData);
 
-				m_Entries.Add(PEImportEntry(name, reinterpret_cast<uintptr_t>(firstThunk) - reinterpret_cast<uintptr_t>(base), reinterpret_cast<uintptr_t>(originalFirstThunk) - reinterpret_cast<uintptr_t>(base)));
+				m_Entries.Add(PEImportEntry(name, reinterpret_cast<uintptr_t>(originalFirstThunk) - reinterpret_cast<uintptr_t>(base)));
 			}
 		}
 	}

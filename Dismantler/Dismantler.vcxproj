@@ -141,6 +141,9 @@
     <ClCompile Include="explorer\FunctionExplorer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="managed\ManagedExportInterface.cpp" />
+    <ClCompile Include="pe\PEExportEntry.cpp" />
+    <ClCompile Include="pe\PEExportTable.cpp" />
+    <ClCompile Include="pe\PEDelayImportTable.cpp" />
     <ClCompile Include="pe\PEImportEntry.cpp" />
     <ClCompile Include="pe\PEImportTable.cpp" />
     <ClCompile Include="pe\PEBuffer.cpp" />
@@ -159,6 +162,9 @@
     <ClInclude Include="managed\ManagedArray.hpp" />
     <ClInclude Include="managed\ManagedString.hpp" />
     <ClInclude Include="managed\ManagedObject.hpp" />
+    <ClInclude Include="pe\PEExportEntry.hpp" />
+    <ClInclude Include="pe\PEExportTable.hpp" />
+    <ClInclude Include="pe\PEDelayImportTable.hpp" />
     <ClInclude Include="pe\PEImportEntry.hpp" />
     <ClInclude Include="pe\PEImportTable.hpp" />
     <ClInclude Include="pe\PEBuffer.hpp" />

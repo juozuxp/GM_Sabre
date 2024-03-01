@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sabre.Native.PEHeaders
+namespace Sabre.Native.PE
 {
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
 	internal struct IMAGE_SECTION_HEADER

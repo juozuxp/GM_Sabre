@@ -5,13 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sabre.Explorer
+namespace Sabre.Explorer.PE
 {
 	internal struct PEImportEntry
 	{
 		public ushort m_Ordinal;
-		public uint m_FirstThunk;
-		public uint m_OriginalFirstThunk;
+		public uint m_FunctionAddressBase;
 
 		public string m_Name;
 	}

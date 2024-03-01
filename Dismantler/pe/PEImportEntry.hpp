@@ -5,12 +5,11 @@
 struct PEImportEntry : public ManagedObject
 {
 	PEImportEntry() = default;
-	PEImportEntry(uint16_t ordinal, uint32_t firstThunk, uint32_t originalFirstThunk);
-	PEImportEntry(const IMAGE_IMPORT_BY_NAME* name, uint32_t firstThunk, uint32_t originalFirstThunk);
+	PEImportEntry(uint16_t ordinal, uint32_t functionAddressBase);
+	PEImportEntry(const IMAGE_IMPORT_BY_NAME* name, uint32_t functionAddressBase);
 
 	uint16_t m_Ordinal;
-	uint32_t m_FirstThunk;
-	uint32_t m_OriginalFirstThunk;
+	uint32_t m_FunctionAddressBase;
 
 	ManagedString m_Name;
 };

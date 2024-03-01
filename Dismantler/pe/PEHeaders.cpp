@@ -25,12 +25,27 @@ PEHeaders::PEHeaders(const void* base)
 
 		m_Base = optional->ImageBase;
 
-		const IMAGE_DATA_DIRECTORY* importDir = &optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
-
-		const IMAGE_IMPORT_DESCRIPTOR* import = reinterpret_cast<const IMAGE_IMPORT_DESCRIPTOR*>(reinterpret_cast<uintptr_t>(base) + importDir->VirtualAddress);
-		for (; import->Characteristics != 0; import++)
+		if (optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size != 0)
 		{
-			m_Imports.Add(PEImportTable(base, import));
+			const IMAGE_IMPORT_DESCRIPTOR* import = reinterpret_cast<const IMAGE_IMPORT_DESCRIPTOR*>(reinterpret_cast<uintptr_t>(base) + optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
+			for (; import->Name != 0; import++)
+			{
+				m_Imports.Add(PEImportTable(base, import));
+			}
+		}
+
+		if (optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT].Size != 0)
+		{
+			const IMAGE_DELAYLOAD_DESCRIPTOR* delayImport = reinterpret_cast<const IMAGE_DELAYLOAD_DESCRIPTOR*>(reinterpret_cast<uintptr_t>(base) + optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT].VirtualAddress);
+			for (; delayImport->DllNameRVA != 0; delayImport++)
+			{
+				m_DelayImports.Add(PEDelayImportTable(base, delayImport));
+			}
+		}
+
+		if (optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size != 0)
+		{
+			m_Exports = PEExportTable(base);
 		}
 	}
 	else
@@ -39,12 +54,28 @@ PEHeaders::PEHeaders(const void* base)
 
 		m_Base = optional->ImageBase;
 
-		const IMAGE_DATA_DIRECTORY* importDir = &optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
-
-		const IMAGE_IMPORT_DESCRIPTOR* import = reinterpret_cast<const IMAGE_IMPORT_DESCRIPTOR*>(reinterpret_cast<uintptr_t>(base) + importDir->VirtualAddress);
-		for (; import->Characteristics != 0; import++)
+		if (optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size != 0)
 		{
-			m_Imports.Add(PEImportTable(base, import));
+			const IMAGE_IMPORT_DESCRIPTOR* import = reinterpret_cast<const IMAGE_IMPORT_DESCRIPTOR*>(reinterpret_cast<uintptr_t>(base) + optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
+			for (; import->Name != 0; import++)
+			{
+				m_Imports.Add(PEImportTable(base, import));
+			}
+		}
+
+		if (optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT].Size != 0)
+		{
+			const IMAGE_DELAYLOAD_DESCRIPTOR* delayImport = reinterpret_cast<const IMAGE_DELAYLOAD_DESCRIPTOR*>(reinterpret_cast<uintptr_t>(base) + optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT].VirtualAddress);
+			for (; delayImport->DllNameRVA != 0; delayImport++)
+			{
+				m_DelayImports.Add(PEDelayImportTable(base, delayImport));
+			}
+		}
+
+		if (optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size != 0)
+		{
+			m_Exports = PEExportTable(base);
 		}
 	}
+
 }
