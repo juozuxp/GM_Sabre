@@ -15,6 +15,11 @@ PEExportTable::PEExportTable(const void* base)
 		directory = &reinterpret_cast<const IMAGE_OPTIONAL_HEADER32*>(&nt->OptionalHeader)->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
 	}
 
+	if (directory->Size == 0)
+	{
+		return;
+	}
+
 	m_Descriptor = *reinterpret_cast<const IMAGE_EXPORT_DIRECTORY*>(reinterpret_cast<uintptr_t>(base) + directory->VirtualAddress);
 	m_Name = ManagedString(reinterpret_cast<const char*>(reinterpret_cast<const uint64_t*>(reinterpret_cast<uintptr_t>(base) + m_Descriptor.Name)));
 

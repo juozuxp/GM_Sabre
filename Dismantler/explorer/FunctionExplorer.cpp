@@ -7,8 +7,10 @@ FunctionExplorer::Function::Function(const void* base, uint32_t size) :
 {
 }
 
-std::vector<FunctionExplorer::Function> FunctionExplorer::ExplorePEFunctions(const PEBuffer& buffer) const
+std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreExecutable(const PEBuffer& buffer)
 {
+	std::vector<FunctionExplorer::Function> foundFunctions;
+
 	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(buffer.GetBuffer());
 	const IMAGE_NT_HEADERS64* nt = reinterpret_cast<const IMAGE_NT_HEADERS64*>(reinterpret_cast<const uint8_t*>(dos) + dos->e_lfanew);
 
@@ -19,148 +21,134 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExplorePEFunctions(con
 
 	const IMAGE_OPTIONAL_HEADER64* optional = &nt->OptionalHeader;
 
-	return ExploreFunction(reinterpret_cast<const uint8_t*>(dos) + optional->AddressOfEntryPoint);
+	const IMAGE_DATA_DIRECTORY* exportDirectory = &optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+	if (exportDirectory->Size != 0)
+	{
+		const IMAGE_EXPORT_DIRECTORY* exports = reinterpret_cast<const IMAGE_EXPORT_DIRECTORY*>(reinterpret_cast<uintptr_t>(dos) + exportDirectory->VirtualAddress);
+
+		const uint32_t* functions = reinterpret_cast<const uint32_t*>(reinterpret_cast<uintptr_t>(dos) + exports->AddressOfFunctions);
+		for (uint16_t i = 0; i < exports->NumberOfFunctions; i++, functions++)
+		{
+			if (*functions >= exportDirectory->VirtualAddress &&
+				*functions < (exportDirectory->VirtualAddress + exportDirectory->Size))
+			{
+				continue;
+			}
+
+			std::vector<FunctionExplorer::Function> found = ExploreFunction(buffer, reinterpret_cast<const uint8_t*>(dos) + *functions);
+
+			foundFunctions.insert(foundFunctions.begin(), found.begin(), found.end());
+		}
+	}
+
+	std::vector<FunctionExplorer::Function> found = ExploreFunction(buffer, reinterpret_cast<const uint8_t*>(dos) + optional->AddressOfEntryPoint);
+
+	foundFunctions.insert(foundFunctions.begin(), found.begin(), found.end());
+	return foundFunctions;
 }
 
-std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreFunction(const void* function) const
+std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreFunction(const PEBuffer& buffer, const void* function)
 {
-	std::unordered_set<const void*> explored;
+	if (!m_Explored.insert(function).second)
+	{
+		return std::vector<FunctionExplorer::Function>();
+	}
+
+	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(buffer.GetBuffer());
+	const IMAGE_NT_HEADERS64* nt = reinterpret_cast<const IMAGE_NT_HEADERS64*>(reinterpret_cast<const uint8_t*>(dos) + dos->e_lfanew);
+
+	if (nt->FileHeader.Machine != IMAGE_FILE_MACHINE_AMD64)
+	{
+		return std::vector<FunctionExplorer::Function>();
+	}
+
+	const IMAGE_OPTIONAL_HEADER64* optional = &nt->OptionalHeader;
+
+	std::vector<Function> functions;
+
 	uint32_t size;
-
 	State state;
-	
-	explored.insert(function);
 
-	state.m_Stack.push_back(0); // sub rsp, 20
-	state.m_Stack.push_back(0); // sub rsp, 20
-	state.m_Stack.push_back(0); // sub rsp, 20
-	state.m_Stack.push_back(0); // sub rsp, 20
-	state.m_Stack.push_back(0); // call function
+	state.m_General[REG_RSP] = 0x10008;
+	state.m_StackBase = state.m_General[REG_RSP];
 
-	std::vector<Function> functions = ExploreBranch(function, function, state, explored, size);
+	ExploreBranch(function, state, functions, size);
 
 	functions.push_back(Function(function, size));
+
+	for (Function& function : functions)
+	{
+		function.m_Base = reinterpret_cast<const uint8_t*>(reinterpret_cast<uintptr_t>(function.m_Base) - reinterpret_cast<uintptr_t>(dos) + optional->ImageBase);
+	}
+
 	return functions;
 }
 
-std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreBranch(const void* base, const void* branch, State state, std::unordered_set<const void*>& explored, uint32_t& size) const
+void FunctionExplorer::ExploreBranch(const void* branch, State state, std::vector<Function>& functions, uint32_t& size)
 {
-	std::vector<ILInstruction> instructions;
-	std::vector<Function> functions;
-
-	size = 0;
-	explored.insert(branch);
-
+	uint32_t accumulateSize = 0;
 	uint32_t maxSize = 0;
 
-	uint64_t enterSP = state.m_General[REG_RSP];
-	if (base == branch)
-	{
-		enterSP = 0;
-	}
-
+	std::vector<ILInstruction> instructions;
 	while (true)
 	{
-		instructions.clear();
-
-		uint32_t chunkSize = ((1 << 12) - reinterpret_cast<uintptr_t>(branch) & ((1 << 12) - 1));
-		if (CHUNK_SIZE < chunkSize ||
+		uint32_t chunkSize = (1 << 12) - (reinterpret_cast<uint64_t>(branch) & ((1 << 12) - 1));
+		if (chunkSize > CHUNK_SIZE ||
 			chunkSize == 0)
 		{
 			chunkSize = CHUNK_SIZE;
 		}
 
+		instructions.clear();
 		m_Disassembler.Disassemble(branch, chunkSize, instructions);
 
 		for (const ILInstruction& instruction : instructions)
 		{
+			accumulateSize += instruction.m_Size;
 			branch = reinterpret_cast<const uint8_t*>(branch) + instruction.m_Size;
-			size += instruction.m_Size;
 
-			bool breakout = false;
+			bool reset = false;
+
 			switch (instruction.m_Type)
 			{
-			case InsType_mov:
-			{
-				HandleMov(instruction, state);
-			} break;
-			case InsType_add:
-			{
-				HandleAdd(instruction, state);
-			} break;
-			case InsType_sub:
-			{
-				HandleSub(instruction, state);
-			} break;
 			case InsType_jmp:
 			{
-				const ILOperand& dest = instruction.m_Operands[0];
-				if (dest.m_Type != ILOperandType_ValueRelative)
-				{
-					if (size < maxSize)
-					{
-						size = maxSize;
-					}
+				const ILOperand& first = instruction.m_Operands[0];
 
-					return functions;
+				if (first.m_Type != ILOperandType_ValueRelative)
+				{
+					size = max(accumulateSize, maxSize);
+					return;
 				}
 
-				branch = reinterpret_cast<const uint8_t*>(branch) + dest.m_Relative.m_Value;
-				if (enterSP == state.m_General[REG_RSP])
+				const void* address = reinterpret_cast<const uint8_t*>(branch) + first.m_Relative.m_Value;
+				if (!m_Explored.insert(address).second)
 				{
-					functions.push_back(Function(base, size));
+					size = max(accumulateSize, maxSize);
+					return;
+				}
 
-					base = branch;
-					if (explored.contains(base))
-					{
-						if (size < maxSize)
-						{
-							size = maxSize;
-						}
+				if (state.m_General[REG_RSP] == state.m_StackBase)
+				{
+					uint32_t funcSize = 0;
 
-						return functions;
-					}
+					ExploreBranch(address, state, functions, funcSize);
 
-					size = 0;
+					functions.push_back(Function(address, funcSize));
+
+					size = max(accumulateSize, maxSize);
+					return;
 				}
 				else
 				{
-					if (explored.contains(branch))
+					if (first.m_Relative.m_Value > 0)
 					{
-						if (size < maxSize)
-						{
-							size = maxSize;
-						}
-
-						return functions;
+						accumulateSize += first.m_Relative.m_Value;
 					}
-
-					size += dest.m_Relative.m_Value;
 				}
 
-				explored.insert(branch);
-
-				breakout = true;
-			} break;
-			case InsType_call:
-			{
-				const ILOperand& dest = instruction.m_Operands[0];
-				if (dest.m_Type != ILOperandType_ValueRelative)
-				{
-					continue;
-				}
-
-				const void* function = reinterpret_cast<const uint8_t*>(branch) + dest.m_Relative.m_Value;
-
-				if (!explored.contains(function))
-				{
-					uint32_t funcSize;
-
-					std::vector<Function> result = ExploreBranch(function, function, state, explored, funcSize);
-
-					functions.insert(functions.end(), result.begin(), result.end());
-					functions.push_back(Function(function, funcSize));
-				}
+				reset = true;
+				branch = address;
 			} break;
 			case InsType_ja:
 			case InsType_jae:
@@ -180,39 +168,242 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreBranch(const vo
 			case InsType_jrcxz:
 			case InsType_js:
 			{
-				const ILOperand& dest = instruction.m_Operands[0];
-				if (dest.m_Type != ILOperandType_ValueRelative)
+				const ILOperand& first = instruction.m_Operands[0];
+
+				if (first.m_Type != ILOperandType_ValueRelative)
 				{
 					continue;
 				}
 
-				const void* jump = reinterpret_cast<const uint8_t*>(branch) + dest.m_Relative.m_Value;
-				if (!explored.contains(jump))
+				const void* address = reinterpret_cast<const uint8_t*>(branch) + first.m_Relative.m_Value;
+				if (!m_Explored.insert(address).second)
 				{
-					uint32_t branchSize;
+					continue;
+				}
 
-					std::vector<Function> result = ExploreBranch(base, jump, state, explored, branchSize);
+				uint32_t branchSize = 0;
 
-					functions.insert(functions.end(), result.begin(), result.end());
+				ExploreBranch(address, state, functions, branchSize);
 
-					if (maxSize < branchSize)
-					{
-						maxSize = branchSize;
-					}
+				if (first.m_Relative.m_Value > 0)
+				{
+					maxSize = max(branchSize + accumulateSize, maxSize);
+				}
+			} break;
+			case InsType_call:
+			{
+				const ILOperand& first = instruction.m_Operands[0];
+
+				if (first.m_Type != ILOperandType_ValueRelative)
+				{
+					continue;
+				}
+
+				const void* address = reinterpret_cast<const uint8_t*>(branch) + first.m_Relative.m_Value;
+				if (!m_Explored.insert(address).second)
+				{
+					continue;
+				}
+
+				State callState = state;
+				uint32_t callSize = 0;
+
+				callState.m_General[REG_RSP] -= 8;
+				callState.m_StackBase = callState.m_General[REG_RSP];
+
+				ExploreBranch(address, callState, functions, callSize);
+
+				functions.push_back(Function(address, callSize));
+			} break;
+			case InsType_mov:
+			{
+				const ILOperand& first = instruction.m_Operands[0];
+				const ILOperand& second = instruction.m_Operands[1];
+
+				uint64_t value;
+
+				if (!ReadOperand(second, state, value))
+				{
+					break;
+				}
+
+				if (!WriteOperand(first, state, value))
+				{
+					break;
+				}
+			} break;
+			case InsType_lea:
+			{
+				constexpr uint8_t multiplier[] = { 1, 2, 4, 8 };
+
+				const ILOperand& first = instruction.m_Operands[0];
+				const ILOperand& second = instruction.m_Operands[1];
+
+				if (second.m_Type != ILOperandType_Memory)
+				{
+					break;
+				}
+
+				uint64_t value = 0;
+
+				if (second.m_Memory.m_Base != IL_INVALID_REGISTER)
+				{
+					value = state.m_General[second.m_Memory.m_Base];
+				}
+
+				if (second.m_Memory.m_Index != IL_INVALID_REGISTER)
+				{
+					value += state.m_General[second.m_Memory.m_Index] * multiplier[second.m_Memory.m_Scale];
+				}
+
+				value += second.m_Memory.m_Offset;
+
+				if (!WriteOperand(first, state, value))
+				{
+					break;
+				}
+			} break;
+			case InsType_push:
+			{
+				state.m_General[REG_RSP] -= 8;
+			} break;
+			case InsType_pop:
+			{
+				state.m_General[REG_RSP] += 8;
+			} break;
+			case InsType_sub:
+			{
+				const ILOperand& first = instruction.m_Operands[0];
+				const ILOperand& second = instruction.m_Operands[1];
+
+				uint64_t firstValue;
+				if (!ReadOperand(first, state, firstValue))
+				{
+					break;
+				}
+
+				uint64_t secondValue;
+				if (!ReadOperand(second, state, secondValue))
+				{
+					break;
+				}
+
+				if (!WriteOperand(first, state, firstValue - secondValue))
+				{
+					break;
+				}
+			} break;
+			case InsType_add:
+			{
+				const ILOperand& first = instruction.m_Operands[0];
+				const ILOperand& second = instruction.m_Operands[1];
+
+				uint64_t firstValue;
+				if (!ReadOperand(first, state, firstValue))
+				{
+					break;
+				}
+
+				uint64_t secondValue;
+				if (!ReadOperand(second, state, secondValue))
+				{
+					break;
+				}
+
+				if (!WriteOperand(first, state, firstValue + secondValue))
+				{
+					break;
+				}
+			} break;
+			case InsType_xor:
+			{
+				const ILOperand& first = instruction.m_Operands[0];
+				const ILOperand& second = instruction.m_Operands[1];
+
+				uint64_t firstValue;
+				if (!ReadOperand(first, state, firstValue))
+				{
+					break;
+				}
+
+				uint64_t secondValue;
+				if (!ReadOperand(second, state, secondValue))
+				{
+					break;
+				}
+
+				if (!WriteOperand(first, state, firstValue ^ secondValue))
+				{
+					break;
+				}
+			} break;
+			case InsType_and:
+			{
+				const ILOperand& first = instruction.m_Operands[0];
+				const ILOperand& second = instruction.m_Operands[1];
+
+				uint64_t firstValue;
+				if (!ReadOperand(first, state, firstValue))
+				{
+					break;
+				}
+
+				uint64_t secondValue;
+				if (!ReadOperand(second, state, secondValue))
+				{
+					break;
+				}
+
+				if (!WriteOperand(first, state, firstValue & secondValue))
+				{
+					break;
+				}
+			} break;
+			case InsType_or:
+			{
+				const ILOperand& first = instruction.m_Operands[0];
+				const ILOperand& second = instruction.m_Operands[1];
+
+				uint64_t firstValue;
+				if (!ReadOperand(first, state, firstValue))
+				{
+					break;
+				}
+
+				uint64_t secondValue;
+				if (!ReadOperand(second, state, secondValue))
+				{
+					break;
+				}
+
+				if (!WriteOperand(first, state, firstValue | secondValue))
+				{
+					break;
+				}
+			} break;
+			case InsType_not:
+			{
+				const ILOperand& first = instruction.m_Operands[0];
+
+				uint64_t value;
+				if (!ReadOperand(first, state, value))
+				{
+					break;
+				}
+
+				if (!WriteOperand(first, state, ~value))
+				{
+					break;
 				}
 			} break;
 			case InsType_ret:
 			{
-				if (size < maxSize)
-				{
-					size = maxSize;
-				}
-
-				return functions;
+				size = max(accumulateSize, maxSize);
+				return;
 			} break;
 			}
 
-			if (breakout)
+			if (reset)
 			{
 				break;
 			}
@@ -220,577 +411,78 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreBranch(const vo
 	}
 }
 
-void FunctionExplorer::HandleMov(const ILInstruction& instruction, State& state)
+bool FunctionExplorer::WriteOperand(const ILOperand& operand, State& state, uint64_t value)
 {
-	const ILOperand& lhs = instruction.m_Operands[0];
-	const ILOperand& rhs = instruction.m_Operands[1];
+	constexpr uint64_t masks[] = { 0, (1ull << 8) - 1, (1ull << 16) - 1, (1ull << 32) - 1, ~0 };
+	constexpr uint8_t multiplier[] = { 1, 2, 4, 8 };
 
-	uint64_t value;
-	if (rhs.m_Type == ILOperandType_Register)
+	switch (operand.m_Type)
 	{
-		if (rhs.m_Register.m_Type != Register::general)
+	case ILOperandType_Register:
+	{
+		if (operand.m_Register.m_Type != Register::general)
 		{
-			return;
+			return false;
 		}
 
-		switch (rhs.m_Scale)
+		if (operand.m_Scale == ILOperandScale_8)
 		{
-		case ILOperandScale_8:
-		{
-			if (rhs.m_Register.m_BaseHigh)
+			if (operand.m_Register.m_BaseHigh)
 			{
-				value = (state.m_General[rhs.m_Register.m_Base] >> 8) & ((1ull << 8) - 1);
+				state.m_General[operand.m_Register.m_Base] = (state.m_General[operand.m_Register.m_Base] & ~(((1 << 8) - 1) << 8)) | ((value & ((1 << 8) - 1)) << 8);
 			}
 			else
 			{
-				value = state.m_General[rhs.m_Register.m_Base] & ((1ull << 8) - 1);
+				state.m_General[operand.m_Register.m_Base] = (state.m_General[operand.m_Register.m_Base] & ~((1 << 8) - 1)) | (value & ((1 << 8) - 1));
 			}
-		} break;
-		case ILOperandScale_16:
-		{
-			value = state.m_General[rhs.m_Register.m_Base] & ((1ull << 16) - 1);
-		} break;
-		case ILOperandScale_32:
-		{
-			value = state.m_General[rhs.m_Register.m_Base] & ((1ull << 32) - 1);
-		} break;
-		case ILOperandScale_64:
-		{
-			value = state.m_General[rhs.m_Register.m_Base];
-		} break;
-		}
-	}
-	else if (rhs.m_Type == ILOperandType_Memory)
-	{
-		if (rhs.m_Memory.m_Base != REG_RSP)
-		{
-			return;
+
+			return true;
 		}
 
-		switch (rhs.m_Scale)
+		if (operand.m_Scale == ILOperandScale_16)
 		{
-		case ILOperandScale_8:
-		{
-			uint64_t index = 0;
-			if (rhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-			{
-				index = state.m_General[rhs.m_Memory.m_Index] * c_MemoryMultiplier[rhs.m_Memory.m_Scale];
-			}
-
-			value = *(reinterpret_cast<uint8_t*>(&state.m_Stack[state.m_Stack.size() - ((rhs.m_Memory.m_Offset + index) / 8) - 1]) + (rhs.m_Memory.m_Offset + index) % 8);
-		} break;
-		case ILOperandScale_16:
-		{
-			uint64_t index = 0;
-			if (rhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-			{
-				index = state.m_General[rhs.m_Memory.m_Index] * c_MemoryMultiplier[rhs.m_Memory.m_Scale];
-			}
-
-			value = *reinterpret_cast<uint16_t*>(reinterpret_cast<uint8_t*>(&state.m_Stack[state.m_Stack.size() - ((rhs.m_Memory.m_Offset + index) / 8) - 1]) + (rhs.m_Memory.m_Offset + index) % 8);
-		} break;
-		case ILOperandScale_32:
-		{
-			uint64_t index = 0;
-			if (rhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-			{
-				index = state.m_General[rhs.m_Memory.m_Index] * c_MemoryMultiplier[rhs.m_Memory.m_Scale];
-			}
-
-			value = *reinterpret_cast<uint32_t*>(reinterpret_cast<uint8_t*>(&state.m_Stack[state.m_Stack.size() - ((rhs.m_Memory.m_Offset + index) / 8) - 1]) + (rhs.m_Memory.m_Offset + index) % 8);
-		} break;
-		case ILOperandScale_64:
-		{
-			uint64_t index = 0;
-			if (rhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-			{
-				index = state.m_General[rhs.m_Memory.m_Index] * c_MemoryMultiplier[rhs.m_Memory.m_Scale];
-			}
-
-			value = *reinterpret_cast<uint64_t*>(reinterpret_cast<uint8_t*>(&state.m_Stack[state.m_Stack.size() - ((rhs.m_Memory.m_Offset + index) / 8) - 1]) + (rhs.m_Memory.m_Offset + index) % 8);
-		} break;
+			state.m_General[operand.m_Register.m_Base] = (state.m_General[operand.m_Register.m_Base] & ~((1 << 16) - 1)) | (value & ((1 << 16) - 1));
+			return true;
 		}
-	}
-	else if (rhs.m_Type == ILOperandType_Value)
-	{
-		value = rhs.m_Value;
+
+		state.m_General[operand.m_Register.m_Base] = value & masks[operand.m_Scale];
+		return true;
+	} break;
 	}
 
-	if (lhs.m_Type == ILOperandType_Register)
-	{
-		if (lhs.m_Register.m_Type != Register::general)
-		{
-			return;
-		}
-
-		if (lhs.m_Register.m_Base == REG_RSP)
-		{
-			uint64_t original = state.m_General[lhs.m_Register.m_Base];
-			switch (lhs.m_Scale)
-			{
-			case ILOperandScale_8:
-			{
-				if (lhs.m_Register.m_BaseHigh)
-				{
-					*(reinterpret_cast<uint8_t*>(&state.m_General[lhs.m_Register.m_Base]) + 1) = value;
-				}
-				else
-				{
-					*reinterpret_cast<uint8_t*>(&state.m_General[lhs.m_Register.m_Base]) = value;
-				}
-			} break;
-			default:
-			{
-				state.m_General[lhs.m_Register.m_Base] = value;
-			} break;
-			}
-
-			int64_t difference = (state.m_General[lhs.m_Register.m_Base] - original) / 8;
-
-			if (difference > 0)
-			{
-				for (uint64_t i = 0; i < difference; i++)
-				{
-					state.m_Stack.pop_back();
-				}
-			}
-			else
-			{
-				difference = -difference;
-				for (uint64_t i = 0; i < difference; i++)
-				{
-					state.m_Stack.push_back(0);
-				}
-			}
-		}
-		else
-		{
-			switch (lhs.m_Scale)
-			{
-			case ILOperandScale_8:
-			{
-				if (lhs.m_Register.m_BaseHigh)
-				{
-					*(reinterpret_cast<uint8_t*>(&state.m_General[lhs.m_Register.m_Base]) + 1) = value;
-				}
-				else
-				{
-					*reinterpret_cast<uint8_t*>(&state.m_General[lhs.m_Register.m_Base]) = value;
-				}
-			} break;
-			default:
-			{
-				state.m_General[lhs.m_Register.m_Base] = value;
-			} break;
-			}
-		}
-	}
-	else if (lhs.m_Type == ILOperandType_Memory &&
-		lhs.m_Memory.m_Base == REG_RSP)
-	{
-		uint64_t index = 0;
-		if (lhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-		{
-			index = c_MemoryMultiplier[lhs.m_Memory.m_Scale] * state.m_General[lhs.m_Memory.m_Index];
-		}
-
-		void* base = &state.m_Stack[state.m_Stack.size() - (lhs.m_Memory.m_Offset / 8) - 1];
-		switch (lhs.m_Scale)
-		{
-		case ILOperandScale_8:
-		{
-			*(reinterpret_cast<uint8_t*>(base) + (lhs.m_Memory.m_Offset % 8)) = value;
-		} break;
-		case ILOperandScale_16:
-		{
-			*reinterpret_cast<uint16_t*>(reinterpret_cast<uint8_t*>(base) + (lhs.m_Memory.m_Offset % 8)) = value;
-		} break;
-		case ILOperandScale_32:
-		{
-			*reinterpret_cast<uint32_t*>(reinterpret_cast<uint8_t*>(base) + (lhs.m_Memory.m_Offset % 8)) = value;
-		} break;
-		case ILOperandScale_64:
-		{
-			*reinterpret_cast<uint64_t*>(reinterpret_cast<uint8_t*>(base) + (lhs.m_Memory.m_Offset % 8)) = value;
-		} break;
-		}
-	}
-	else
-	{
-		return;
-	}
+	return false;
 }
 
-void FunctionExplorer::HandleAdd(const ILInstruction& instruction, State& state)
+bool FunctionExplorer::ReadOperand(const ILOperand& operand, const State& state, uint64_t& value)
 {
-	const ILOperand& lhs = instruction.m_Operands[0];
-	const ILOperand& rhs = instruction.m_Operands[1];
+	constexpr uint64_t masks[] = { 0, (1ull << 8) - 1, (1ull << 16) - 1, (1ull << 32) - 1, ~0 };
+	constexpr uint8_t multiplier[] = { 1, 2, 4, 8 };
 
-	int64_t value;
-	if (rhs.m_Type == ILOperandType_Register)
+	switch (operand.m_Type)
 	{
-		if (rhs.m_Register.m_Type != Register::general)
-		{
-			return;
-		}
-
-		switch (rhs.m_Scale)
-		{
-		case ILOperandScale_8:
-		{
-			if (rhs.m_Register.m_BaseHigh)
-			{
-				value = static_cast<int8_t>((state.m_General[rhs.m_Register.m_Base] >> 8) & ((1ull << 8) - 1));
-			}
-			else
-			{
-				value = static_cast<int8_t>(state.m_General[rhs.m_Register.m_Base] & ((1ull << 8) - 1));
-			}
-		} break;
-		case ILOperandScale_16:
-		{
-			value = static_cast<int16_t>(state.m_General[rhs.m_Register.m_Base] & ((1ull << 16) - 1));
-		} break;
-		case ILOperandScale_32:
-		{
-			value = static_cast<int32_t>(state.m_General[rhs.m_Register.m_Base] & ((1ull << 32) - 1));
-		} break;
-		case ILOperandScale_64:
-		{
-			value = static_cast<int64_t>(state.m_General[rhs.m_Register.m_Base]);
-		} break;
-		}
-	}
-	else if (rhs.m_Type == ILOperandType_Memory)
+	case ILOperandType_Register:
 	{
-		if (rhs.m_Memory.m_Base != REG_RSP)
+		if (operand.m_Register.m_Type != Register::general)
 		{
-			return;
+			return false;
 		}
 
-		switch (rhs.m_Scale)
+		if (operand.m_Scale == ILOperandScale_8 &&
+			operand.m_Register.m_BaseHigh)
 		{
-		case ILOperandScale_8:
-		{
-			uint64_t index = 0;
-			if (rhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-			{
-				index = state.m_General[rhs.m_Memory.m_Index] * c_MemoryMultiplier[rhs.m_Memory.m_Scale];
-			}
-
-			value = *(reinterpret_cast<int8_t*>(&state.m_Stack[state.m_Stack.size() - ((rhs.m_Memory.m_Offset + index) / 8) - 1]) + (rhs.m_Memory.m_Offset + index) % 8);
-		} break;
-		case ILOperandScale_16:
-		{
-			uint64_t index = 0;
-			if (rhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-			{
-				index = state.m_General[rhs.m_Memory.m_Index] * c_MemoryMultiplier[rhs.m_Memory.m_Scale];
-			}
-
-			value = *reinterpret_cast<int16_t*>(reinterpret_cast<uint8_t*>(&state.m_Stack[state.m_Stack.size() - ((rhs.m_Memory.m_Offset + index) / 8) - 1]) + (rhs.m_Memory.m_Offset + index) % 8);
-		} break;
-		case ILOperandScale_32:
-		{
-			uint64_t index = 0;
-			if (rhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-			{
-				index = state.m_General[rhs.m_Memory.m_Index] * c_MemoryMultiplier[rhs.m_Memory.m_Scale];
-			}
-
-			value = *reinterpret_cast<int32_t*>(reinterpret_cast<uint8_t*>(&state.m_Stack[state.m_Stack.size() - ((rhs.m_Memory.m_Offset + index) / 8) - 1]) + (rhs.m_Memory.m_Offset + index) % 8);
-		} break;
-		case ILOperandScale_64:
-		{
-			uint64_t index = 0;
-			if (rhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-			{
-				index = state.m_General[rhs.m_Memory.m_Index] * c_MemoryMultiplier[rhs.m_Memory.m_Scale];
-			}
-
-			value = *reinterpret_cast<int64_t*>(reinterpret_cast<uint8_t*>(&state.m_Stack[state.m_Stack.size() - ((rhs.m_Memory.m_Offset + index) / 8) - 1]) + (rhs.m_Memory.m_Offset + index) % 8);
-		} break;
+			value = (state.m_General[operand.m_Register.m_Base] >> 8) & ((1 << 8) - 1);
+			return true; 
 		}
-	}
-	else if (rhs.m_Type == ILOperandType_Value)
+
+		value = state.m_General[operand.m_Register.m_Base] & masks[operand.m_Scale];
+		return true;
+	} break;
+	case ILOperandType_Value:
 	{
-		value = rhs.m_Value;
+		value = operand.m_Value;
+		return true;
+	} break;
 	}
 
-	if (lhs.m_Type == ILOperandType_Register)
-	{
-		if (lhs.m_Register.m_Type != Register::general)
-		{
-			return;
-		}
-
-		switch (lhs.m_Scale)
-		{
-		case ILOperandScale_8:
-		{
-			if (lhs.m_Register.m_BaseHigh)
-			{
-				*(reinterpret_cast<int8_t*>(&state.m_General[lhs.m_Register.m_Base]) + 1) += value;
-			}
-			else
-			{
-				*reinterpret_cast<int8_t*>(&state.m_General[lhs.m_Register.m_Base]) += value;
-			}
-		} break;
-		case ILOperandScale_16:
-		{
-			*reinterpret_cast<int16_t*>(&state.m_General[lhs.m_Register.m_Base]) += value;
-			state.m_General[lhs.m_Register.m_Base] &= (1ull << 16) - 1;
-		} break;
-		case ILOperandScale_32:
-		{
-			*reinterpret_cast<int32_t*>(&state.m_General[lhs.m_Register.m_Base]) += value;
-			state.m_General[lhs.m_Register.m_Base] &= (1ull << 32) - 1;
-		} break;
-		case ILOperandScale_64:
-		{
-			*reinterpret_cast<int64_t*>(&state.m_General[lhs.m_Register.m_Base]) += value;
-		} break;
-		}
-
-		if (lhs.m_Register.m_Base == REG_RSP)
-		{
-			if (value > 0)
-			{
-				for (uint64_t i = 0; i < value / 8; i++)
-				{
-					state.m_Stack.pop_back();
-				}
-			}
-			else
-			{
-				value = -value;
-				for (uint64_t i = 0; i < value / 8; i++)
-				{
-					state.m_Stack.push_back(0);
-				}
-			}
-		}
-	}
-	else if (lhs.m_Type == ILOperandType_Memory &&
-		lhs.m_Memory.m_Base == REG_RSP)
-	{
-		uint64_t index = 0;
-		if (lhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-		{
-			index = c_MemoryMultiplier[lhs.m_Memory.m_Scale] * state.m_General[lhs.m_Memory.m_Index];
-		}
-
-		void* base = &state.m_Stack[state.m_Stack.size() - (lhs.m_Memory.m_Offset / 8) - 1];
-		switch (lhs.m_Scale)
-		{
-		case ILOperandScale_8:
-		{
-			*(reinterpret_cast<int8_t*>(base) + (lhs.m_Memory.m_Offset % 8)) += value;
-		} break;
-		case ILOperandScale_16:
-		{
-			*reinterpret_cast<int16_t*>(reinterpret_cast<uint8_t*>(base) + (lhs.m_Memory.m_Offset % 8)) += value;
-		} break;
-		case ILOperandScale_32:
-		{
-			*reinterpret_cast<int32_t*>(reinterpret_cast<uint8_t*>(base) + (lhs.m_Memory.m_Offset % 8)) += value;
-		} break;
-		case ILOperandScale_64:
-		{
-			*reinterpret_cast<int64_t*>(reinterpret_cast<uint8_t*>(base) + (lhs.m_Memory.m_Offset % 8)) += value;
-		} break;
-		}
-	}
-	else
-	{
-		return;
-	}
-}
-
-void FunctionExplorer::HandleSub(const ILInstruction& instruction, State& state)
-{
-	const ILOperand& lhs = instruction.m_Operands[0];
-	const ILOperand& rhs = instruction.m_Operands[1];
-
-	int64_t value;
-	if (rhs.m_Type == ILOperandType_Register)
-	{
-		if (rhs.m_Register.m_Type != Register::general)
-		{
-			return;
-		}
-
-		switch (rhs.m_Scale)
-		{
-		case ILOperandScale_8:
-		{
-			if (rhs.m_Register.m_BaseHigh)
-			{
-				value = static_cast<int8_t>((state.m_General[rhs.m_Register.m_Base] >> 8) & ((1ull << 8) - 1));
-			}
-			else
-			{
-				value = static_cast<int8_t>(state.m_General[rhs.m_Register.m_Base] & ((1ull << 8) - 1));
-			}
-		} break;
-		case ILOperandScale_16:
-		{
-			value = static_cast<int16_t>(state.m_General[rhs.m_Register.m_Base] & ((1ull << 16) - 1));
-		} break;
-		case ILOperandScale_32:
-		{
-			value = static_cast<int32_t>(state.m_General[rhs.m_Register.m_Base] & ((1ull << 32) - 1));
-		} break;
-		case ILOperandScale_64:
-		{
-			value = static_cast<int64_t>(state.m_General[rhs.m_Register.m_Base]);
-		} break;
-		}
-	}
-	else if (rhs.m_Type == ILOperandType_Memory)
-	{
-		if (rhs.m_Memory.m_Base != REG_RSP)
-		{
-			return;
-		}
-
-		switch (rhs.m_Scale)
-		{
-		case ILOperandScale_8:
-		{
-			uint64_t index = 0;
-			if (rhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-			{
-				index = state.m_General[rhs.m_Memory.m_Index] * c_MemoryMultiplier[rhs.m_Memory.m_Scale];
-			}
-
-			value = *(reinterpret_cast<int8_t*>(&state.m_Stack[state.m_Stack.size() - ((rhs.m_Memory.m_Offset + index) / 8) - 1]) + (rhs.m_Memory.m_Offset + index) % 8);
-		} break;
-		case ILOperandScale_16:
-		{
-			uint64_t index = 0;
-			if (rhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-			{
-				index = state.m_General[rhs.m_Memory.m_Index] * c_MemoryMultiplier[rhs.m_Memory.m_Scale];
-			}
-
-			value = *reinterpret_cast<int16_t*>(reinterpret_cast<uint8_t*>(&state.m_Stack[state.m_Stack.size() - ((rhs.m_Memory.m_Offset + index) / 8) - 1]) + (rhs.m_Memory.m_Offset + index) % 8);
-		} break;
-		case ILOperandScale_32:
-		{
-			uint64_t index = 0;
-			if (rhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-			{
-				index = state.m_General[rhs.m_Memory.m_Index] * c_MemoryMultiplier[rhs.m_Memory.m_Scale];
-			}
-
-			value = *reinterpret_cast<int32_t*>(reinterpret_cast<uint8_t*>(&state.m_Stack[state.m_Stack.size() - ((rhs.m_Memory.m_Offset + index) / 8) - 1]) + (rhs.m_Memory.m_Offset + index) % 8);
-		} break;
-		case ILOperandScale_64:
-		{
-			uint64_t index = 0;
-			if (rhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-			{
-				index = state.m_General[rhs.m_Memory.m_Index] * c_MemoryMultiplier[rhs.m_Memory.m_Scale];
-			}
-
-			value = *reinterpret_cast<int64_t*>(reinterpret_cast<uint8_t*>(&state.m_Stack[state.m_Stack.size() - ((rhs.m_Memory.m_Offset + index) / 8) - 1]) + (rhs.m_Memory.m_Offset + index) % 8);
-		} break;
-		}
-	}
-	else if (rhs.m_Type == ILOperandType_Value)
-	{
-		value = rhs.m_Value;
-	}
-
-	if (lhs.m_Type == ILOperandType_Register)
-	{
-		if (lhs.m_Register.m_Type != Register::general)
-		{
-			return;
-		}
-
-		switch (lhs.m_Scale)
-		{
-		case ILOperandScale_8:
-		{
-			if (lhs.m_Register.m_BaseHigh)
-			{
-				*(reinterpret_cast<int8_t*>(&state.m_General[lhs.m_Register.m_Base]) + 1) -= value;
-			}
-			else
-			{
-				*reinterpret_cast<int8_t*>(&state.m_General[lhs.m_Register.m_Base]) -= value;
-			}
-		} break;
-		case ILOperandScale_16:
-		{
-			*reinterpret_cast<int16_t*>(&state.m_General[lhs.m_Register.m_Base]) -= value;
-			state.m_General[lhs.m_Register.m_Base] &= (1ull << 16) - 1;
-		} break;
-		case ILOperandScale_32:
-		{
-			*reinterpret_cast<int32_t*>(&state.m_General[lhs.m_Register.m_Base]) -= value;
-			state.m_General[lhs.m_Register.m_Base] &= (1ull << 32) - 1;
-		} break;
-		case ILOperandScale_64:
-		{
-			*reinterpret_cast<int64_t*>(&state.m_General[lhs.m_Register.m_Base]) -= value;
-		} break;
-		}
-
-		if (lhs.m_Register.m_Base == REG_RSP)
-		{
-			if (value > 0)
-			{
-				for (uint64_t i = 0; i < value / 8; i++)
-				{
-					state.m_Stack.push_back(0);
-				}
-			}
-			else
-			{
-				value = -value;
-				for (uint64_t i = 0; i < value / 8; i++)
-				{
-					state.m_Stack.pop_back();
-				}
-			}
-		}
-	}
-	else if (lhs.m_Type == ILOperandType_Memory &&
-		lhs.m_Memory.m_Base == REG_RSP)
-	{
-		uint64_t index = 0;
-		if (lhs.m_Memory.m_Index != IL_INVALID_REGISTER)
-		{
-			index = c_MemoryMultiplier[lhs.m_Memory.m_Scale] * state.m_General[lhs.m_Memory.m_Index];
-		}
-
-		void* base = &state.m_Stack[state.m_Stack.size() - (lhs.m_Memory.m_Offset / 8) - 1];
-		switch (lhs.m_Scale)
-		{
-		case ILOperandScale_8:
-		{
-			*(reinterpret_cast<int8_t*>(base) + (lhs.m_Memory.m_Offset % 8)) -= value;
-		} break;
-		case ILOperandScale_16:
-		{
-			*reinterpret_cast<int16_t*>(reinterpret_cast<uint8_t*>(base) + (lhs.m_Memory.m_Offset % 8)) -= value;
-		} break;
-		case ILOperandScale_32:
-		{
-			*reinterpret_cast<int32_t*>(reinterpret_cast<uint8_t*>(base) + (lhs.m_Memory.m_Offset % 8)) -= value;
-		} break;
-		case ILOperandScale_64:
-		{
-			*reinterpret_cast<int64_t*>(reinterpret_cast<uint8_t*>(base) + (lhs.m_Memory.m_Offset % 8)) -= value;
-		} break;
-		}
-	}
-	else
-	{
-		return;
-	}
+	return false;
 }

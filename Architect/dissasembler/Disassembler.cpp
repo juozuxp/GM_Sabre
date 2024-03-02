@@ -340,7 +340,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 				{
 					bool high = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && (operand.m_Register == Register::general) && operand.m_Value >= 4;
 
-					resolved.m_Operands[i].m_Register.m_Base = operand.m_Value - (high ? 4 : 0) + reg_extend;
+					resolved.m_Operands[i].m_Register.m_Base = operand.m_Value - (high ? 4 : 0) + base_extend;
 					resolved.m_Operands[i].m_Register.m_BaseHigh = high;
 				}
 				else

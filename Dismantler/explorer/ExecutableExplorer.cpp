@@ -14,3 +14,8 @@ ExecutableView* ExecutableExplorer::GetExecutableView() const
 {
 	return new ExecutableView(m_Buffer, m_Disassembler, m_Visualizer);
 }
+
+void ExecutableExplorer::ExploreFunctions()
+{
+	m_FunctionExplorer.ExploreExecutable(m_Buffer);
+}

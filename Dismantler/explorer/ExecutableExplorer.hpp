@@ -16,10 +16,13 @@ public:
 public:
 	PEHeaders* GetHeaders() const;
 	ExecutableView* GetExecutableView() const;
+	void ExploreFunctions();
 
 private:
 	PEBuffer m_Buffer;
 
 	Visualizer m_Visualizer;
 	Disassembler m_Disassembler;
+
+	FunctionExplorer m_FunctionExplorer;
 };

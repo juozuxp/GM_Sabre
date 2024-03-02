@@ -19,6 +19,8 @@ int main()
 {
 	ExecutableExplorer explorer = ExecutableExplorer(L"kernel32.dll");
 
+	explorer.ExploreFunctions();
+
 	delete explorer.GetHeaders();
 	delete explorer.GetExecutableView();
 }
