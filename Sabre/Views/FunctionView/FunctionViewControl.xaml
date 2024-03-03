@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="Sabre.Views.FunctionView.FunctionsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
+			 xmlns:local="clr-namespace:Sabre.Utility"
+             local:VsTheme.UseVsTheme="True"
+             Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
+             Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300"
+             Name="MyToolWindow">
+    <Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="20"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<TextBox Grid.Row="0" x:Name="m_SearchField" TextWrapping="NoWrap" AcceptsReturn="False"/>
+		<ListView Grid.Row="1" x:Name="m_FunctionView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="FunctionView_SizeChanged">
+			<ListView.View>
+				<GridView AllowsColumnReorder="true" >
+					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Name}" Width="200"/>
+					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Address}" Width="200"/>
+					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Size}" Width="Auto"/>
+				</GridView>
+			</ListView.View>
+		</ListView>
+	</Grid>
+</UserControl>

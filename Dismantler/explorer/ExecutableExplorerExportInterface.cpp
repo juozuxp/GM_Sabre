@@ -20,3 +20,10 @@ ExecutableView* ExecutableExplorer_GetExecutableView(const ExecutableExplorer* i
 {
 	return instance->GetExecutableView();
 }
+
+extern "C"
+__declspec(dllexport)
+ManagedArray<FunctionExplorer::Function>* ExecutableExplorer_GetExecutableFunctions(ExecutableExplorer* instance)
+{
+	return instance->GetExecutableFunctions();
+}

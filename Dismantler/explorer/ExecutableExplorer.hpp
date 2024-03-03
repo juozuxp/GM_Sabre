@@ -16,7 +16,7 @@ public:
 public:
 	PEHeaders* GetHeaders() const;
 	ExecutableView* GetExecutableView() const;
-	void ExploreFunctions();
+	ManagedArray<FunctionExplorer::Function>* GetExecutableFunctions();
 
 private:
 	PEBuffer m_Buffer;

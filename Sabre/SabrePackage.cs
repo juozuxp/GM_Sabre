@@ -29,6 +29,7 @@ namespace Sabre
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(Sabre.Views.Loader.LoaderView))]
 	[ProvideToolWindow(typeof(Sabre.Views.ByteView.ByteViewView))]
+	[ProvideToolWindow(typeof(Sabre.Views.FunctionView.FunctionViewView))]
 	public sealed class SabrePackage : AsyncPackage
     {
         /// <summary>
@@ -57,6 +58,7 @@ namespace Sabre
 
             await Views.Loader.LoaderCommand.InitializeAsync(this);
             await Views.ByteView.ByteViewCommand.InitializeAsync(this);
+            await Sabre.Views.FunctionView.FunctionViewCommand.InitializeAsync(this);
         }
 
         #endregion

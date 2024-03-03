@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Sabre.Explorer.Objects;
 
 namespace Sabre.Controller
 {
@@ -72,6 +73,16 @@ namespace Sabre.Controller
 			}
 
 			return s_Instance.m_Explorer.GetExecutableView();
+		}
+
+		public static ExecutableFunction[] GetExecutableFunctions()
+		{
+			if (s_Instance.m_Explorer == null)
+			{
+				return Array.Empty<ExecutableFunction>();
+			}
+
+			return s_Instance.m_Explorer.GetExecutableFunctions();
 		}
 
 		public static void AddOnLoadEvent(OnLoad function)

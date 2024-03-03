@@ -162,7 +162,7 @@ namespace Sabre.Dismantler.Visuals
 
 						builder.Append($"{c_MemoryScale[(byte)visual.m_Memory.m_Size]}");
 
-						if (visual.m_Memory.m_Segment != NativeVisual.c_IvalidRegister)
+						if (visual.m_Memory.m_Segment != NativeVisual.c_InvalidRegister)
 						{
 							builder.Append($"{c_Registers[visual.m_Memory.m_Segment]}:[");
 						}
@@ -171,14 +171,14 @@ namespace Sabre.Dismantler.Visuals
 							builder.Append('[');
 						}
 
-						if (visual.m_Memory.m_Base != NativeVisual.c_IvalidRegister)
+						if (visual.m_Memory.m_Base != NativeVisual.c_InvalidRegister)
 						{
 							builder.Append(c_Registers[visual.m_Memory.m_Base]);
 						}
 
-						if (visual.m_Memory.m_Index != NativeVisual.c_IvalidRegister)
+						if (visual.m_Memory.m_Index != NativeVisual.c_InvalidRegister)
 						{
-							if (visual.m_Memory.m_Base != NativeVisual.c_IvalidRegister)
+							if (visual.m_Memory.m_Base != NativeVisual.c_InvalidRegister)
 							{
 								builder.Append(" + ");
 							}
@@ -196,8 +196,8 @@ namespace Sabre.Dismantler.Visuals
 							bool sign = visual.m_Memory.m_Offset < 0;
 							int value = visual.m_Memory.m_Offset;
 
-							if (visual.m_Memory.m_Base != NativeVisual.c_IvalidRegister ||
-								visual.m_Memory.m_Index != NativeVisual.c_IvalidRegister)
+							if (visual.m_Memory.m_Base != NativeVisual.c_InvalidRegister ||
+								visual.m_Memory.m_Index != NativeVisual.c_InvalidRegister)
 							{
 								value = sign ? -value : value;
 

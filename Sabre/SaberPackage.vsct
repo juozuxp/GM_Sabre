@@ -26,6 +26,7 @@
     <GuidSymbol value="{fa4c2f58-3039-42e9-84b9-eca29e509d36}" name="guidSabrePackageCmdSet">
       <IDSymbol value="256" name="cmdidDismantlerCommand" />
       <IDSymbol value="257" name="cmdidDisassemblyCommand" />
+      <IDSymbol value="258" name="cmdidFunctionsCommand" />
     </GuidSymbol>
 	  
   </Symbols>
@@ -41,6 +42,12 @@
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Strings>
           <ButtonText>Sabre byte view</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="guidSabrePackageCmdSet" id="cmdidFunctionsCommand" priority="0x0100" type="Button">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+        <Strings>
+          <ButtonText>Sabre function view</ButtonText>
         </Strings>
       </Button>
     </Buttons>

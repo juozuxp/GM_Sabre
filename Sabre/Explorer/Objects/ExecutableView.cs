@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sabre.Explorer
+namespace Sabre.Explorer.Objects
 {
 	internal struct ExecutableView
 	{

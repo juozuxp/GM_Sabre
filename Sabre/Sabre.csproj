@@ -62,8 +62,9 @@
     <Compile Include="Dismantler\Visuals\NativeVisual.cs" />
     <Compile Include="Dismantler\Visuals\Visualizer.cs" />
     <Compile Include="Explorer\ExecutableExplorer.cs" />
-    <Compile Include="Explorer\ExecutableView.cs" />
-    <Compile Include="Explorer\ExecutableViewSection.cs" />
+    <Compile Include="Explorer\Objects\ExecutableFunction.cs" />
+    <Compile Include="Explorer\Objects\ExecutableView.cs" />
+    <Compile Include="Explorer\Objects\ExecutableViewSection.cs" />
     <Compile Include="Explorer\PE\PEDelayImportTable.cs" />
     <Compile Include="Explorer\PE\PEExportTable.cs" />
     <Compile Include="Explorer\PE\PEHeaders.cs" />
@@ -83,6 +84,11 @@
     <Compile Include="Native\PE\IMAGE_OPTIONAL_HEADER64.cs" />
     <Compile Include="Native\PE\IMAGE_SECTION_HEADER.cs" />
     <Compile Include="Utility\VsTheme.cs" />
+    <Compile Include="Views\FunctionView\FunctionViewView.cs" />
+    <Compile Include="Views\FunctionView\FunctionViewCommand.cs" />
+    <Compile Include="Views\FunctionView\FunctionViewControl.xaml.cs">
+      <DependentUpon>FunctionViewControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Loader\LoaderView.cs" />
     <Compile Include="Views\Loader\LoaderCommand.cs" />
     <Compile Include="Views\Loader\LoaderControl.xaml.cs">
@@ -127,6 +133,10 @@
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.8.2367" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\FunctionView\FunctionViewControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Loader\LoaderControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -149,7 +159,6 @@
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

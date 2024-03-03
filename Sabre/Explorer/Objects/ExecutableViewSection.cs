@@ -9,7 +9,7 @@ using System.Windows.Markup;
 using Sabre.Dismantler.Visuals;
 using Sabre.ListItems;
 
-namespace Sabre.Explorer
+namespace Sabre.Explorer.Objects
 {
 	internal struct ExecutableViewSection
 	{

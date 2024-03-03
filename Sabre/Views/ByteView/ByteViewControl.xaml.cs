@@ -6,6 +6,7 @@ using System.Windows.Input;
 using Sabre.Controller;
 using Sabre.Explorer;
 using Sabre.ListItems;
+using Sabre.Explorer.Objects;
 
 namespace Sabre.Views.ByteView
 {
@@ -80,7 +81,7 @@ namespace Sabre.Views.ByteView
 			gridView.Columns[gridView.Columns.Count - 1].Width = width;
 		}
 
-		private void m_DismView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		private void DismView_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			if (e.AddedItems.Count == 0)
 			{

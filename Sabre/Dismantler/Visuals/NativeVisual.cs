@@ -20,7 +20,7 @@ namespace Sabre.Dismantler.Visuals
 			OperandRegister,
 		}
 
-		public const byte c_IvalidRegister = 255;
+		public const byte c_InvalidRegister = 255;
 
 		[FieldOffset(0)]
 		public Type m_Type;

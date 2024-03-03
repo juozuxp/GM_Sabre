@@ -4,6 +4,7 @@ using Sabre.Native.Managed;
 using Sabre.Native.PE;
 using System;
 using System.Runtime.InteropServices;
+using Sabre.Explorer.Objects;
 
 namespace Sabre.Explorer
 {
@@ -300,6 +301,9 @@ namespace Sabre.Explorer
 		[DllImport("Dismantler.dll")]
 		private static extern IntPtr ExecutableExplorer_GetExecutableView(IntPtr instance);
 
+		[DllImport("Dismantler.dll")]
+		private static extern IntPtr ExecutableExplorer_GetExecutableFunctions(IntPtr instance);
+
 		private readonly ManagedObject m_Instance;
 
 		public ExecutableExplorer(string path) 
@@ -337,6 +341,20 @@ namespace Sabre.Explorer
 			using (NativeExecutableView native = Marshal.PtrToStructure<NativeExecutableView>(pointer))
 			{
 				return native.ToData();
+			}
+		}
+
+		public ExecutableFunction[] GetExecutableFunctions()
+		{
+			IntPtr pointer = ExecutableExplorer_GetExecutableFunctions(m_Instance);
+			if (pointer == IntPtr.Zero)
+			{
+				return Array.Empty<ExecutableFunction>();
+			}
+
+			using (ManagedArray native = Marshal.PtrToStructure<ManagedArray>(pointer))
+			{
+				return native.ToArray<ExecutableFunction>();
 			}
 		}
 	}
