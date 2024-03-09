@@ -17,9 +17,9 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 
 int main()
 {
-	ExecutableExplorer explorer = ExecutableExplorer(L"Dismantler.exe");
+	ExecutableExplorer explorer = ExecutableExplorer(L"electron.exe");
 
-	explorer.GetExecutableFunctions();
+	delete explorer.GetExecutableFunctions();
 
 	delete explorer.GetHeaders();
 	delete explorer.GetExecutableView();

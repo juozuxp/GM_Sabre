@@ -66,15 +66,7 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreFunction(const 
 
 	std::vector<Function> functions;
 
-	uint32_t size;
-	State state;
-
-	state.m_General[REG_RSP] = 0x10008;
-	state.m_StackBase = state.m_General[REG_RSP];
-
-	ExploreBranch(function, state, functions, size);
-
-	functions.push_back(Function(function, size));
+	ExploreFunction(function, functions);
 
 	for (Function& function : functions)
 	{
@@ -84,15 +76,26 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreFunction(const 
 	return functions;
 }
 
-void FunctionExplorer::ExploreBranch(const void* branch, State state, std::vector<Function>& functions, uint32_t& size)
+void FunctionExplorer::ExploreFunction(const void* function, std::vector<Function>& functions)
 {
-	uint32_t accumulateSize = 0;
-	uint32_t maxSize = 0;
+	std::vector<StackEntry> stack;
+	StackEntry stackEntry;
+
+	State state;
+
+	state.m_General[REG_RSP] = 0x10008;
+	state.m_StackBase = state.m_General[REG_RSP];
+
+	stackEntry.m_MaxSize = 0;
+	stackEntry.m_AccumSize = 0;
+	stackEntry.m_State = state;
+	stackEntry.m_Branch = function;
+	stackEntry.m_Function = function;
 
 	std::vector<ILInstruction> instructions;
 	while (true)
 	{
-		uint32_t chunkSize = (1 << 12) - (reinterpret_cast<uint64_t>(branch) & ((1 << 12) - 1));
+		uint32_t chunkSize = (1 << 12) - (reinterpret_cast<uint64_t>(stackEntry.m_Branch) & ((1 << 12) - 1));
 		if (chunkSize > CHUNK_SIZE ||
 			chunkSize == 0)
 		{
@@ -100,55 +103,123 @@ void FunctionExplorer::ExploreBranch(const void* branch, State state, std::vecto
 		}
 
 		instructions.clear();
-		m_Disassembler.Disassemble(branch, chunkSize, instructions);
+		m_Disassembler.Disassemble(stackEntry.m_Branch, chunkSize, instructions);
 
 		for (const ILInstruction& instruction : instructions)
 		{
-			accumulateSize += instruction.m_Size;
-			branch = reinterpret_cast<const uint8_t*>(branch) + instruction.m_Size;
+			stackEntry.m_AccumSize += instruction.m_Size;
+			stackEntry.m_Branch = reinterpret_cast<const uint8_t*>(stackEntry.m_Branch) + instruction.m_Size;
 
 			bool reset = false;
 
 			switch (instruction.m_Type)
 			{
+			case InsType_invalid:
+			{
+				reset = true;
+
+				if (stackEntry.m_Function != nullptr)
+				{
+					functions.push_back(Function(stackEntry.m_Function, max(stackEntry.m_AccumSize, stackEntry.m_MaxSize)));
+				}
+
+				if (stack.empty())
+				{
+					return;
+				}
+
+				int32_t size = 0;
+				if (stackEntry.m_Function == nullptr)
+				{
+					size = max(stackEntry.m_AccumSize, stackEntry.m_MaxSize);
+				}
+
+				stackEntry = stack[stack.size() - 1];
+				stack.pop_back();
+
+				stackEntry.m_MaxSize = max(stackEntry.m_MaxSize, size);
+				return;
+			} break;
 			case InsType_jmp:
 			{
 				const ILOperand& first = instruction.m_Operands[0];
 
 				if (first.m_Type != ILOperandType_ValueRelative)
 				{
-					size = max(accumulateSize, maxSize);
+					reset = true;
+
+					if (stackEntry.m_Function != nullptr)
+					{
+						functions.push_back(Function(stackEntry.m_Function, max(stackEntry.m_AccumSize, stackEntry.m_MaxSize)));
+					}
+
+					if (stack.empty())
+					{
+						return;
+					}
+
+					int32_t size = 0;
+					if (stackEntry.m_Function == nullptr)
+					{
+						size = max(stackEntry.m_AccumSize, stackEntry.m_MaxSize);
+					}
+
+					stackEntry = stack[stack.size() - 1];
+					stack.pop_back();
+
+					stackEntry.m_MaxSize = max(stackEntry.m_MaxSize, size);
 					return;
 				}
 
-				const void* address = reinterpret_cast<const uint8_t*>(branch) + first.m_Relative.m_Value;
+				const void* address = reinterpret_cast<const uint8_t*>(stackEntry.m_Branch) + first.m_Relative.m_Value;
 				if (!m_Explored.insert(address).second)
 				{
-					size = max(accumulateSize, maxSize);
+					reset = true;
+
+					if (stackEntry.m_Function != nullptr)
+					{
+						functions.push_back(Function(stackEntry.m_Function, max(stackEntry.m_AccumSize, stackEntry.m_MaxSize)));
+					}
+
+					if (stack.empty())
+					{
+						return;
+					}
+
+					int32_t size = 0;
+					if (stackEntry.m_Function == nullptr)
+					{
+						size = max(stackEntry.m_AccumSize, stackEntry.m_MaxSize);
+					}
+
+					stackEntry = stack[stack.size() - 1];
+					stack.pop_back();
+
+					stackEntry.m_MaxSize = max(stackEntry.m_MaxSize, size);
 					return;
 				}
 
-				if (state.m_General[REG_RSP] == state.m_StackBase)
+				if (stackEntry.m_State.m_General[REG_RSP] == stackEntry.m_State.m_StackBase)
 				{
-					uint32_t funcSize = 0;
+					if (stackEntry.m_Function != nullptr)
+					{
+						functions.push_back(Function(stackEntry.m_Function, max(stackEntry.m_AccumSize, stackEntry.m_MaxSize)));
+					}
 
-					ExploreBranch(address, state, functions, funcSize);
-
-					functions.push_back(Function(address, funcSize));
-
-					size = max(accumulateSize, maxSize);
-					return;
+					stackEntry.m_MaxSize = 0;
+					stackEntry.m_AccumSize = 0;
+					stackEntry.m_Function = address;
 				}
 				else
 				{
 					if (first.m_Relative.m_Value > 0)
 					{
-						accumulateSize += first.m_Relative.m_Value;
+						stackEntry.m_AccumSize += first.m_Relative.m_Value;
 					}
 				}
 
 				reset = true;
-				branch = address;
+				stackEntry.m_Branch = address;
 			} break;
 			case InsType_ja:
 			case InsType_jae:
@@ -175,20 +246,20 @@ void FunctionExplorer::ExploreBranch(const void* branch, State state, std::vecto
 					continue;
 				}
 
-				const void* address = reinterpret_cast<const uint8_t*>(branch) + first.m_Relative.m_Value;
+				const void* address = reinterpret_cast<const uint8_t*>(stackEntry.m_Branch) + first.m_Relative.m_Value;
 				if (!m_Explored.insert(address).second)
 				{
 					continue;
 				}
 
-				uint32_t branchSize = 0;
+				stack.push_back(stackEntry);
 
-				ExploreBranch(address, state, functions, branchSize);
+				stackEntry.m_MaxSize = 0;
+				stackEntry.m_AccumSize = 0;
+				stackEntry.m_Branch = address;
+				stackEntry.m_Function = nullptr;
 
-				if (first.m_Relative.m_Value > 0)
-				{
-					maxSize = max(branchSize + accumulateSize, maxSize);
-				}
+				reset = true;
 			} break;
 			case InsType_call:
 			{
@@ -199,21 +270,26 @@ void FunctionExplorer::ExploreBranch(const void* branch, State state, std::vecto
 					continue;
 				}
 
-				const void* address = reinterpret_cast<const uint8_t*>(branch) + first.m_Relative.m_Value;
+				const void* address = reinterpret_cast<const uint8_t*>(stackEntry.m_Branch) + first.m_Relative.m_Value;
 				if (!m_Explored.insert(address).second)
 				{
 					continue;
 				}
 
-				State callState = state;
-				uint32_t callSize = 0;
+				State callState = stackEntry.m_State;
 
 				callState.m_General[REG_RSP] -= 8;
 				callState.m_StackBase = callState.m_General[REG_RSP];
 
-				ExploreBranch(address, callState, functions, callSize);
+				stack.push_back(stackEntry);
 
-				functions.push_back(Function(address, callSize));
+				stackEntry.m_MaxSize = 0;
+				stackEntry.m_AccumSize = 0;
+				stackEntry.m_State = callState;
+				stackEntry.m_Branch = address;
+				stackEntry.m_Function = address;
+
+				reset = true;
 			} break;
 			case InsType_mov:
 			{
@@ -222,12 +298,12 @@ void FunctionExplorer::ExploreBranch(const void* branch, State state, std::vecto
 
 				uint64_t value;
 
-				if (!ReadOperand(second, state, value))
+				if (!ReadOperand(second, stackEntry.m_State, value))
 				{
 					break;
 				}
 
-				if (!WriteOperand(first, state, value))
+				if (!WriteOperand(first, stackEntry.m_State, value))
 				{
 					break;
 				}
@@ -248,28 +324,28 @@ void FunctionExplorer::ExploreBranch(const void* branch, State state, std::vecto
 
 				if (second.m_Memory.m_Base != IL_INVALID_REGISTER)
 				{
-					value = state.m_General[second.m_Memory.m_Base];
+					value = stackEntry.m_State.m_General[second.m_Memory.m_Base];
 				}
 
 				if (second.m_Memory.m_Index != IL_INVALID_REGISTER)
 				{
-					value += state.m_General[second.m_Memory.m_Index] * multiplier[second.m_Memory.m_Scale];
+					value += stackEntry.m_State.m_General[second.m_Memory.m_Index] * multiplier[second.m_Memory.m_Scale];
 				}
 
 				value += second.m_Memory.m_Offset;
 
-				if (!WriteOperand(first, state, value))
+				if (!WriteOperand(first, stackEntry.m_State, value))
 				{
 					break;
 				}
 			} break;
 			case InsType_push:
 			{
-				state.m_General[REG_RSP] -= 8;
+				stackEntry.m_State.m_General[REG_RSP] -= 8;
 			} break;
 			case InsType_pop:
 			{
-				state.m_General[REG_RSP] += 8;
+				stackEntry.m_State.m_General[REG_RSP] += 8;
 			} break;
 			case InsType_sub:
 			{
@@ -277,18 +353,18 @@ void FunctionExplorer::ExploreBranch(const void* branch, State state, std::vecto
 				const ILOperand& second = instruction.m_Operands[1];
 
 				uint64_t firstValue;
-				if (!ReadOperand(first, state, firstValue))
+				if (!ReadOperand(first, stackEntry.m_State, firstValue))
 				{
 					break;
 				}
 
 				uint64_t secondValue;
-				if (!ReadOperand(second, state, secondValue))
+				if (!ReadOperand(second, stackEntry.m_State, secondValue))
 				{
 					break;
 				}
 
-				if (!WriteOperand(first, state, firstValue - secondValue))
+				if (!WriteOperand(first, stackEntry.m_State, firstValue - secondValue))
 				{
 					break;
 				}
@@ -299,18 +375,18 @@ void FunctionExplorer::ExploreBranch(const void* branch, State state, std::vecto
 				const ILOperand& second = instruction.m_Operands[1];
 
 				uint64_t firstValue;
-				if (!ReadOperand(first, state, firstValue))
+				if (!ReadOperand(first, stackEntry.m_State, firstValue))
 				{
 					break;
 				}
 
 				uint64_t secondValue;
-				if (!ReadOperand(second, state, secondValue))
+				if (!ReadOperand(second, stackEntry.m_State, secondValue))
 				{
 					break;
 				}
 
-				if (!WriteOperand(first, state, firstValue + secondValue))
+				if (!WriteOperand(first, stackEntry.m_State, firstValue + secondValue))
 				{
 					break;
 				}
@@ -321,18 +397,18 @@ void FunctionExplorer::ExploreBranch(const void* branch, State state, std::vecto
 				const ILOperand& second = instruction.m_Operands[1];
 
 				uint64_t firstValue;
-				if (!ReadOperand(first, state, firstValue))
+				if (!ReadOperand(first, stackEntry.m_State, firstValue))
 				{
 					break;
 				}
 
 				uint64_t secondValue;
-				if (!ReadOperand(second, state, secondValue))
+				if (!ReadOperand(second, stackEntry.m_State, secondValue))
 				{
 					break;
 				}
 
-				if (!WriteOperand(first, state, firstValue ^ secondValue))
+				if (!WriteOperand(first, stackEntry.m_State, firstValue ^ secondValue))
 				{
 					break;
 				}
@@ -343,18 +419,18 @@ void FunctionExplorer::ExploreBranch(const void* branch, State state, std::vecto
 				const ILOperand& second = instruction.m_Operands[1];
 
 				uint64_t firstValue;
-				if (!ReadOperand(first, state, firstValue))
+				if (!ReadOperand(first, stackEntry.m_State, firstValue))
 				{
 					break;
 				}
 
 				uint64_t secondValue;
-				if (!ReadOperand(second, state, secondValue))
+				if (!ReadOperand(second, stackEntry.m_State, secondValue))
 				{
 					break;
 				}
 
-				if (!WriteOperand(first, state, firstValue & secondValue))
+				if (!WriteOperand(first, stackEntry.m_State, firstValue & secondValue))
 				{
 					break;
 				}
@@ -365,18 +441,18 @@ void FunctionExplorer::ExploreBranch(const void* branch, State state, std::vecto
 				const ILOperand& second = instruction.m_Operands[1];
 
 				uint64_t firstValue;
-				if (!ReadOperand(first, state, firstValue))
+				if (!ReadOperand(first, stackEntry.m_State, firstValue))
 				{
 					break;
 				}
 
 				uint64_t secondValue;
-				if (!ReadOperand(second, state, secondValue))
+				if (!ReadOperand(second, stackEntry.m_State, secondValue))
 				{
 					break;
 				}
 
-				if (!WriteOperand(first, state, firstValue | secondValue))
+				if (!WriteOperand(first, stackEntry.m_State, firstValue | secondValue))
 				{
 					break;
 				}
@@ -386,20 +462,40 @@ void FunctionExplorer::ExploreBranch(const void* branch, State state, std::vecto
 				const ILOperand& first = instruction.m_Operands[0];
 
 				uint64_t value;
-				if (!ReadOperand(first, state, value))
+				if (!ReadOperand(first, stackEntry.m_State, value))
 				{
 					break;
 				}
 
-				if (!WriteOperand(first, state, ~value))
+				if (!WriteOperand(first, stackEntry.m_State, ~value))
 				{
 					break;
 				}
 			} break;
 			case InsType_ret:
 			{
-				size = max(accumulateSize, maxSize);
-				return;
+				reset = true;
+
+				if (stackEntry.m_Function != nullptr)
+				{
+					functions.push_back(Function(stackEntry.m_Function, max(stackEntry.m_AccumSize, stackEntry.m_MaxSize)));
+				}
+
+				if (stack.empty())
+				{
+					return;
+				}
+
+				int32_t size = 0;
+				if (stackEntry.m_Function == nullptr)
+				{
+					size = max(stackEntry.m_AccumSize, stackEntry.m_MaxSize);
+				}
+
+				stackEntry = stack[stack.size() - 1];
+				stack.pop_back();
+
+				stackEntry.m_MaxSize = max(stackEntry.m_MaxSize, size);
 			} break;
 			}
 

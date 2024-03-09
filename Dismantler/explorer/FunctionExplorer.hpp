@@ -24,12 +24,23 @@ private:
 		uint64_t m_General[16] = {};
 	};
 
+	struct StackEntry
+	{
+		State m_State;
+
+		const void* m_Branch;
+		const void* m_Function;
+
+		uint32_t m_MaxSize;
+		uint32_t m_AccumSize;
+	};
+
 public:
 	std::vector<Function> ExploreExecutable(const PEBuffer& buffer);
 	std::vector<Function> ExploreFunction(const PEBuffer& buffer, const void* function);
 
 private:
-	void ExploreBranch(const void* branch, State state, std::vector<Function>& functions, uint32_t& size);
+	void ExploreFunction(const void* function, std::vector<Function>& functions);
 
 private:
 	static bool WriteOperand(const ILOperand& operand, State& state, uint64_t value);
