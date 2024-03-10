@@ -17,7 +17,7 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 
 int main()
 {
-	ExecutableExplorer explorer = ExecutableExplorer(L"Injector.exe");
+	ExecutableExplorer explorer = ExecutableExplorer(L"dxgi.dll");
 
 	delete explorer.GetExecutableFunctions();
 

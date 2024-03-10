@@ -47,6 +47,17 @@ PEHeaders::PEHeaders(const void* base)
 		{
 			m_Exports = PEExportTable(base);
 		}
+
+		if (optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size != 0)
+		{
+			const IMAGE_BASE_RELOCATION* relocation = reinterpret_cast<const IMAGE_BASE_RELOCATION*>(reinterpret_cast<uintptr_t>(base) + optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress);
+			while (relocation->SizeOfBlock != 0)
+			{
+				m_Relocations.Add(PERelocationTable(base, relocation));
+
+				relocation = reinterpret_cast<const IMAGE_BASE_RELOCATION*>(reinterpret_cast<uintptr_t>(relocation) + relocation->SizeOfBlock);
+			}
+		}
 	}
 	else
 	{
@@ -75,6 +86,17 @@ PEHeaders::PEHeaders(const void* base)
 		if (optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size != 0)
 		{
 			m_Exports = PEExportTable(base);
+		}
+
+		if (optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size != 0)
+		{
+			const IMAGE_BASE_RELOCATION* relocation = reinterpret_cast<const IMAGE_BASE_RELOCATION*>(reinterpret_cast<uintptr_t>(base) + optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress);
+			while (relocation->SizeOfBlock != 0)
+			{
+				m_Relocations.Add(PERelocationTable(base, relocation));
+
+				relocation = reinterpret_cast<const IMAGE_BASE_RELOCATION*>(reinterpret_cast<uintptr_t>(relocation) + relocation->SizeOfBlock);
+			}
 		}
 	}
 

@@ -25,6 +25,7 @@ namespace Sabre.Explorer.PE
 		public PEExportTable m_Exports;
 
 		public PEImportTable[] m_Imports;
+		public PERelocationTable[] m_Relocations;
 		public PEDelayImportTable[] m_DelayImports;
 
 		public IMAGE_SECTION_HEADER[] m_Sections;
@@ -641,6 +642,62 @@ namespace Sabre.Explorer.PE
 			return item;
 		}
 
+		private TreeViewItem RelocationsToTreeView()
+		{
+			TreeViewItem item = new TreeViewItem();
+
+			item.Header = "relocations";
+
+			foreach (PERelocationTable table in m_Relocations)
+			{
+				TreeViewItem tableItem = new TreeViewItem();
+
+				tableItem.Header = table.m_Descriptor.VirtualAddress != 0 ? (m_Base + (int)table.m_Descriptor.VirtualAddress).ToString("X16") : 0.ToString("X16");
+
+				ListView tableView = NewListView();
+
+				tableView.Items.Add(new { m_Name = "Virtual Address", m_Value = table.m_Descriptor.VirtualAddress.ToString("X4"), m_Info = table.m_Descriptor.VirtualAddress != 0 ? (m_Base + (int)table.m_Descriptor.VirtualAddress).ToString("X16") : 0.ToString("X16") });
+				tableView.Items.Add(new { m_Name = "Size Of Block", m_Value = table.m_Descriptor.SizeOfBlock });
+
+				tableItem.Items.Add(tableView);
+
+				foreach (PERelocationEntry entry in table.m_Relocations)
+				{
+					TreeViewItem entryItem = new TreeViewItem();
+
+					entryItem.Header = (m_Base + (int)table.m_Descriptor.VirtualAddress + (short)entry.m_Offset).ToString("X16");
+
+					ListView entryView = NewListView();
+
+					entryView.Items.Add(new { m_Name = "Type", m_Value = entry.m_Type, m_Info = ((IMAGE_BASE_RELOCATION.Type)entry.m_Type).ToString() });
+					entryView.Items.Add(new { m_Name = "Offset", m_Value = entry.m_Offset.ToString("X2"), m_Info = (m_Base + (int)table.m_Descriptor.VirtualAddress + (short)entry.m_Offset).ToString("X16") });
+
+					switch ((IMAGE_BASE_RELOCATION.Type)entry.m_Type)
+					{
+						case IMAGE_BASE_RELOCATION.Type.IMAGE_REL_BASED_HIGH:
+						case IMAGE_BASE_RELOCATION.Type.IMAGE_REL_BASED_LOW:
+						case IMAGE_BASE_RELOCATION.Type.IMAGE_REL_BASED_HIGHLOW:
+						case IMAGE_BASE_RELOCATION.Type.IMAGE_REL_BASED_HIGHADJ:
+
+							entryView.Items.Add(new { m_Name = "Value", m_Value = entry.m_Value.ToString("X8") });
+							break;
+
+						default:
+
+							entryView.Items.Add(new { m_Name = "Value", m_Value = entry.m_Value.ToString("X16") });
+							break;
+					}
+
+					entryItem.Items.Add(entryView);
+					tableItem.Items.Add(entryItem);
+				}
+
+				item.Items.Add(tableItem);
+			}
+
+			return item;
+		}
+
 		public void ToTreeView(TreeView view)
 		{
 			view.Items.Clear();
@@ -651,6 +708,7 @@ namespace Sabre.Explorer.PE
 			view.Items.Add(ImportsToView());
 			view.Items.Add(DelayImportsToView());
 			view.Items.Add(ExportsToView());
+			view.Items.Add(RelocationsToTreeView());
 		}
 	}
 }

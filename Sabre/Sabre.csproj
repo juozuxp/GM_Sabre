@@ -71,7 +71,10 @@
     <Compile Include="Explorer\PE\PEImportEntry.cs" />
     <Compile Include="Explorer\PE\PEImportTable.cs" />
     <Compile Include="Explorer\PE\PEExportEntry.cs" />
+    <Compile Include="Explorer\PE\PERelocationEntry.cs" />
+    <Compile Include="Explorer\PE\PERelocationTable.cs" />
     <Compile Include="ListItems\ByteViewItem.cs" />
+    <Compile Include="Native\PE\IMAGE_BASE_RELOCATION.cs" />
     <Compile Include="Native\PE\IMAGE_DATA_DIRECTORY.cs" />
     <Compile Include="Native\PE\IMAGE_DELAYLOAD_DESCRIPTOR.cs" />
     <Compile Include="Native\PE\IMAGE_DOS_HEADER.cs" />

@@ -171,6 +171,30 @@ namespace Sabre.Explorer
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
+		internal struct NativePERelocationTable : IDisposable
+		{
+			private readonly ManagedObject m_Base;
+
+			public readonly IMAGE_BASE_RELOCATION m_Descriptor;
+			public readonly ManagedArray m_Relocations; // PERelocationEntry
+
+			public PERelocationTable ToData()
+			{
+				PERelocationTable data = new PERelocationTable();
+
+				data.m_Descriptor = m_Descriptor;
+				data.m_Relocations = m_Relocations.ToArray<PERelocationEntry>();
+
+				return data;
+			}
+
+			public void Dispose()
+			{
+				m_Base.Dispose();
+			}
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
 		internal struct NativeHeaders : IDisposable
 		{
 			private readonly ManagedObject m_Base;
@@ -186,6 +210,7 @@ namespace Sabre.Explorer
 			public readonly NativePEExportTable m_Exports;
 
 			public readonly ManagedArray m_Imports; // NativePEImportTable
+			public readonly ManagedArray m_Relocations; // NativePERelocationTable
 			public readonly ManagedArray m_DelayImports; // NativePEDelayImportTable
 
 			public PEHeaders ToData()
@@ -215,6 +240,14 @@ namespace Sabre.Explorer
 				for (int i = 0; i < delayImports.Length; i++)
 				{
 					data.m_DelayImports[i] = delayImports[i].ToData();
+				}
+
+				NativePERelocationTable[] relocations = m_Relocations.ToArray<NativePERelocationTable>();
+
+				data.m_Relocations = new PERelocationTable[relocations.Length];
+				for (int i = 0; i < relocations.Length; i++)
+				{
+					data.m_Relocations[i] = relocations[i].ToData();
 				}
 
 				return data;
@@ -311,7 +344,7 @@ namespace Sabre.Explorer
 			m_Instance = Marshal.PtrToStructure<ManagedObject>(ExecutableExplorer_Init(path));
 		}
 
-		~ExecutableExplorer() 
+		~ExecutableExplorer()
 		{
 			m_Instance.Dispose();
 		}

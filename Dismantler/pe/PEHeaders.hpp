@@ -5,6 +5,7 @@
 #include "managed/ManagedArray.hpp"
 
 #include "PEDelayImportTable.hpp"
+#include "PERelocationTable.hpp"
 #include "PEImportTable.hpp"
 #include "PEExportTable.hpp"
 
@@ -24,5 +25,6 @@ struct PEHeaders : public ManagedObject
 	PEExportTable m_Exports;
 
 	ManagedArray<PEImportTable> m_Imports;
+	ManagedArray<PERelocationTable> m_Relocations;
 	ManagedArray<PEDelayImportTable> m_DelayImports;
 };
