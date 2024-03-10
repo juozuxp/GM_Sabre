@@ -41,6 +41,11 @@ public:
 
 private:
 	void ExploreFunction(const void* function, std::vector<Function>& functions);
+	void ExploreFunction(const PEBuffer& buffer, const void* function, std::vector<Function>& functions);
+
+private:
+	void GatherExports(const PEBuffer& buffer, std::vector<const void*>& functions);
+	void GatherVirtual(const PEBuffer& buffer, std::vector<const void*>& functions);
 
 private:
 	static bool WriteOperand(const ILOperand& operand, State& state, uint64_t value);

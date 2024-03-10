@@ -9,7 +9,7 @@ FunctionExplorer::Function::Function(const void* base, uint32_t size) :
 
 std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreExecutable(const PEBuffer& buffer)
 {
-	std::vector<FunctionExplorer::Function> foundFunctions;
+	std::vector<FunctionExplorer::Function> found;
 
 	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(buffer.GetBuffer());
 	const IMAGE_NT_HEADERS64* nt = reinterpret_cast<const IMAGE_NT_HEADERS64*>(reinterpret_cast<const uint8_t*>(dos) + dos->e_lfanew);
@@ -21,37 +21,33 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreExecutable(cons
 
 	const IMAGE_OPTIONAL_HEADER64* optional = &nt->OptionalHeader;
 
-	const IMAGE_DATA_DIRECTORY* exportDirectory = &optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
-	if (exportDirectory->Size != 0)
+	std::vector<const void*> functions;
+
+	GatherExports(buffer, functions);
+	GatherVirtual(buffer, functions);
+
+	for (const void* function : functions)
 	{
-		const IMAGE_EXPORT_DIRECTORY* exports = reinterpret_cast<const IMAGE_EXPORT_DIRECTORY*>(reinterpret_cast<uintptr_t>(dos) + exportDirectory->VirtualAddress);
-
-		const uint32_t* functions = reinterpret_cast<const uint32_t*>(reinterpret_cast<uintptr_t>(dos) + exports->AddressOfFunctions);
-		for (uint16_t i = 0; i < exports->NumberOfFunctions; i++, functions++)
-		{
-			if (*functions >= exportDirectory->VirtualAddress &&
-				*functions < (exportDirectory->VirtualAddress + exportDirectory->Size))
-			{
-				continue;
-			}
-
-			std::vector<FunctionExplorer::Function> found = ExploreFunction(buffer, reinterpret_cast<const uint8_t*>(dos) + *functions);
-
-			foundFunctions.insert(foundFunctions.begin(), found.begin(), found.end());
-		}
+		ExploreFunction(buffer, function, found);
 	}
 
-	std::vector<FunctionExplorer::Function> found = ExploreFunction(buffer, reinterpret_cast<const uint8_t*>(dos) + optional->AddressOfEntryPoint);
-
-	foundFunctions.insert(foundFunctions.begin(), found.begin(), found.end());
-	return foundFunctions;
+	ExploreFunction(buffer, reinterpret_cast<const uint8_t*>(dos) + optional->AddressOfEntryPoint, found);
+	return found;
 }
 
 std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreFunction(const PEBuffer& buffer, const void* function)
 {
+	std::vector<FunctionExplorer::Function> functions;
+
+	ExploreFunction(buffer, function, functions);
+	return functions;
+}
+
+void FunctionExplorer::ExploreFunction(const PEBuffer& buffer, const void* function, std::vector<Function>& functions)
+{
 	if (!m_Explored.insert(function).second)
 	{
-		return std::vector<FunctionExplorer::Function>();
+		return;
 	}
 
 	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(buffer.GetBuffer());
@@ -59,21 +55,19 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreFunction(const 
 
 	if (nt->FileHeader.Machine != IMAGE_FILE_MACHINE_AMD64)
 	{
-		return std::vector<FunctionExplorer::Function>();
+		return;
 	}
 
 	const IMAGE_OPTIONAL_HEADER64* optional = &nt->OptionalHeader;
 
-	std::vector<Function> functions;
+	uint32_t cursor = functions.size();
 
 	ExploreFunction(function, functions);
 
-	for (Function& function : functions)
+	for (uint32_t i = cursor; i < functions.size(); i++)
 	{
-		function.m_Base = reinterpret_cast<const uint8_t*>(reinterpret_cast<uintptr_t>(function.m_Base) - reinterpret_cast<uintptr_t>(dos) + optional->ImageBase);
+		functions[i].m_Base = reinterpret_cast<const uint8_t*>(reinterpret_cast<uintptr_t>(functions[i].m_Base) - reinterpret_cast<uintptr_t>(dos) + optional->ImageBase);
 	}
-
-	return functions;
 }
 
 void FunctionExplorer::ExploreFunction(const void* function, std::vector<Function>& functions)
@@ -114,40 +108,12 @@ void FunctionExplorer::ExploreFunction(const void* function, std::vector<Functio
 
 			switch (instruction.m_Type)
 			{
-			case InsType_invalid:
-			{
-				reset = true;
-
-				if (stackEntry.m_Function != nullptr)
-				{
-					functions.push_back(Function(stackEntry.m_Function, max(stackEntry.m_AccumSize, stackEntry.m_MaxSize)));
-				}
-
-				if (stack.empty())
-				{
-					return;
-				}
-
-				int32_t size = 0;
-				if (stackEntry.m_Function == nullptr)
-				{
-					size = max(stackEntry.m_AccumSize, stackEntry.m_MaxSize);
-				}
-
-				stackEntry = stack[stack.size() - 1];
-				stack.pop_back();
-
-				stackEntry.m_MaxSize = max(stackEntry.m_MaxSize, size);
-				return;
-			} break;
 			case InsType_jmp:
 			{
 				const ILOperand& first = instruction.m_Operands[0];
 
 				if (first.m_Type != ILOperandType_ValueRelative)
 				{
-					reset = true;
-
 					if (stackEntry.m_Function != nullptr)
 					{
 						functions.push_back(Function(stackEntry.m_Function, max(stackEntry.m_AccumSize, stackEntry.m_MaxSize)));
@@ -168,14 +134,14 @@ void FunctionExplorer::ExploreFunction(const void* function, std::vector<Functio
 					stack.pop_back();
 
 					stackEntry.m_MaxSize = max(stackEntry.m_MaxSize, size);
-					return;
+
+					reset = true;
+					break;
 				}
 
 				const void* address = reinterpret_cast<const uint8_t*>(stackEntry.m_Branch) + first.m_Relative.m_Value;
 				if (!m_Explored.insert(address).second)
 				{
-					reset = true;
-
 					if (stackEntry.m_Function != nullptr)
 					{
 						functions.push_back(Function(stackEntry.m_Function, max(stackEntry.m_AccumSize, stackEntry.m_MaxSize)));
@@ -196,7 +162,9 @@ void FunctionExplorer::ExploreFunction(const void* function, std::vector<Functio
 					stack.pop_back();
 
 					stackEntry.m_MaxSize = max(stackEntry.m_MaxSize, size);
-					return;
+
+					reset = true;
+					break;
 				}
 
 				if (stackEntry.m_State.m_General[REG_RSP] == stackEntry.m_State.m_StackBase)
@@ -218,8 +186,9 @@ void FunctionExplorer::ExploreFunction(const void* function, std::vector<Functio
 					}
 				}
 
-				reset = true;
 				stackEntry.m_Branch = address;
+
+				reset = true;
 			} break;
 			case InsType_ja:
 			case InsType_jae:
@@ -473,9 +442,12 @@ void FunctionExplorer::ExploreFunction(const void* function, std::vector<Functio
 				}
 			} break;
 			case InsType_ret:
+			case InsType_int3:
+			case InsType_ud0:
+			case InsType_ud1:
+			case InsType_ud2:
+			case InsType_invalid:
 			{
-				reset = true;
-
 				if (stackEntry.m_Function != nullptr)
 				{
 					functions.push_back(Function(stackEntry.m_Function, max(stackEntry.m_AccumSize, stackEntry.m_MaxSize)));
@@ -496,6 +468,8 @@ void FunctionExplorer::ExploreFunction(const void* function, std::vector<Functio
 				stack.pop_back();
 
 				stackEntry.m_MaxSize = max(stackEntry.m_MaxSize, size);
+
+				reset = true;
 			} break;
 			}
 
@@ -581,4 +555,102 @@ bool FunctionExplorer::ReadOperand(const ILOperand& operand, const State& state,
 	}
 
 	return false;
+}
+
+void FunctionExplorer::GatherExports(const PEBuffer& buffer, std::vector<const void*>& functions)
+{
+	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(buffer.GetBuffer());
+	const IMAGE_NT_HEADERS64* nt = reinterpret_cast<const IMAGE_NT_HEADERS64*>(reinterpret_cast<const uint8_t*>(dos) + dos->e_lfanew);
+
+	if (nt->FileHeader.Machine != IMAGE_FILE_MACHINE_AMD64)
+	{
+		return;
+	}
+
+	const IMAGE_OPTIONAL_HEADER64* optional = &nt->OptionalHeader;
+
+	const IMAGE_DATA_DIRECTORY* exportDirectory = &optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+	if (exportDirectory->Size == 0)
+	{
+		return;
+	}
+
+	const IMAGE_EXPORT_DIRECTORY* exportTable = reinterpret_cast<const IMAGE_EXPORT_DIRECTORY*>(reinterpret_cast<uintptr_t>(dos) + exportDirectory->VirtualAddress);
+
+	const uint32_t* exports = reinterpret_cast<const uint32_t*>(reinterpret_cast<uintptr_t>(dos) + exportTable->AddressOfFunctions);
+	for (uint16_t i = 0; i < exportTable->NumberOfFunctions; i++, exports++)
+	{
+		if (*exports >= exportDirectory->VirtualAddress &&
+			*exports < (exportDirectory->VirtualAddress + exportDirectory->Size))
+		{
+			continue;
+		}
+
+		functions.push_back(reinterpret_cast<const uint8_t*>(dos) + *exports);
+	}
+}
+
+void FunctionExplorer::GatherVirtual(const PEBuffer& buffer, std::vector<const void*>& functions)
+{
+	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(buffer.GetBuffer());
+	const IMAGE_NT_HEADERS64* nt = reinterpret_cast<const IMAGE_NT_HEADERS64*>(reinterpret_cast<const uint8_t*>(dos) + dos->e_lfanew);
+	const IMAGE_FILE_HEADER* file = &nt->FileHeader;
+
+	if (file->Machine != IMAGE_FILE_MACHINE_AMD64)
+	{
+		return;
+	}
+
+	const IMAGE_OPTIONAL_HEADER64* optional = &nt->OptionalHeader;
+
+	std::vector<std::pair<uint64_t, uint64_t>> executableArea;
+
+	const IMAGE_SECTION_HEADER* section = IMAGE_FIRST_SECTION(nt);
+	for (uint32_t i = 0; i < file->NumberOfSections; i++, section++)
+	{
+		if ((section->Characteristics & IMAGE_SCN_MEM_EXECUTE) == 0)
+		{
+			continue;
+		}
+
+		executableArea.push_back(std::pair<uint64_t, uint64_t>(optional->ImageBase + section->VirtualAddress, optional->ImageBase + section->VirtualAddress + section->SizeOfRawData));
+	}
+
+	const IMAGE_DATA_DIRECTORY* relocDirectory = &optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC];
+	if (relocDirectory->Size == 0)
+	{
+		return;
+	}
+
+	const IMAGE_BASE_RELOCATION* baseReloc = reinterpret_cast<const IMAGE_BASE_RELOCATION*>(reinterpret_cast<const uint8_t*>(dos) + relocDirectory->VirtualAddress);
+	while (baseReloc->SizeOfBlock != 0)
+	{
+		uint32_t count = (baseReloc->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(uint16_t);
+
+		const uint16_t* relocInfo = reinterpret_cast<const uint16_t*>(baseReloc + 1);
+		const uint8_t* page = reinterpret_cast<const uint8_t*>(dos) + baseReloc->VirtualAddress;
+		for (uint32_t i = 0; i < count; i++, relocInfo++)
+		{
+			uint8_t type = (*relocInfo) >> 12;
+			uint16_t offset = (*relocInfo) & ((1 << 12) - 1);
+
+			if (type != IMAGE_REL_BASED_DIR64)
+			{
+				continue;
+			}
+
+			uint64_t address = *reinterpret_cast<const uint64_t*>(page + offset);
+			for (const std::pair<uint64_t, uint64_t>& area : executableArea)
+			{
+				if (address >= area.first &&
+					address < area.second)
+				{
+					functions.push_back(reinterpret_cast<const uint8_t*>(dos) + address - optional->ImageBase);
+					break;
+				}
+			}
+		}
+
+		baseReloc = reinterpret_cast<const IMAGE_BASE_RELOCATION*>(reinterpret_cast<const uint8_t*>(baseReloc) + baseReloc->SizeOfBlock);
+	}
 }
