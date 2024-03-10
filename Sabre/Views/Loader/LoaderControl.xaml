@@ -9,6 +9,20 @@
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
              Name="MyToolWindow">
+	<UserControl.Resources>
+		<Style TargetType="ListViewItem">
+			<Style.Setters>
+				<Setter Property="Margin" Value="0"/>
+				<Setter Property="Focusable" Value="False"/>
+			</Style.Setters>
+			<Style.Triggers>
+				<Trigger Property="IsMouseOver" Value="True">
+					<Setter Property="Background" Value="DimGray" />
+					<Setter Property="BorderBrush" Value="Black"/>
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+	</UserControl.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="20"/>

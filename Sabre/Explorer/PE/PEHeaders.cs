@@ -13,8 +13,6 @@ namespace Sabre.Explorer.PE
 {
 	internal struct PEHeaders
 	{
-		private static Style s_ContainerStyle = null;
-
 		public IntPtr m_Base;
 
 		public IMAGE_DOS_HEADER m_Dos;
@@ -33,18 +31,6 @@ namespace Sabre.Explorer.PE
 		private static ListView NewListView()
 		{
 			ListView view = new ListView();
-
-			if (s_ContainerStyle == null)
-			{
-				Setter setter = new Setter();
-
-				setter.Value = false;
-				setter.Property = DependencyPropertyDescriptor.FromName("Focusable", typeof(UIElement), typeof(UIElement)).DependencyProperty;
-
-				s_ContainerStyle = new Style();
-				
-				s_ContainerStyle.Setters.Add(setter);
-			}
 
 			GridView gridView = new GridView();
 			
@@ -70,7 +56,6 @@ namespace Sabre.Explorer.PE
 			gridView.Columns.Add(column);
 
 			view.View = gridView;
-			view.ItemContainerStyle = s_ContainerStyle;
 
 			return view;
 		}
