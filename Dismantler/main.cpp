@@ -2,22 +2,17 @@
 
 #include "explorer/ExecutableExplorer.hpp"
 
+#include "pseudoc/PCConverter.hpp"
+
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 {
-	switch (reason)
-	{
-	case DLL_THREAD_ATTACH:
-	{
-
-	} break;
-	}
-
 	return true;
 }
 
 int main()
 {
 	ExecutableExplorer explorer = ExecutableExplorer(L"dxgi.dll");
+	PCConverter converter;
 
 	delete explorer.GetExecutableFunctions();
 

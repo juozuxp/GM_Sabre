@@ -29,8 +29,7 @@
 			<RowDefinition Height="30"/>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
-
-
+		
 		<Button Grid.Row="0" Click="LoadFile">Load</Button>
 		<Label Grid.Row="1"  x:Name="m_LoadedLabel" Visibility="Hidden"/>
 

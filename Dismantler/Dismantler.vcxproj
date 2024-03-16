@@ -27,26 +27,26 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -141,6 +141,11 @@
     <ClCompile Include="explorer\FunctionExplorer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="managed\ManagedExportInterface.cpp" />
+    <ClCompile Include="pseudoc\PCOperand.cpp" />
+    <ClCompile Include="pseudoc\PCVariable.cpp" />
+    <ClCompile Include="pseudoc\PCInstruction.cpp" />
+    <ClCompile Include="pseudoc\PCBlob.cpp" />
+    <ClCompile Include="pseudoc\PCConverter.cpp" />
     <ClCompile Include="pe\PERelocationEntry.cpp" />
     <ClCompile Include="pe\PERelocationTable.cpp" />
     <ClCompile Include="pe\PEExportEntry.cpp" />
@@ -164,6 +169,11 @@
     <ClInclude Include="managed\ManagedArray.hpp" />
     <ClInclude Include="managed\ManagedString.hpp" />
     <ClInclude Include="managed\ManagedObject.hpp" />
+    <ClInclude Include="pseudoc\PCOperand.hpp" />
+    <ClInclude Include="pseudoc\PCVariable.hpp" />
+    <ClInclude Include="pseudoc\PCInstruction.hpp" />
+    <ClInclude Include="pseudoc\PCBlob.hpp" />
+    <ClInclude Include="pseudoc\PCConverter.hpp" />
     <ClInclude Include="pe\PERelocationEntry.hpp" />
     <ClInclude Include="pe\PERelocationTable.hpp" />
     <ClInclude Include="pe\PEExportEntry.hpp" />
