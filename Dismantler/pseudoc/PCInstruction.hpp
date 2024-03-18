@@ -6,7 +6,7 @@ struct PCInstruction
 	enum class Type
 	{
 		None,
-		Equal,
+		Assign,
 	};
 
 	Type m_Type;
@@ -16,6 +16,6 @@ struct PCInstruction
 		{
 			PCOperand m_Lhs;
 			PCOperand m_Rhs;
-		} m_Equal;
+		} m_Assign;
 	};
 };

@@ -1,5 +1,6 @@
 #pragma once
 #include <Disassembler.hpp>
+#include "pe/PEBuffer.hpp"
 #include "PCBlob.hpp"
 
 class PCConverter
@@ -22,11 +23,10 @@ private:
 	};
 
 public:
-	void Convert(const void* base, const void* function, PCBlob& blob) const;
+	void Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& blob) const;
 
 private:
-	bool CreateOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const;
-	bool ReadOperand(const State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const;
+	bool ReadOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand, bool create) const;
 
 private:
 	Disassembler m_Disassembler;

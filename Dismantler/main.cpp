@@ -11,11 +11,15 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 
 int main()
 {
-	ExecutableExplorer explorer = ExecutableExplorer(L"dxgi.dll");
+	ExecutableExplorer explorer = ExecutableExplorer(L"Injector.exe");
 	PCConverter converter;
 
-	delete explorer.GetExecutableFunctions();
+	PCBlob blob;
+
+	converter.Convert(explorer.GetBuffer(), 0x1400211A0, blob);
+
+	/*delete explorer.GetExecutableFunctions();
 
 	delete explorer.GetHeaders();
-	delete explorer.GetExecutableView();
+	delete explorer.GetExecutableView();*/
 }

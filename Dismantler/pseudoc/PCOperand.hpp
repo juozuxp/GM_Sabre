@@ -7,10 +7,12 @@ struct PCOperand
 	{
 		None,
 		Variable,
-		Dereference
+		Dereference,
+		Literal
 	};
 
 	Type m_Type;
+	ILOperandScale m_Scale;
 	union
 	{
 		struct
@@ -19,13 +21,13 @@ struct PCOperand
 		} m_Variable;
 		struct
 		{
-			ILOperandScale m_Scale;
-
 			uint32_t m_BaseVariable;
 			uint32_t m_IndexVariable;
 
 			int32_t m_Offset;
 			uint8_t m_Multiplier;
 		} m_Dereference;
+
+		int64_t m_Literal;
 	};
 };

@@ -18,6 +18,8 @@ public:
 	ExecutableView* GetExecutableView() const;
 	ManagedArray<FunctionExplorer::Function>* GetExecutableFunctions();
 
+	const PEBuffer& GetBuffer() const;
+
 private:
 	PEBuffer m_Buffer;
 

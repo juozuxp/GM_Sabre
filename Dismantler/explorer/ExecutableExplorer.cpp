@@ -19,3 +19,8 @@ ManagedArray<FunctionExplorer::Function>* ExecutableExplorer::GetExecutableFunct
 {
 	return new ManagedArray<FunctionExplorer::Function>(m_FunctionExplorer.ExploreExecutable(m_Buffer));
 }
+
+const PEBuffer& ExecutableExplorer::GetBuffer() const
+{
+	return m_Buffer;
+}
