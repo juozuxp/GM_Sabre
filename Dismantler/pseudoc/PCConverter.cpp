@@ -1,5 +1,6 @@
 #include "PCConverter.hpp"
 #include <vector>
+#include <format>
 
 #define CHUNK_SIZE 0x200 
 
@@ -71,7 +72,7 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					ExecWriteOperand(lhs, state, lhsValue - rhsValue);
 				}
 
-				PCInstruction pseudo;
+				PCInstruction pseudo = {};
 
 				pseudo.m_Type = PCInstruction::Type::Subtract;
 
@@ -110,7 +111,7 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					ExecWriteOperand(lhs, state, value);
 				}
 
-				PCInstruction pseudo;
+				PCInstruction pseudo = {};
 
 				pseudo.m_Type = PCInstruction::Type::Assign;
 
@@ -247,15 +248,52 @@ bool PCConverter::ReadOperand(State& state, PCBlob& blob, const ILOperand& asmOp
 	} break;
 	case ILOperandType_ValueRelative:
 	{
-
+		pcOperand.m_Type = PCOperand::Type::Literal;
+		pcOperand.m_Literal = reinterpret_cast<uintptr_t>(state.m_Cursor) + asmOperand.m_Relative.m_Value - state.m_CursorBase + state.m_ImageBase;
 	} break;
 	case ILOperandType_MemoryRelative:
 	{
+		uint64_t address = reinterpret_cast<uintptr_t>(state.m_Cursor) + asmOperand.m_Relative.m_Value - state.m_CursorBase + state.m_ImageBase;
 
+		pcOperand.m_Type = PCOperand::Type::Dereference;
+
+		MemSpace& space = state.m_Memory[address];
+		if (space.m_VariableIndex == 0)
+		{
+			space.m_VariableIndex = blob.m_Variables.size() + 1;
+
+			PCVariable variable;
+
+			variable.m_Size = asmOperand.m_Scale;
+			variable.m_Type = PCVariable::Type::Static;
+			variable.m_Name = "sv" + std::format("{:X}", address);
+
+			blob.m_Variables.push_back(variable);
+		}
+
+		pcOperand.m_Dereference.m_BaseVariable = space.m_VariableIndex;
 	} break;
 	case ILOperandType_MemoryAbsolute:
 	{
+		uint64_t address = asmOperand.m_MemoryValue.m_Value;
 
+		pcOperand.m_Type = PCOperand::Type::Dereference;
+
+		MemSpace& space = state.m_Memory[address];
+		if (space.m_VariableIndex == 0)
+		{
+			space.m_VariableIndex = blob.m_Variables.size() + 1;
+
+			PCVariable variable;
+
+			variable.m_Size = asmOperand.m_Scale;
+			variable.m_Type = PCVariable::Type::Static;
+			variable.m_Name = "sv" + std::format("{:X}", address);
+
+			blob.m_Variables.push_back(variable);
+		}
+
+		pcOperand.m_Dereference.m_BaseVariable = space.m_VariableIndex;
 	} break;
 	}
 
