@@ -7,6 +7,7 @@ struct PCInstruction
 	{
 		None,
 		Assign,
+		Subtract
 	};
 
 	Type m_Type;
@@ -16,6 +17,6 @@ struct PCInstruction
 		{
 			PCOperand m_Lhs;
 			PCOperand m_Rhs;
-		} m_Assign;
+		} m_Double; // Assign, Subtract
 	};
 };

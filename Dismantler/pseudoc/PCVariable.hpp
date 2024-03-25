@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <ArchitectureIL.hpp>
 
 struct PCVariable
 {
@@ -12,4 +13,5 @@ struct PCVariable
 
 	Type m_Type;
 	std::string m_Name;
+	ILOperandScale m_Size;
 };
