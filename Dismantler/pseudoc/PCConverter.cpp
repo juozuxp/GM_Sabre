@@ -379,6 +379,8 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 			address += reg.m_Value * multiplier[asmOperand.m_Memory.m_Scale];
 		}
 
+		address += asmOperand.m_Memory.m_Offset;
+
 		if (base != 0 && index != 0)
 		{
 			pcOperand.m_Type = PCOperand::Type::Expression;
@@ -485,6 +487,8 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 			index = reg.m_VariableIndex;
 			address += reg.m_Value * multiplier[asmOperand.m_Memory.m_Scale];
 		}
+
+		address += asmOperand.m_Memory.m_Offset;
 
 		if (base != 0 && index != 0)
 		{
@@ -635,6 +639,8 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 			index = reg.m_VariableIndex;
 			address += reg.m_Value * multiplier[asmOperand.m_Memory.m_Scale];
 		}
+
+		address += asmOperand.m_Memory.m_Offset;
 
 		if (base != 0 && index != 0)
 		{
