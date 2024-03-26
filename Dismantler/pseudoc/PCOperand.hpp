@@ -7,6 +7,8 @@ struct PCOperand
 	{
 		None,
 		Variable,
+		Reference,
+		Expression,
 		Dereference,
 		Literal
 	};
@@ -26,7 +28,7 @@ struct PCOperand
 
 			int32_t m_Offset;
 			uint8_t m_Multiplier;
-		} m_Dereference;
+		} m_Expression;
 
 		int64_t m_Literal;
 	};

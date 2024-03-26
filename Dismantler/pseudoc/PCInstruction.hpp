@@ -7,16 +7,15 @@ struct PCInstruction
 	{
 		None,
 		Assign,
-		Subtract
+		Subtract,
+		Addition,
+		Xor,
+		Or,
+		And,
+		Not,
+		Invoke
 	};
 
 	Type m_Type;
-	union
-	{
-		struct
-		{
-			PCOperand m_Lhs;
-			PCOperand m_Rhs;
-		} m_Double; // Assign, Subtract
-	};
+	PCOperand m_Operands[2];
 };

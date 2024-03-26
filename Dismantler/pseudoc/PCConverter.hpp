@@ -25,6 +25,8 @@ private:
 
 	struct State
 	{
+		PCBlob* m_Blob;
+
 		const void* m_Cursor;
 
 		size_t m_ImageSize;
@@ -41,7 +43,9 @@ public:
 	void Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& blob) const;
 
 private:
-	bool ReadOperand(State& state, PCBlob& blob, const ILOperand& asmOperand, PCOperand& pcOperand, bool create) const;
+	bool LoadOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const;
+	bool ReadOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const;
+	bool WriteOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const;
 
 	bool ExecWriteOperand(const ILOperand& operand, State& state, uint64_t value) const;
 	bool ExecReadOperand(const ILOperand& operand, const State& state, uint64_t& value) const;

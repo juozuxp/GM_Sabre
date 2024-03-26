@@ -75,6 +75,9 @@
     <ClCompile Include="pseudoc\PCOperand.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="pseudoc\PCVisualizer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="managed\ManagedObject.hpp">
@@ -138,6 +141,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pseudoc\PCOperand.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pseudoc\PCVisualizer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

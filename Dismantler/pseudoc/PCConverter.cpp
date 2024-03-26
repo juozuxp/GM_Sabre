@@ -21,7 +21,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 
 	std::vector<ILInstruction> instructions;
 
-	State state;
+	State state = {};
+
+	state.m_Blob = &blob;
 
 	state.m_Cursor = reinterpret_cast<const void*>(reinterpret_cast<uintptr_t>(dos) + function - optional->ImageBase);
 
@@ -59,6 +61,17 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					state.m_Memory[state.m_General[REG_RSP].m_Value].m_Value = value & masks[lhs.m_Scale];
 				}
 			} break;
+			case InsType_pop:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				uint64_t value;
+				if (ExecReadOperand(lhs, state, value))
+				{
+					state.m_Memory[state.m_General[REG_RSP].m_Value].m_Value = value & masks[lhs.m_Scale];
+					state.m_General[REG_RSP].m_Value += 8;
+				}
+			} break;
 			case InsType_sub:
 			{
 				const ILOperand& lhs = ins.m_Operands[0];
@@ -76,12 +89,178 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 
 				pseudo.m_Type = PCInstruction::Type::Subtract;
 
-				if (!ReadOperand(state, blob, rhs, pseudo.m_Double.m_Rhs, false))
+				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
 					break;
 				}
 
-				if (!ReadOperand(state, blob, lhs, pseudo.m_Double.m_Lhs, false))
+				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					break;
+				}
+
+				blob.m_Instructions.push_back(pseudo);
+			} break;
+			case InsType_add:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+				const ILOperand& rhs = ins.m_Operands[1];
+
+				uint64_t lhsValue;
+				uint64_t rhsValue;
+				if (ExecReadOperand(lhs, state, lhsValue) &&
+					ExecReadOperand(rhs, state, rhsValue))
+				{
+					ExecWriteOperand(lhs, state, lhsValue + rhsValue);
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::Addition;
+
+				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
+				{
+					break;
+				}
+
+				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					break;
+				}
+
+				blob.m_Instructions.push_back(pseudo);
+			} break;
+			case InsType_and:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+				const ILOperand& rhs = ins.m_Operands[1];
+
+				uint64_t lhsValue;
+				uint64_t rhsValue;
+				if (ExecReadOperand(lhs, state, lhsValue) &&
+					ExecReadOperand(rhs, state, rhsValue))
+				{
+					ExecWriteOperand(lhs, state, lhsValue & rhsValue);
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::And;
+
+				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
+				{
+					break;
+				}
+
+				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					break;
+				}
+
+				blob.m_Instructions.push_back(pseudo);
+			} break;
+			case InsType_or:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+				const ILOperand& rhs = ins.m_Operands[1];
+
+				uint64_t lhsValue;
+				uint64_t rhsValue;
+				if (ExecReadOperand(lhs, state, lhsValue) &&
+					ExecReadOperand(rhs, state, rhsValue))
+				{
+					ExecWriteOperand(lhs, state, lhsValue | rhsValue);
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::Or;
+
+				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
+				{
+					break;
+				}
+
+				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					break;
+				}
+
+				blob.m_Instructions.push_back(pseudo);
+			} break;
+			case InsType_xor:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+				const ILOperand& rhs = ins.m_Operands[1];
+
+				uint64_t lhsValue;
+				uint64_t rhsValue;
+				if (ExecReadOperand(lhs, state, lhsValue) &&
+					ExecReadOperand(rhs, state, rhsValue))
+				{
+					ExecWriteOperand(lhs, state, lhsValue ^ rhsValue);
+				}
+
+				if (lhs.m_Type == ILOperandType_Register &&
+					rhs.m_Type == ILOperandType_Register &&
+					lhs.m_Register.m_Base == rhs.m_Register.m_Base &&
+					lhs.m_Register.m_BaseHigh == rhs.m_Register.m_BaseHigh)
+				{
+					PCInstruction pseudo = {};
+
+					pseudo.m_Type = PCInstruction::Type::Assign;
+
+					ILOperand newRhs;
+
+					newRhs.m_Type = ILOperandType_Value;
+					newRhs.m_Scale = lhs.m_Scale;
+					newRhs.m_Value = 0;
+
+					if (!ReadOperand(state, newRhs, pseudo.m_Operands[1]))
+					{
+						break;
+					}
+
+					if (!WriteOperand(state, lhs, pseudo.m_Operands[0]))
+					{
+						break;
+					}
+
+					blob.m_Instructions.push_back(pseudo);
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::Xor;
+
+				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
+				{
+					break;
+				}
+
+				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					break;
+				}
+
+				blob.m_Instructions.push_back(pseudo);
+			} break;
+			case InsType_not:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				uint64_t value;
+				if (ExecReadOperand(lhs, state, value))
+				{
+					ExecWriteOperand(lhs, state, ~value);
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::Not;
+
+				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
 					break;
 				}
@@ -99,6 +278,21 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					ExecWriteOperand(lhs, state, value);
 				}
 
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::Assign;
+
+				if (!LoadOperand(state, rhs, pseudo.m_Operands[1]))
+				{
+					break;
+				}
+
+				if (!WriteOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					break;
+				}
+
+				blob.m_Instructions.push_back(pseudo);
 			} break;
 			case InsType_mov:
 			{
@@ -115,12 +309,27 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 
 				pseudo.m_Type = PCInstruction::Type::Assign;
 
-				if (!ReadOperand(state, blob, rhs, pseudo.m_Double.m_Rhs, false))
+				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
 					break;
 				}
 
-				if (!ReadOperand(state, blob, lhs, pseudo.m_Double.m_Lhs, true))
+				if (!WriteOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					break;
+				}
+
+				blob.m_Instructions.push_back(pseudo);
+			} break;
+			case InsType_call:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::Invoke;
+
+				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
 					break;
 				}
@@ -140,8 +349,8 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 		}
 	}
 }
- 
-bool PCConverter::ReadOperand(State& state, PCBlob& blob, const ILOperand& asmOperand, PCOperand& pcOperand, bool create) const
+
+bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const
 {
 	constexpr uint8_t multiplier[] = { 1, 2, 4, 8 };
 
@@ -150,36 +359,304 @@ bool PCConverter::ReadOperand(State& state, PCBlob& blob, const ILOperand& asmOp
 	{
 	case ILOperandType_Memory:
 	{
-		pcOperand.m_Type = PCOperand::Type::Dereference;
+		uint64_t address = 0;
 
-		uint32_t base = 0;
+		uint32_t base = ~0;
 		if (asmOperand.m_Memory.m_Base != IL_INVALID_REGISTER)
 		{
 			RegSpace& reg = state.m_General[asmOperand.m_Memory.m_Base];
-			if (reg.m_VariableIndex != 0)
-			{
-				return false;
-			}
 
 			base = reg.m_VariableIndex;
+			address = reg.m_Value;
 		}
 
-		uint32_t index = 0;
+		uint32_t index = ~0;
 		if (asmOperand.m_Memory.m_Index != IL_INVALID_REGISTER)
 		{
 			RegSpace& reg = state.m_General[asmOperand.m_Memory.m_Index];
-			if (reg.m_VariableIndex != 0)
-			{
-				return false;
-			}
 
 			index = reg.m_VariableIndex;
+			address += reg.m_Value * multiplier[asmOperand.m_Memory.m_Scale];
 		}
 
-		pcOperand.m_Dereference.m_BaseVariable = base;
-		pcOperand.m_Dereference.m_IndexVariable = index;
-		pcOperand.m_Dereference.m_Offset = asmOperand.m_Memory.m_Offset;
-		pcOperand.m_Dereference.m_Multiplier = multiplier[asmOperand.m_Memory.m_Scale];
+		if (base != 0 && index != 0)
+		{
+			pcOperand.m_Type = PCOperand::Type::Expression;
+
+			pcOperand.m_Expression.m_BaseVariable = (base == ~0) ? 0 : base;
+			pcOperand.m_Expression.m_IndexVariable = (index == ~0) ? 0 : index;
+			pcOperand.m_Expression.m_Offset = asmOperand.m_Memory.m_Offset;
+			pcOperand.m_Expression.m_Multiplier = multiplier[asmOperand.m_Memory.m_Scale];
+
+			return true;
+		}
+
+		auto memory = state.m_Memory.find(address);
+		if (memory == state.m_Memory.end())
+		{
+			return false;
+		}
+
+		if (memory->second.m_VariableIndex == 0)
+		{
+			return false;
+		}
+
+		pcOperand.m_Type = PCOperand::Type::Reference;
+		pcOperand.m_Variable.m_Index = memory->second.m_VariableIndex;
+		return true;
+	} break;
+	case ILOperandType_MemoryRelative:
+	{
+		uint64_t address = reinterpret_cast<uintptr_t>(state.m_Cursor) + asmOperand.m_Relative.m_Value - state.m_CursorBase + state.m_ImageBase;
+
+		pcOperand.m_Type = PCOperand::Type::Reference;
+
+		MemSpace& space = state.m_Memory[address];
+		if (space.m_VariableIndex == 0)
+		{
+			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+			PCVariable variable;
+
+			variable.m_Size = asmOperand.m_Scale;
+			variable.m_Type = PCVariable::Type::Static;
+			variable.m_Name = std::format("sv{:X}", address);
+
+			state.m_Blob->m_Variables.push_back(variable);
+		}
+
+		pcOperand.m_Expression.m_BaseVariable = space.m_VariableIndex;
+		return true;
+	} break;
+	case ILOperandType_MemoryAbsolute:
+	{
+		uint64_t address = asmOperand.m_MemoryValue.m_Value;
+
+		pcOperand.m_Type = PCOperand::Type::Reference;
+
+		MemSpace& space = state.m_Memory[address];
+		if (space.m_VariableIndex == 0)
+		{
+			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+			PCVariable variable;
+
+			variable.m_Size = asmOperand.m_Scale;
+			variable.m_Type = PCVariable::Type::Static;
+			variable.m_Name = std::format("sv{:X}", address);
+
+			state.m_Blob->m_Variables.push_back(variable);
+		}
+
+		pcOperand.m_Expression.m_BaseVariable = space.m_VariableIndex;
+		return true;
+	} break;
+	}
+
+	return false;
+}
+
+bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const
+{
+	constexpr uint8_t multiplier[] = { 1, 2, 4, 8 };
+
+	pcOperand.m_Scale = asmOperand.m_Scale;
+	switch (asmOperand.m_Type)
+	{
+	case ILOperandType_Memory:
+	{
+		uint64_t address = 0;
+
+		uint32_t base = ~0;
+		if (asmOperand.m_Memory.m_Base != IL_INVALID_REGISTER)
+		{
+			RegSpace& reg = state.m_General[asmOperand.m_Memory.m_Base];
+
+			base = reg.m_VariableIndex;
+			address = reg.m_Value;
+		}
+
+		uint32_t index = ~0;
+		if (asmOperand.m_Memory.m_Index != IL_INVALID_REGISTER)
+		{
+			RegSpace& reg = state.m_General[asmOperand.m_Memory.m_Index];
+
+			index = reg.m_VariableIndex;
+			address += reg.m_Value * multiplier[asmOperand.m_Memory.m_Scale];
+		}
+
+		if (base != 0 && index != 0)
+		{
+			pcOperand.m_Type = PCOperand::Type::Dereference;
+
+			pcOperand.m_Expression.m_BaseVariable = (base == ~0) ? 0 : base;
+			pcOperand.m_Expression.m_IndexVariable = (index == ~0) ? 0 : index;
+			pcOperand.m_Expression.m_Offset = asmOperand.m_Memory.m_Offset;
+			pcOperand.m_Expression.m_Multiplier = multiplier[asmOperand.m_Memory.m_Scale];
+
+			return true;
+		}
+
+		pcOperand.m_Type = PCOperand::Type::Variable;
+
+		MemSpace& memory = state.m_Memory[address];
+
+		memory.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+		PCVariable variable;
+
+		variable.m_Size = asmOperand.m_Scale;
+		variable.m_Name = "v" + std::to_string(memory.m_VariableIndex);
+		variable.m_Type = PCVariable::Type::Local;
+
+		state.m_Blob->m_Variables.push_back(variable);
+
+		pcOperand.m_Variable.m_Index = memory.m_VariableIndex;
+		return true;
+	} break;
+	case ILOperandType_Register:
+	{
+		pcOperand.m_Type = PCOperand::Type::Variable;
+
+		uint32_t base = 0;
+		if (asmOperand.m_Register.m_BaseHigh)
+		{
+			RegSpace& reg = state.m_General[asmOperand.m_Register.m_Base];
+
+			base = state.m_Blob->m_Variables.size() + 1;
+
+			PCVariable variable;
+
+			variable.m_Size = asmOperand.m_Scale;
+			variable.m_Name = "v" + std::to_string(base);
+			variable.m_Type = PCVariable::Type::Local;
+
+			state.m_Blob->m_Variables.push_back(variable);
+
+			reg.m_VariableHigh = base;
+		}
+		else
+		{
+			RegSpace& reg = state.m_General[asmOperand.m_Register.m_Base];
+
+			base = state.m_Blob->m_Variables.size() + 1;
+
+			PCVariable variable;
+
+			variable.m_Size = asmOperand.m_Scale;
+			variable.m_Name = "v" + std::to_string(base);
+			variable.m_Type = PCVariable::Type::Local;
+
+			state.m_Blob->m_Variables.push_back(variable);
+
+			reg.m_VariableIndex = base;
+		}
+
+		pcOperand.m_Variable.m_Index = base;
+		return true;
+	} break;
+	case ILOperandType_MemoryRelative:
+	{
+		uint64_t address = reinterpret_cast<uintptr_t>(state.m_Cursor) + asmOperand.m_Relative.m_Value - state.m_CursorBase + state.m_ImageBase;
+
+		pcOperand.m_Type = PCOperand::Type::Variable;
+
+		MemSpace& space = state.m_Memory[address];
+		if (space.m_VariableIndex == 0)
+		{
+			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+			PCVariable variable;
+
+			variable.m_Size = asmOperand.m_Scale;
+			variable.m_Type = PCVariable::Type::Static;
+			variable.m_Name = std::format("sv{:X}", address);
+
+			state.m_Blob->m_Variables.push_back(variable);
+		}
+
+		pcOperand.m_Variable.m_Index = space.m_VariableIndex;
+		return true;
+	} break;
+	case ILOperandType_MemoryAbsolute:
+	{
+		uint64_t address = asmOperand.m_MemoryValue.m_Value;
+
+		pcOperand.m_Type = PCOperand::Type::Variable;
+
+		MemSpace& space = state.m_Memory[address];
+		if (space.m_VariableIndex == 0)
+		{
+			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+			PCVariable variable;
+
+			variable.m_Size = asmOperand.m_Scale;
+			variable.m_Type = PCVariable::Type::Static;
+			variable.m_Name = std::format("sv{:X}", address);
+
+			state.m_Blob->m_Variables.push_back(variable);
+		}
+
+		pcOperand.m_Variable.m_Index = space.m_VariableIndex;
+		return true;
+	} break;
+	}
+
+	return false;
+}
+
+bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const
+{
+	constexpr uint8_t multiplier[] = { 1, 2, 4, 8 };
+
+	pcOperand.m_Scale = asmOperand.m_Scale;
+	switch (asmOperand.m_Type)
+	{
+	case ILOperandType_Memory:
+	{
+		uint64_t address = 0;
+
+		uint32_t base = ~0;
+		if (asmOperand.m_Memory.m_Base != IL_INVALID_REGISTER)
+		{
+			RegSpace& reg = state.m_General[asmOperand.m_Memory.m_Base];
+
+			base = reg.m_VariableIndex;
+			address = reg.m_Value;
+		}
+
+		uint32_t index = ~0;
+		if (asmOperand.m_Memory.m_Index != IL_INVALID_REGISTER)
+		{
+			RegSpace& reg = state.m_General[asmOperand.m_Memory.m_Index];
+
+			index = reg.m_VariableIndex;
+			address += reg.m_Value * multiplier[asmOperand.m_Memory.m_Scale];
+		}
+
+		if (base != 0 && index != 0)
+		{
+			pcOperand.m_Type = PCOperand::Type::Dereference;
+
+			pcOperand.m_Expression.m_BaseVariable = (base == ~0) ? 0 : base;
+			pcOperand.m_Expression.m_IndexVariable = (index == ~0) ? 0 : index;
+			pcOperand.m_Expression.m_Offset = asmOperand.m_Memory.m_Offset;
+			pcOperand.m_Expression.m_Multiplier = multiplier[asmOperand.m_Memory.m_Scale];
+
+			return true;
+		}
+		
+		auto memory = state.m_Memory.find(address);
+		if (memory == state.m_Memory.end())
+		{
+			return false;
+		}
+
+		pcOperand.m_Type = PCOperand::Type::Variable;
+		pcOperand.m_Variable.m_Index = memory->second.m_VariableIndex;
+		return true;
 	} break;
 	case ILOperandType_Register:
 	{
@@ -191,113 +668,86 @@ bool PCConverter::ReadOperand(State& state, PCBlob& blob, const ILOperand& asmOp
 			RegSpace& reg = state.m_General[asmOperand.m_Register.m_Base];
 			if (reg.m_VariableHigh != 0)
 			{
-				if (!create)
-				{
-					return false;
-				}
-				
-				base = blob.m_Variables.size() + 1;
-
-				PCVariable variable;
-
-				variable.m_Size = asmOperand.m_Scale;
-				variable.m_Name = "v" + std::to_string(base);
-				variable.m_Type = PCVariable::Type::Local;
-
-				blob.m_Variables.push_back(variable);
-				state.m_General[asmOperand.m_Register.m_Base].m_VariableHigh = base;
+				return false;
 			}
-			else
-			{
-				base = reg.m_VariableHigh;
-			}
+
+			base = reg.m_VariableHigh;
 		}
 		else
 		{
 			RegSpace& reg = state.m_General[asmOperand.m_Register.m_Base];
-			if (base == 0)
+			if (reg.m_VariableIndex == 0)
 			{
-				if (!create)
-				{
-					return false;
-				}
-
-				base = blob.m_Variables.size() + 1;
-
-				PCVariable variable;
-
-				variable.m_Size = asmOperand.m_Scale;
-				variable.m_Name = "v" + std::to_string(base);
-				variable.m_Type = PCVariable::Type::Local;
-
-				blob.m_Variables.push_back(variable);
-				state.m_General[asmOperand.m_Register.m_Base].m_VariableIndex = base;
+				return false;
 			}
-			else
-			{
-				base = reg.m_VariableIndex;
-			}
+
+			base = reg.m_VariableIndex;
 		}
 
 		pcOperand.m_Variable.m_Index = base;
+		return true;
 	} break;
 	case ILOperandType_Value:
 	{
 		pcOperand.m_Type = PCOperand::Type::Literal;
 		pcOperand.m_Literal = asmOperand.m_Value;
+		return true;
 	} break;
 	case ILOperandType_ValueRelative:
 	{
 		pcOperand.m_Type = PCOperand::Type::Literal;
 		pcOperand.m_Literal = reinterpret_cast<uintptr_t>(state.m_Cursor) + asmOperand.m_Relative.m_Value - state.m_CursorBase + state.m_ImageBase;
+		return true;
 	} break;
 	case ILOperandType_MemoryRelative:
 	{
 		uint64_t address = reinterpret_cast<uintptr_t>(state.m_Cursor) + asmOperand.m_Relative.m_Value - state.m_CursorBase + state.m_ImageBase;
 
-		pcOperand.m_Type = PCOperand::Type::Dereference;
+		pcOperand.m_Type = PCOperand::Type::Variable;
 
 		MemSpace& space = state.m_Memory[address];
 		if (space.m_VariableIndex == 0)
 		{
-			space.m_VariableIndex = blob.m_Variables.size() + 1;
+			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
 			PCVariable variable;
 
 			variable.m_Size = asmOperand.m_Scale;
 			variable.m_Type = PCVariable::Type::Static;
-			variable.m_Name = "sv" + std::format("{:X}", address);
+			variable.m_Name = std::format("sv{:X}", address);
 
-			blob.m_Variables.push_back(variable);
+			state.m_Blob->m_Variables.push_back(variable);
 		}
 
-		pcOperand.m_Dereference.m_BaseVariable = space.m_VariableIndex;
+		pcOperand.m_Variable.m_Index = space.m_VariableIndex;
+		return true;
 	} break;
 	case ILOperandType_MemoryAbsolute:
 	{
 		uint64_t address = asmOperand.m_MemoryValue.m_Value;
 
-		pcOperand.m_Type = PCOperand::Type::Dereference;
+		pcOperand.m_Type = PCOperand::Type::Variable;
 
 		MemSpace& space = state.m_Memory[address];
 		if (space.m_VariableIndex == 0)
 		{
-			space.m_VariableIndex = blob.m_Variables.size() + 1;
+			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
 			PCVariable variable;
 
 			variable.m_Size = asmOperand.m_Scale;
 			variable.m_Type = PCVariable::Type::Static;
-			variable.m_Name = "sv" + std::format("{:X}", address);
+			variable.m_Name = std::format("sv{:X}", address);
 
-			blob.m_Variables.push_back(variable);
+			state.m_Blob->m_Variables.push_back(variable);
 		}
 
-		pcOperand.m_Dereference.m_BaseVariable = space.m_VariableIndex;
+		pcOperand.m_Variable.m_Index = space.m_VariableIndex;
+		return true;
 	} break;
 	}
 
-	return true;
+	return false;
 }
 
 bool PCConverter::ExecWriteOperand(const ILOperand& operand, State& state, uint64_t value) const
