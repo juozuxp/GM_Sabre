@@ -13,7 +13,8 @@ struct PCInstruction
 		Or,
 		And,
 		Not,
-		Invoke
+		Invoke,
+		Return
 	};
 
 	Type m_Type;

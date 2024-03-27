@@ -32,6 +32,11 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 	state.m_CursorBase = reinterpret_cast<uintptr_t>(dos);
 
 	state.m_General[REG_RSP].m_Value = state.m_ImageBase + (1ull << 40) - 8;
+
+	state.m_General[REG_RCX].m_Type = SpaceType::Argument0;
+	state.m_General[REG_RDX].m_Type = SpaceType::Argument1;
+	state.m_General[REG_R8].m_Type = SpaceType::Argument2;
+	state.m_General[REG_R9].m_Type = SpaceType::Argument3;
 	while (true)
 	{
 		uint32_t chunk = (1 << 12) - (reinterpret_cast<uintptr_t>(state.m_Cursor) & ((1 << 12) - 1));
@@ -91,11 +96,15 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 
 				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
 					break;
 				}
 
 				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
 					break;
 				}
 
@@ -120,11 +129,15 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 
 				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
 					break;
 				}
 
 				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
 					break;
 				}
 
@@ -149,11 +162,15 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 
 				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
 					break;
 				}
 
 				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
 					break;
 				}
 
@@ -178,11 +195,15 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 
 				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
 					break;
 				}
 
 				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
 					break;
 				}
 
@@ -218,11 +239,15 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 
 					if (!ReadOperand(state, newRhs, pseudo.m_Operands[1]))
 					{
+						ClearOperand(state, lhs);
+						ClearOperand(state, rhs);
 						break;
 					}
 
 					if (!WriteOperand(state, lhs, pseudo.m_Operands[0]))
 					{
+						ClearOperand(state, lhs);
+						ClearOperand(state, rhs);
 						break;
 					}
 
@@ -236,11 +261,15 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 
 				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
 					break;
 				}
 
 				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
 					break;
 				}
 
@@ -262,6 +291,7 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 
 				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
+					ClearOperand(state, lhs);
 					break;
 				}
 
@@ -278,17 +308,32 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					ExecWriteOperand(lhs, state, value);
 				}
 
+				if (lhs.m_Type == ILOperandType_Register &&
+					rhs.m_Type == ILOperandType_Memory)
+				{
+					if (lhs.m_Register.m_Base == REG_RBP &&
+						(rhs.m_Memory.m_Base == REG_RSP ||
+						rhs.m_Memory.m_Index == REG_RSP))
+					{
+						break;
+					}
+				}
+
 				PCInstruction pseudo = {};
 
 				pseudo.m_Type = PCInstruction::Type::Assign;
 
 				if (!LoadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
 					break;
 				}
 
 				if (!WriteOperand(state, lhs, pseudo.m_Operands[0]))
 				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
 					break;
 				}
 
@@ -311,11 +356,15 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 
 				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
 					break;
 				}
 
 				if (!WriteOperand(state, lhs, pseudo.m_Operands[0]))
 				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
 					break;
 				}
 
@@ -325,18 +374,48 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 			{
 				const ILOperand& lhs = ins.m_Operands[0];
 
+				state.m_General[REG_RAX].m_Type = SpaceType::Result;
+				state.m_General[REG_RAX].m_VariableHigh = 0;
+				state.m_General[REG_RAX].m_VariableIndex = 0;
+
+				state.m_General[REG_RCX].m_Type = SpaceType::Normal;
+				state.m_General[REG_RCX].m_VariableHigh = 0;
+				state.m_General[REG_RCX].m_VariableIndex = 0;
+
+
+				state.m_General[REG_RDX].m_Type = SpaceType::Normal;
+				state.m_General[REG_RDX].m_VariableHigh = 0;
+				state.m_General[REG_RDX].m_VariableIndex = 0;
+
+				state.m_General[REG_R8].m_Type = SpaceType::Normal;
+				state.m_General[REG_R8].m_VariableHigh = 0;
+				state.m_General[REG_R8].m_VariableIndex = 0;
+
+				state.m_General[REG_R9].m_Type = SpaceType::Normal;
+				state.m_General[REG_R9].m_VariableHigh = 0;
+				state.m_General[REG_R9].m_VariableIndex = 0;
+
 				PCInstruction pseudo = {};
 
 				pseudo.m_Type = PCInstruction::Type::Invoke;
 
 				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
+					ClearOperand(state, lhs);
 					break;
 				}
 
 				blob.m_Instructions.push_back(pseudo);
 			} break;
 			case InsType_ret:
+			{
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::Return;
+
+				blob.m_Instructions.push_back(pseudo);
+				return;
+			} break;
 			case InsType_int3:
 			case InsType_ud0:
 			case InsType_ud1:
@@ -348,6 +427,32 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 			}
 		}
 	}
+}
+
+bool PCConverter::ClearOperand(State& state, const ILOperand& operand) const
+{
+	switch (operand.m_Type)
+	{
+	case ILOperandType_Register:
+	{
+		if (operand.m_Register.m_BaseHigh)
+		{
+			RegSpace& reg = state.m_General[operand.m_Memory.m_Base];
+
+			reg.m_Type = SpaceType::Normal;
+			reg.m_VariableHigh = 0;
+		}
+		else
+		{
+			RegSpace& reg = state.m_General[operand.m_Memory.m_Base];
+
+			reg.m_Type = SpaceType::Normal;
+			reg.m_VariableIndex = 0;
+		}
+	} break;
+	}
+
+	return false;
 }
 
 bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const
@@ -365,6 +470,35 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 		if (asmOperand.m_Memory.m_Base != IL_INVALID_REGISTER)
 		{
 			RegSpace& reg = state.m_General[asmOperand.m_Memory.m_Base];
+			if (reg.m_VariableIndex == 0)
+			{
+				if (reg.m_Type >= SpaceType::Argument_Start &&
+					reg.m_Type <= SpaceType::Argument_End)
+				{
+					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
+					variable.m_Type = PCVariable::Type::Argument;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+				else if (reg.m_Type == SpaceType::Result)
+				{
+					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
+					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Bind = 1;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+			}
 
 			base = reg.m_VariableIndex;
 			address = reg.m_Value;
@@ -374,6 +508,35 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 		if (asmOperand.m_Memory.m_Index != IL_INVALID_REGISTER)
 		{
 			RegSpace& reg = state.m_General[asmOperand.m_Memory.m_Index];
+			if (reg.m_VariableIndex == 0)
+			{
+				if (reg.m_Type >= SpaceType::Argument_Start &&
+					reg.m_Type <= SpaceType::Argument_End)
+				{
+					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
+					variable.m_Type = PCVariable::Type::Argument;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+				else if (reg.m_Type == SpaceType::Result)
+				{
+					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
+					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Bind = 1;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+			}
 
 			index = reg.m_VariableIndex;
 			address += reg.m_Value * multiplier[asmOperand.m_Memory.m_Scale];
@@ -393,19 +556,21 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 			return true;
 		}
 
-		auto memory = state.m_Memory.find(address);
-		if (memory == state.m_Memory.end())
-		{
-			return false;
-		}
-
-		if (memory->second.m_VariableIndex == 0)
-		{
-			return false;
-		}
-
 		pcOperand.m_Type = PCOperand::Type::Reference;
-		pcOperand.m_Variable.m_Index = memory->second.m_VariableIndex;
+
+		MemSpace& memory = state.m_Memory[address];
+
+		memory.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+		PCVariable variable;
+
+		variable.m_Size = asmOperand.m_Scale;
+		variable.m_Name = "v" + std::to_string(memory.m_VariableIndex);
+		variable.m_Type = PCVariable::Type::Local;
+
+		state.m_Blob->m_Variables.push_back(variable);
+
+		pcOperand.m_Variable.m_Index = memory.m_VariableIndex;
 		return true;
 	} break;
 	case ILOperandType_MemoryRelative:
@@ -474,6 +639,35 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 		if (asmOperand.m_Memory.m_Base != IL_INVALID_REGISTER)
 		{
 			RegSpace& reg = state.m_General[asmOperand.m_Memory.m_Base];
+			if (reg.m_VariableIndex == 0)
+			{
+				if (reg.m_Type >= SpaceType::Argument_Start &&
+					reg.m_Type <= SpaceType::Argument_End)
+				{
+					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
+					variable.m_Type = PCVariable::Type::Argument;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+				else if (reg.m_Type == SpaceType::Result)
+				{
+					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
+					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Bind = 1;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+			}
 
 			base = reg.m_VariableIndex;
 			address = reg.m_Value;
@@ -483,6 +677,35 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 		if (asmOperand.m_Memory.m_Index != IL_INVALID_REGISTER)
 		{
 			RegSpace& reg = state.m_General[asmOperand.m_Memory.m_Index];
+			if (reg.m_VariableIndex == 0)
+			{
+				if (reg.m_Type >= SpaceType::Argument_Start &&
+					reg.m_Type <= SpaceType::Argument_End)
+				{
+					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
+					variable.m_Type = PCVariable::Type::Argument;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+				else if (reg.m_Type == SpaceType::Result)
+				{
+					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
+					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Bind = 1;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+			}
 
 			index = reg.m_VariableIndex;
 			address += reg.m_Value * multiplier[asmOperand.m_Memory.m_Scale];
@@ -521,6 +744,11 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 	} break;
 	case ILOperandType_Register:
 	{
+		if (asmOperand.m_Register.m_Type != Register::general)
+		{
+			return false;
+		}
+
 		pcOperand.m_Type = PCOperand::Type::Variable;
 
 		uint32_t base = 0;
@@ -536,9 +764,30 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 			variable.m_Name = "v" + std::to_string(base);
 			variable.m_Type = PCVariable::Type::Local;
 
+			switch (asmOperand.m_Register.m_Base)
+			{
+			case REG_RCX:
+			{
+				variable.m_Bind = 2;
+			} break;
+			case REG_RDX:
+			{
+				variable.m_Bind = 3;
+			} break;
+			case REG_R8:
+			{
+				variable.m_Bind = 4;
+			} break;
+			case REG_R9:
+			{
+				variable.m_Bind = 5;
+			} break;
+			}
+
 			state.m_Blob->m_Variables.push_back(variable);
 
 			reg.m_VariableHigh = base;
+			reg.m_Type = SpaceType::Normal;
 		}
 		else
 		{
@@ -552,9 +801,30 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 			variable.m_Name = "v" + std::to_string(base);
 			variable.m_Type = PCVariable::Type::Local;
 
+			switch (asmOperand.m_Register.m_Base)
+			{
+			case REG_RCX:
+			{
+				variable.m_Bind = 2;
+			} break;
+			case REG_RDX:
+			{
+				variable.m_Bind = 3;
+			} break;
+			case REG_R8:
+			{
+				variable.m_Bind = 4;
+			} break;
+			case REG_R9:
+			{
+				variable.m_Bind = 5;
+			} break;
+			}
+
 			state.m_Blob->m_Variables.push_back(variable);
 
 			reg.m_VariableIndex = base;
+			reg.m_Type = SpaceType::Normal;
 		}
 
 		pcOperand.m_Variable.m_Index = base;
@@ -626,6 +896,35 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 		if (asmOperand.m_Memory.m_Base != IL_INVALID_REGISTER)
 		{
 			RegSpace& reg = state.m_General[asmOperand.m_Memory.m_Base];
+			if (reg.m_VariableIndex == 0)
+			{
+				if (reg.m_Type >= SpaceType::Argument_Start &&
+					reg.m_Type <= SpaceType::Argument_End)
+				{
+					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
+					variable.m_Type = PCVariable::Type::Argument;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+				else if (reg.m_Type == SpaceType::Result)
+				{
+					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
+					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Bind = 1;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+			}
 
 			base = reg.m_VariableIndex;
 			address = reg.m_Value;
@@ -635,6 +934,35 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 		if (asmOperand.m_Memory.m_Index != IL_INVALID_REGISTER)
 		{
 			RegSpace& reg = state.m_General[asmOperand.m_Memory.m_Index];
+			if (reg.m_VariableIndex == 0)
+			{
+				if (reg.m_Type >= SpaceType::Argument_Start &&
+					reg.m_Type <= SpaceType::Argument_End)
+				{
+					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
+					variable.m_Type = PCVariable::Type::Argument;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+				else if (reg.m_Type == SpaceType::Result)
+				{
+					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
+					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Bind = 1;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+			}
 
 			index = reg.m_VariableIndex;
 			address += reg.m_Value * multiplier[asmOperand.m_Memory.m_Scale];
@@ -666,15 +994,49 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 	} break;
 	case ILOperandType_Register:
 	{
+		if (asmOperand.m_Register.m_Type != Register::general)
+		{
+			return false;
+		}
+
 		pcOperand.m_Type = PCOperand::Type::Variable;
 
 		uint32_t base = 0;
 		if (asmOperand.m_Register.m_BaseHigh)
 		{
 			RegSpace& reg = state.m_General[asmOperand.m_Register.m_Base];
-			if (reg.m_VariableHigh != 0)
+			if (reg.m_VariableHigh == 0)
 			{
-				return false;
+				if (reg.m_Type >= SpaceType::Argument_Start &&
+					reg.m_Type <= SpaceType::Argument_End)
+				{
+					reg.m_VariableHigh = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
+					variable.m_Type = PCVariable::Type::Argument;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+				else if (reg.m_Type == SpaceType::Result)
+				{
+					reg.m_VariableHigh = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "result" + std::to_string(reg.m_VariableHigh);
+					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Bind = 1;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 			base = reg.m_VariableHigh;
@@ -684,7 +1046,36 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 			RegSpace& reg = state.m_General[asmOperand.m_Register.m_Base];
 			if (reg.m_VariableIndex == 0)
 			{
-				return false;
+				if (reg.m_Type >= SpaceType::Argument_Start &&
+					reg.m_Type <= SpaceType::Argument_End)
+				{
+					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
+					variable.m_Type = PCVariable::Type::Argument;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+				else if (reg.m_Type == SpaceType::Result)
+				{
+					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
+
+					PCVariable variable;
+
+					variable.m_Size = asmOperand.m_Scale;
+					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
+					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Bind = 1;
+
+					state.m_Blob->m_Variables.push_back(variable);
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 			base = reg.m_VariableIndex;
