@@ -477,7 +477,7 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
@@ -489,7 +489,7 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
@@ -515,7 +515,7 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
@@ -527,7 +527,7 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
@@ -562,7 +562,7 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 
 		memory.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-		PCVariable variable;
+		PCVariable variable = {};
 
 		variable.m_Size = asmOperand.m_Scale;
 		variable.m_Name = "v" + std::to_string(memory.m_VariableIndex);
@@ -584,7 +584,7 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 		{
 			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable;
+			PCVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
 			variable.m_Type = PCVariable::Type::Static;
@@ -607,7 +607,7 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 		{
 			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable;
+			PCVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
 			variable.m_Type = PCVariable::Type::Static;
@@ -646,7 +646,7 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
@@ -658,7 +658,7 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
@@ -684,7 +684,7 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
@@ -696,7 +696,7 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
@@ -731,7 +731,7 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 
 		memory.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-		PCVariable variable;
+		PCVariable variable = {};
 
 		variable.m_Size = asmOperand.m_Scale;
 		variable.m_Name = "v" + std::to_string(memory.m_VariableIndex);
@@ -758,7 +758,7 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 
 			base = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable;
+			PCVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
 			variable.m_Name = "v" + std::to_string(base);
@@ -795,7 +795,7 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 
 			base = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable;
+			PCVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
 			variable.m_Name = "v" + std::to_string(base);
@@ -841,7 +841,7 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 		{
 			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable;
+			PCVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
 			variable.m_Type = PCVariable::Type::Static;
@@ -864,7 +864,7 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 		{
 			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable;
+			PCVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
 			variable.m_Type = PCVariable::Type::Static;
@@ -903,7 +903,7 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
@@ -915,7 +915,7 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
@@ -941,7 +941,7 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
@@ -953,7 +953,7 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
@@ -1012,7 +1012,7 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableHigh = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
@@ -1024,7 +1024,7 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableHigh = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "result" + std::to_string(reg.m_VariableHigh);
@@ -1051,7 +1051,7 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
@@ -1063,7 +1063,7 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable;
+					PCVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
 					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
@@ -1107,7 +1107,7 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 		{
 			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable;
+			PCVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
 			variable.m_Type = PCVariable::Type::Static;
@@ -1130,7 +1130,7 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 		{
 			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable;
+			PCVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
 			variable.m_Type = PCVariable::Type::Static;
