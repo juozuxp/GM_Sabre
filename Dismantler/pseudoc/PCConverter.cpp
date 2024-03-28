@@ -1,6 +1,7 @@
 #include "PCConverter.hpp"
 #include <vector>
 #include <format>
+#include <map>
 
 #define CHUNK_SIZE 0x200 
 
@@ -21,6 +22,7 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 
 	std::vector<ILInstruction> instructions;
 
+	std::vector<State> stack;
 	State state = {};
 
 	state.m_Blob = &blob;
@@ -32,13 +34,19 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 	state.m_CursorBase = reinterpret_cast<uintptr_t>(dos);
 
 	state.m_General[REG_RSP].m_Value = state.m_ImageBase + (1ull << 40) - 8;
+	state.m_StackBase = state.m_General[REG_RSP].m_Value;
 
 	state.m_General[REG_RCX].m_Type = SpaceType::Argument0;
 	state.m_General[REG_RDX].m_Type = SpaceType::Argument1;
 	state.m_General[REG_R8].m_Type = SpaceType::Argument2;
 	state.m_General[REG_R9].m_Type = SpaceType::Argument3;
+
+	std::vector<const void*> invalid;
+	std::map<const void*, Block> blocks;
 	while (true)
 	{
+		bool breakout = false;
+
 		uint32_t chunk = (1 << 12) - (reinterpret_cast<uintptr_t>(state.m_Cursor) & ((1 << 12) - 1));
 		if (chunk > CHUNK_SIZE ||
 			chunk == 0)
@@ -51,10 +59,623 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 		m_Disassembler.Disassemble(state.m_Cursor, chunk, instructions);
 		for (const ILInstruction& ins : instructions)
 		{
+			bool reset = false;
+			bool jump = false;
+
+			if (blocks.contains(state.m_Cursor))
+			{
+				if (stack.size() != 0)
+				{
+					state = stack[stack.size() - 1];
+					stack.pop_back();
+
+					reset = true;
+					invalid.clear();
+					break;
+				}
+
+				breakout = true;
+				break;
+			}
+
+			const void* address = state.m_Cursor;
+			Block& block = blocks[address];
+
 			state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + ins.m_Size;
 
 			switch (ins.m_Type)
 			{
+			case InsType_jmp:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (state.m_StackBase == state.m_General[REG_RSP].m_Value ||
+					lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					PCInstruction pseudo = {};
+
+					pseudo.m_Type = PCInstruction::Type::Invoke;
+
+					if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+					{
+						block.m_Type = BlockType::Instruction;
+						block.m_Instruction = pseudo;
+
+						state.m_LastValid = address;
+					}
+					
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::Goto;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+
+					state.m_LastValid = address;
+				}
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_jne:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoNE;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_ja:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoA;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_jae:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoAE;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_jb:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoB;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_jbe:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoBE;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_jg:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoG;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_jge:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoGE;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_jl:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoL;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_jle:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoLE;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_jno:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoNO;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_jns:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoNS;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_jo:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoO;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_jpe:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoPE;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_jpo:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoPO;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_jrcxz:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoCXZ;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
+			case InsType_js:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				PCInstruction pseudo = {};
+
+				pseudo.m_Type = PCInstruction::Type::GotoS;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
 			case InsType_push:
 			{
 				const ILOperand& lhs = ins.m_Operands[0];
@@ -108,7 +729,10 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				blob.m_Instructions.push_back(pseudo);
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
 			} break;
 			case InsType_add:
 			{
@@ -141,7 +765,10 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				blob.m_Instructions.push_back(pseudo);
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
 			} break;
 			case InsType_and:
 			{
@@ -174,7 +801,10 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				blob.m_Instructions.push_back(pseudo);
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
 			} break;
 			case InsType_or:
 			{
@@ -207,7 +837,10 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				blob.m_Instructions.push_back(pseudo);
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
 			} break;
 			case InsType_xor:
 			{
@@ -251,7 +884,10 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 						break;
 					}
 
-					blob.m_Instructions.push_back(pseudo);
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+
+					state.m_LastValid = address;
 					break;
 				}
 
@@ -273,7 +909,10 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				blob.m_Instructions.push_back(pseudo);
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
 			} break;
 			case InsType_not:
 			{
@@ -295,7 +934,10 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				blob.m_Instructions.push_back(pseudo);
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
 			} break;
 			case InsType_lea:
 			{
@@ -337,7 +979,10 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				blob.m_Instructions.push_back(pseudo);
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
 			} break;
 			case InsType_mov:
 			{
@@ -368,7 +1013,10 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				blob.m_Instructions.push_back(pseudo);
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
 			} break;
 			case InsType_call:
 			{
@@ -381,7 +1029,6 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 				state.m_General[REG_RCX].m_Type = SpaceType::Normal;
 				state.m_General[REG_RCX].m_VariableHigh = 0;
 				state.m_General[REG_RCX].m_VariableIndex = 0;
-
 
 				state.m_General[REG_RDX].m_Type = SpaceType::Normal;
 				state.m_General[REG_RDX].m_VariableHigh = 0;
@@ -405,7 +1052,10 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				blob.m_Instructions.push_back(pseudo);
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
 			} break;
 			case InsType_ret:
 			{
@@ -413,8 +1063,22 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 
 				pseudo.m_Type = PCInstruction::Type::Return;
 
-				blob.m_Instructions.push_back(pseudo);
-				return;
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
+
+				if (stack.size() != 0)
+				{
+					state = stack[stack.size() - 1];
+					stack.pop_back();
+
+					reset = true;
+					break;
+				}
+
+				breakout = true;
+				break;
 			} break;
 			case InsType_int3:
 			case InsType_ud0:
@@ -422,10 +1086,95 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 			case InsType_ud2:
 			case InsType_invalid:
 			{
-				return;
+				if (stack.size() != 0)
+				{
+					state = stack[stack.size() - 1];
+					stack.pop_back();
+
+					reset = true;
+					break;
+				}
+
+				breakout = true;
+				break;
 			} break;
 			}
+
+			if (block.m_Type == BlockType::Instruction)
+			{
+				for (const void* invalid : invalid)
+				{
+					blocks[invalid].m_Type = BlockType::Pointer;
+					blocks[invalid].m_Pointer = state.m_LastValid;
+				}
+
+				invalid.clear();
+			}
+			else if (state.m_LastValid != nullptr)
+			{
+				block.m_Type = BlockType::Pointer;
+				block.m_Pointer = state.m_LastValid;
+			}
+
+			if (jump)
+			{
+				state.m_LastValid = nullptr;
+				invalid.clear();
+				break;
+			}
+
+			if (reset || breakout)
+			{
+				invalid.clear();
+				break;
+			}
+
+			if (block.m_Type == BlockType::None)
+			{
+				invalid.push_back(address);
+			}
 		}
+
+		if (breakout)
+		{
+			break;
+		}
+	}
+
+	uint32_t index = 0;
+	for (auto& pair : blocks)
+	{
+		pair.second.m_Index = index;
+		if (pair.second.m_Type == BlockType::Instruction)
+		{
+			blob.m_Instructions.push_back(pair.second.m_Instruction);
+			index++;
+		}
+	}
+
+	for (PCInstruction& instruction : blob.m_Instructions)
+	{
+		if (instruction.m_Type < PCInstruction::Type::Goto_Start ||
+			instruction.m_Type > PCInstruction::Type::Goto_End)
+		{
+			continue;
+		}
+
+		const void* address = reinterpret_cast<const void*>(instruction.m_Operands[0].m_Literal - state.m_ImageBase + state.m_CursorBase);
+
+		const Block& block = blocks[address];
+		if (block.m_Type == BlockType::None)
+		{
+			continue;
+		}
+
+		if (block.m_Type == BlockType::Pointer)
+		{
+			instruction.m_Operands[0].m_Literal = blocks[block.m_Pointer].m_Index;
+			continue;
+		}
+
+		instruction.m_Operands[0].m_Literal = block.m_Index;
 	}
 }
 
@@ -593,7 +1342,7 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 			state.m_Blob->m_Variables.push_back(variable);
 		}
 
-		pcOperand.m_Expression.m_BaseVariable = space.m_VariableIndex;
+		pcOperand.m_Variable.m_Index = space.m_VariableIndex;
 		return true;
 	} break;
 	case ILOperandType_MemoryAbsolute:
@@ -616,7 +1365,7 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 			state.m_Blob->m_Variables.push_back(variable);
 		}
 
-		pcOperand.m_Expression.m_BaseVariable = space.m_VariableIndex;
+		pcOperand.m_Variable.m_Index = space.m_VariableIndex;
 		return true;
 	} break;
 	}
@@ -749,6 +1498,11 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 			return false;
 		}
 
+		if (asmOperand.m_Register.m_Base == REG_RSP)
+		{
+			return false;
+		}
+
 		pcOperand.m_Type = PCOperand::Type::Variable;
 
 		uint32_t base = 0;
@@ -766,6 +1520,10 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 
 			switch (asmOperand.m_Register.m_Base)
 			{
+			case REG_RAX:
+			{
+				variable.m_Bind = 1;
+			} break;
 			case REG_RCX:
 			{
 				variable.m_Bind = 2;
@@ -803,6 +1561,10 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 
 			switch (asmOperand.m_Register.m_Base)
 			{
+			case REG_RAX:
+			{
+				variable.m_Bind = 1;
+			} break;
 			case REG_RCX:
 			{
 				variable.m_Bind = 2;
@@ -984,6 +1746,11 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 		
 		auto memory = state.m_Memory.find(address);
 		if (memory == state.m_Memory.end())
+		{
+			return false;
+		}
+
+		if (memory->second.m_VariableIndex == 0)
 		{
 			return false;
 		}
@@ -1197,6 +1964,8 @@ bool PCConverter::ExecWriteOperand(const ILOperand& operand, State& state, uint6
 			address += state.m_General[operand.m_Memory.m_Index].m_Value * multiplier[operand.m_Memory.m_Scale];
 		}
 
+		address += operand.m_Memory.m_Offset;
+
 		if (address >= state.m_ImageBase && address < (state.m_ImageBase + state.m_ImageSize))
 		{
 			switch (operand.m_Scale)
@@ -1314,6 +2083,8 @@ bool PCConverter::ExecReadOperand(const ILOperand& operand, const State& state, 
 		{
 			address += state.m_General[operand.m_Memory.m_Index].m_Value * multiplier[operand.m_Memory.m_Scale];
 		}
+
+		address += operand.m_Memory.m_Offset;
 
 		if (address >= state.m_ImageBase && address < (state.m_ImageBase + state.m_ImageSize))
 		{
@@ -1477,6 +2248,7 @@ bool PCConverter::ExecLoadOperand(const ILOperand& operand, const State& state, 
 			value += state.m_General[operand.m_Memory.m_Index].m_Value * multiplier[operand.m_Memory.m_Scale];
 		}
 
+		value += operand.m_Memory.m_Offset;
 		return true;
 	} break;
 	case ILOperandType_MemoryRelative:

@@ -30,6 +30,14 @@ void PCVisualizer::Print(const PCBlob& blob) const
 
 			PrintOperand(blob, ins.m_Operands[1]);
 		} break;
+		case PCInstruction::Type::Or:
+		{
+			PrintOperand(blob, ins.m_Operands[0]);
+
+			printf(" |= ");
+
+			PrintOperand(blob, ins.m_Operands[1]);
+		} break;
 		case PCInstruction::Type::Xor:
 		{
 			PrintOperand(blob, ins.m_Operands[0]);
@@ -58,6 +66,10 @@ void PCVisualizer::Print(const PCBlob& blob) const
 		{
 			PrintOperand(blob, ins.m_Operands[0]);
 			printf("()");
+		} break;
+		case PCInstruction::Type::Return:
+		{
+			printf("return");
 		} break;
 		}
 

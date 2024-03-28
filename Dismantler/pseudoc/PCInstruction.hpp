@@ -14,7 +14,29 @@ struct PCInstruction
 		And,
 		Not,
 		Invoke,
-		Return
+		Return,
+
+		Goto,
+		GotoA,
+		GotoAE,
+		GotoB,
+		GotoBE,
+		GotoE,
+		GotoG,
+		GotoGE,
+		GotoL,
+		GotoLE,
+		GotoNE,
+		GotoNO,
+		GotoNS,
+		GotoO,
+		GotoPE,
+		GotoPO,
+		GotoCXZ,
+		GotoS,
+
+		Goto_Start = Goto,
+		Goto_End = GotoS,
 	};
 
 	Type m_Type;

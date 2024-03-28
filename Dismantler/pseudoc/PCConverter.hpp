@@ -22,6 +22,25 @@ private:
 		Argument_End = Argument3
 	};
 
+	enum class BlockType
+	{
+		None,
+		Pointer,
+		Instruction
+	};
+
+	struct Block
+	{
+		BlockType m_Type = BlockType::None;
+		uint32_t m_Index = 0;
+
+		union
+		{
+			const void* m_Pointer;
+			PCInstruction m_Instruction;
+		};
+	};
+
 	struct RegSpace
 	{
 		SpaceType m_Type;
@@ -44,8 +63,10 @@ private:
 		PCBlob* m_Blob;
 
 		const void* m_Cursor;
+		const void* m_LastValid;
 
 		size_t m_ImageSize;
+		uint64_t m_StackBase;
 
 		uintptr_t m_ImageBase;
 		uintptr_t m_CursorBase;
