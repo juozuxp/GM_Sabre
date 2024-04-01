@@ -2,8 +2,7 @@
 
 #include "explorer/ExecutableExplorer.hpp"
 
-#include "pseudoc/PCConverter.hpp"
-#include "pseudoc/PCVisualizer.hpp"
+//#include "pseudoc/PCConverter.hpp"
 
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 {
@@ -13,14 +12,8 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 int main()
 {
 	ExecutableExplorer explorer = ExecutableExplorer(L"Injector.exe");
-	PCConverter converter;
-	PCVisualizer visualizer;
-
-	PCBlob blob;
-
-	converter.Convert(explorer.GetBuffer(), 0x14001A340, blob);
-
-	visualizer.Print(blob);
+	
+	//converter.Convert(explorer.GetBuffer(), 0x14001A340, blob);
 
 	/*delete explorer.GetExecutableFunctions();
 

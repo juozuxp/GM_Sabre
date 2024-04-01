@@ -60,22 +60,7 @@
     <ClCompile Include="pe\PERelocationEntry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="pseudoc\PCConverter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pseudoc\PCBlob.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pseudoc\PCInstruction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pseudoc\PCVariable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pseudoc\PCOperand.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pseudoc\PCVisualizer.cpp">
+    <ClCompile Include="pseudoc\kara\KaraConverter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -128,22 +113,19 @@
     <ClInclude Include="pe\PERelocationEntry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pseudoc\PCConverter.hpp">
+    <ClInclude Include="pseudoc\kara\KaraConverter.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pseudoc\PCBlob.hpp">
+    <ClInclude Include="pseudoc\kara\KaraBlob.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pseudoc\PCInstruction.hpp">
+    <ClInclude Include="pseudoc\kara\KaraInstruction.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pseudoc\PCVariable.hpp">
+    <ClInclude Include="pseudoc\kara\KaraVariable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pseudoc\PCOperand.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pseudoc\PCVisualizer.hpp">
+    <ClInclude Include="pseudoc\kara\KaraOperand.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,7 +1,7 @@
 #pragma once
 #include <ArchitectureIL.hpp>
 
-struct PCOperand
+struct KaraOperand
 {
 	enum class Type
 	{

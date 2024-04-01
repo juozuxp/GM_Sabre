@@ -3,9 +3,9 @@
 #include <unordered_map>
 
 #include "pe/PEBuffer.hpp"
-#include "PCBlob.hpp"
+#include "KaraBlob.hpp"
 
-class PCConverter
+class KaraConverter
 {
 private:
 	enum class SpaceType
@@ -37,7 +37,7 @@ private:
 		union
 		{
 			const void* m_Pointer;
-			PCInstruction m_Instruction;
+			KaraInstruction m_Instruction;
 		};
 	};
 
@@ -60,7 +60,7 @@ private:
 
 	struct State
 	{
-		PCBlob* m_Blob;
+		KaraBlob* m_Blob;
 
 		const void* m_Cursor;
 		const void* m_LastValid;
@@ -77,13 +77,13 @@ private:
 	};
 
 public:
-	void Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& blob) const;
+	void Convert(const PEBuffer& buffer, uintptr_t function, KaraBlob& blob) const;
 
 private:
 	bool ClearOperand(State& state, const ILOperand& operand) const;
-	bool LoadOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const;
-	bool ReadOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const;
-	bool WriteOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const;
+	bool LoadOperand(State& state, const ILOperand& asmOperand, KaraOperand& pcOperand) const;
+	bool ReadOperand(State& state, const ILOperand& asmOperand, KaraOperand& pcOperand) const;
+	bool WriteOperand(State& state, const ILOperand& asmOperand, KaraOperand& pcOperand) const;
 
 	bool ExecWriteOperand(const ILOperand& operand, State& state, uint64_t value) const;
 	bool ExecReadOperand(const ILOperand& operand, const State& state, uint64_t& value) const;

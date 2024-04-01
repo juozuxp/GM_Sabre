@@ -1,11 +1,11 @@
-#include "PCConverter.hpp"
+#include "KaraConverter.hpp"
 #include <vector>
 #include <format>
 #include <map>
 
 #define CHUNK_SIZE 0x200 
 
-void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& blob) const
+void KaraConverter::Convert(const PEBuffer& buffer, uintptr_t function, KaraBlob& blob) const
 {
 	constexpr uint64_t masks[] = { 0, (1ull << 8) - 1, (1ull << 16) - 1, (1ull << 32) - 1, ~0 };
 
@@ -92,9 +92,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 				if (state.m_StackBase == state.m_General[REG_RSP].m_Value ||
 					lhs.m_Type != ILOperandType_ValueRelative)
 				{
-					PCInstruction pseudo = {};
+					KaraInstruction pseudo = {};
 
-					pseudo.m_Type = PCInstruction::Type::Invoke;
+					pseudo.m_Type = KaraInstruction::Type::Invoke;
 
 					if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 					{
@@ -117,9 +117,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::Goto;
+				pseudo.m_Type = KaraInstruction::Type::Goto;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -151,9 +151,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoNE;
+				pseudo.m_Type = KaraInstruction::Type::GotoNE;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -185,9 +185,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoA;
+				pseudo.m_Type = KaraInstruction::Type::GotoA;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -219,9 +219,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoAE;
+				pseudo.m_Type = KaraInstruction::Type::GotoAE;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -253,9 +253,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoB;
+				pseudo.m_Type = KaraInstruction::Type::GotoB;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -287,9 +287,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoBE;
+				pseudo.m_Type = KaraInstruction::Type::GotoBE;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -321,9 +321,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoG;
+				pseudo.m_Type = KaraInstruction::Type::GotoG;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -355,9 +355,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoGE;
+				pseudo.m_Type = KaraInstruction::Type::GotoGE;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -389,9 +389,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoL;
+				pseudo.m_Type = KaraInstruction::Type::GotoL;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -423,9 +423,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoLE;
+				pseudo.m_Type = KaraInstruction::Type::GotoLE;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -457,9 +457,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoNO;
+				pseudo.m_Type = KaraInstruction::Type::GotoNO;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -491,9 +491,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoNS;
+				pseudo.m_Type = KaraInstruction::Type::GotoNS;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -525,9 +525,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoO;
+				pseudo.m_Type = KaraInstruction::Type::GotoO;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -559,9 +559,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoPE;
+				pseudo.m_Type = KaraInstruction::Type::GotoPE;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -593,9 +593,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoPO;
+				pseudo.m_Type = KaraInstruction::Type::GotoPO;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -627,9 +627,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoCXZ;
+				pseudo.m_Type = KaraInstruction::Type::GotoCXZ;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -661,9 +661,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::GotoS;
+				pseudo.m_Type = KaraInstruction::Type::GotoS;
 
 				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -698,6 +698,209 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					state.m_General[REG_RSP].m_Value += 8;
 				}
 			} break;
+			case InsType_cmp:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+				const ILOperand& rhs = ins.m_Operands[1];
+
+				KaraInstruction pseudo = {};
+
+				pseudo.m_Type = KaraInstruction::Type::Compare;
+
+				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
+				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
+					break;
+				}
+
+				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
+					break;
+				}
+
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
+			} break;
+			case InsType_cbw:
+			{
+				ILOperand lhs;
+				ILOperand rhs;
+
+				lhs.m_Type = ILOperandType_Register;
+				rhs.m_Type = ILOperandType_Register;
+
+				lhs.m_Scale = ILOperandScale_16;
+				rhs.m_Scale = ILOperandScale_8;
+
+				lhs.m_Register.m_Type = Register::general;
+				rhs.m_Register.m_Type = Register::general;
+
+				lhs.m_Register.m_Base = REG_RAX;
+				rhs.m_Register.m_Base = REG_RAX;
+
+				lhs.m_Register.m_BaseHigh = false;
+				rhs.m_Register.m_BaseHigh = false;
+
+				uint64_t value;
+				if (ExecReadOperand(rhs, state, value))
+				{
+					ExecWriteOperand(lhs, state, value);
+				}
+
+				KaraInstruction pseudo = {};
+
+				pseudo.m_Type = KaraInstruction::Type::Assign;
+
+				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
+				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
+					break;
+				}
+
+				if (!WriteOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
+					break;
+				}
+
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
+			} break;
+			case InsType_cwde:
+			{
+				ILOperand lhs;
+				ILOperand rhs;
+
+				lhs.m_Type = ILOperandType_Register;
+				rhs.m_Type = ILOperandType_Register;
+
+				lhs.m_Scale = ILOperandScale_32;
+				rhs.m_Scale = ILOperandScale_16;
+
+				lhs.m_Register.m_Type = Register::general;
+				rhs.m_Register.m_Type = Register::general;
+
+				lhs.m_Register.m_Base = REG_RAX;
+				rhs.m_Register.m_Base = REG_RAX;
+
+				lhs.m_Register.m_BaseHigh = false;
+				rhs.m_Register.m_BaseHigh = false;
+
+				uint64_t value;
+				if (ExecReadOperand(rhs, state, value))
+				{
+					ExecWriteOperand(lhs, state, value);
+				}
+
+				KaraInstruction pseudo = {};
+
+				pseudo.m_Type = KaraInstruction::Type::Assign;
+
+				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
+				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
+					break;
+				}
+
+				if (!WriteOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
+					break;
+				}
+
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
+			} break;
+			case InsType_cdqe:
+			{
+				ILOperand lhs;
+				ILOperand rhs;
+
+				lhs.m_Type = ILOperandType_Register;
+				rhs.m_Type = ILOperandType_Register;
+
+				lhs.m_Scale = ILOperandScale_64;
+				rhs.m_Scale = ILOperandScale_32;
+
+				lhs.m_Register.m_Type = Register::general;
+				rhs.m_Register.m_Type = Register::general;
+
+				lhs.m_Register.m_Base = REG_RAX;
+				rhs.m_Register.m_Base = REG_RAX;
+
+				lhs.m_Register.m_BaseHigh = false;
+				rhs.m_Register.m_BaseHigh = false;
+
+				uint64_t value;
+				if (ExecReadOperand(rhs, state, value))
+				{
+					ExecWriteOperand(lhs, state, value);
+				}
+
+				KaraInstruction pseudo = {};
+
+				pseudo.m_Type = KaraInstruction::Type::Assign;
+
+				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
+				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
+					break;
+				}
+
+				if (!WriteOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
+					break;
+				}
+
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
+			} break;
+			case InsType_test:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+				const ILOperand& rhs = ins.m_Operands[1];
+
+				KaraInstruction pseudo = {};
+
+				pseudo.m_Type = KaraInstruction::Type::AndCompare;
+
+				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
+				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
+					break;
+				}
+
+				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					ClearOperand(state, lhs);
+					ClearOperand(state, rhs);
+					break;
+				}
+
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
+			} break;
 			case InsType_sub:
 			{
 				const ILOperand& lhs = ins.m_Operands[0];
@@ -711,9 +914,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					ExecWriteOperand(lhs, state, lhsValue - rhsValue);
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::Subtract;
+				pseudo.m_Type = KaraInstruction::Type::Subtract;
 
 				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
@@ -747,9 +950,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					ExecWriteOperand(lhs, state, lhsValue + rhsValue);
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::Addition;
+				pseudo.m_Type = KaraInstruction::Type::Addition;
 
 				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
@@ -783,9 +986,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					ExecWriteOperand(lhs, state, lhsValue & rhsValue);
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::And;
+				pseudo.m_Type = KaraInstruction::Type::And;
 
 				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
@@ -819,9 +1022,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					ExecWriteOperand(lhs, state, lhsValue | rhsValue);
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::Or;
+				pseudo.m_Type = KaraInstruction::Type::Or;
 
 				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
@@ -860,9 +1063,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					lhs.m_Register.m_Base == rhs.m_Register.m_Base &&
 					lhs.m_Register.m_BaseHigh == rhs.m_Register.m_BaseHigh)
 				{
-					PCInstruction pseudo = {};
+					KaraInstruction pseudo = {};
 
-					pseudo.m_Type = PCInstruction::Type::Assign;
+					pseudo.m_Type = KaraInstruction::Type::Assign;
 
 					ILOperand newRhs;
 
@@ -891,9 +1094,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					break;
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::Xor;
+				pseudo.m_Type = KaraInstruction::Type::Xor;
 
 				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
@@ -924,9 +1127,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					ExecWriteOperand(lhs, state, ~value);
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::Not;
+				pseudo.m_Type = KaraInstruction::Type::Not;
 
 				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -961,9 +1164,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					}
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::Assign;
+				pseudo.m_Type = KaraInstruction::Type::Assign;
 
 				if (!LoadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
@@ -995,9 +1198,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 					ExecWriteOperand(lhs, state, value);
 				}
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::Assign;
+				pseudo.m_Type = KaraInstruction::Type::Assign;
 
 				if (!ReadOperand(state, rhs, pseudo.m_Operands[1]))
 				{
@@ -1042,9 +1245,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 				state.m_General[REG_R9].m_VariableHigh = 0;
 				state.m_General[REG_R9].m_VariableIndex = 0;
 
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::Invoke;
+				pseudo.m_Type = KaraInstruction::Type::Invoke;
 
 				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
 				{
@@ -1059,9 +1262,9 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 			} break;
 			case InsType_ret:
 			{
-				PCInstruction pseudo = {};
+				KaraInstruction pseudo = {};
 
-				pseudo.m_Type = PCInstruction::Type::Return;
+				pseudo.m_Type = KaraInstruction::Type::Return;
 
 				block.m_Type = BlockType::Instruction;
 				block.m_Instruction = pseudo;
@@ -1152,10 +1355,10 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 		}
 	}
 
-	for (PCInstruction& instruction : blob.m_Instructions)
+	for (KaraInstruction& instruction : blob.m_Instructions)
 	{
-		if (instruction.m_Type < PCInstruction::Type::Goto_Start ||
-			instruction.m_Type > PCInstruction::Type::Goto_End)
+		if (instruction.m_Type < KaraInstruction::Type::Goto_Start ||
+			instruction.m_Type > KaraInstruction::Type::Goto_End)
 		{
 			continue;
 		}
@@ -1178,7 +1381,7 @@ void PCConverter::Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& bl
 	}
 }
 
-bool PCConverter::ClearOperand(State& state, const ILOperand& operand) const
+bool KaraConverter::ClearOperand(State& state, const ILOperand& operand) const
 {
 	switch (operand.m_Type)
 	{
@@ -1204,7 +1407,7 @@ bool PCConverter::ClearOperand(State& state, const ILOperand& operand) const
 	return false;
 }
 
-bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const
+bool KaraConverter::LoadOperand(State& state, const ILOperand& asmOperand, KaraOperand& pcOperand) const
 {
 	constexpr uint8_t multiplier[] = { 1, 2, 4, 8 };
 
@@ -1226,11 +1429,11 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
-					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Type = KaraVariable::Type::Argument;
+					variable.m_Index = static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start);
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1238,12 +1441,10 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
-					variable.m_Type = PCVariable::Type::Argument;
-					variable.m_Bind = 1;
+					variable.m_Type = KaraVariable::Type::Result;
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1264,11 +1465,11 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
-					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Type = KaraVariable::Type::Argument;
+					variable.m_Index = static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start);
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1276,12 +1477,10 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
-					variable.m_Type = PCVariable::Type::Argument;
-					variable.m_Bind = 1;
+					variable.m_Type = KaraVariable::Type::Result;
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1295,7 +1494,7 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 
 		if (base != 0 && index != 0)
 		{
-			pcOperand.m_Type = PCOperand::Type::Expression;
+			pcOperand.m_Type = KaraOperand::Type::Expression;
 
 			pcOperand.m_Expression.m_BaseVariable = (base == ~0) ? 0 : base;
 			pcOperand.m_Expression.m_IndexVariable = (index == ~0) ? 0 : index;
@@ -1305,17 +1504,16 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 			return true;
 		}
 
-		pcOperand.m_Type = PCOperand::Type::Reference;
+		pcOperand.m_Type = KaraOperand::Type::Reference;
 
 		MemSpace& memory = state.m_Memory[address];
 
 		memory.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-		PCVariable variable = {};
+		KaraVariable variable = {};
 
 		variable.m_Size = asmOperand.m_Scale;
-		variable.m_Name = "v" + std::to_string(memory.m_VariableIndex);
-		variable.m_Type = PCVariable::Type::Local;
+		variable.m_Type = KaraVariable::Type::Local;
 
 		state.m_Blob->m_Variables.push_back(variable);
 
@@ -1326,18 +1524,18 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 	{
 		uint64_t address = reinterpret_cast<uintptr_t>(state.m_Cursor) + asmOperand.m_Relative.m_Value - state.m_CursorBase + state.m_ImageBase;
 
-		pcOperand.m_Type = PCOperand::Type::Reference;
+		pcOperand.m_Type = KaraOperand::Type::Reference;
 
 		MemSpace& space = state.m_Memory[address];
 		if (space.m_VariableIndex == 0)
 		{
 			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable = {};
+			KaraVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
-			variable.m_Type = PCVariable::Type::Static;
-			variable.m_Name = std::format("sv{:X}", address);
+			variable.m_Type = KaraVariable::Type::Static;
+			variable.m_Address = address;
 
 			state.m_Blob->m_Variables.push_back(variable);
 		}
@@ -1349,18 +1547,18 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 	{
 		uint64_t address = asmOperand.m_MemoryValue.m_Value;
 
-		pcOperand.m_Type = PCOperand::Type::Reference;
+		pcOperand.m_Type = KaraOperand::Type::Reference;
 
 		MemSpace& space = state.m_Memory[address];
 		if (space.m_VariableIndex == 0)
 		{
 			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable = {};
+			KaraVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
-			variable.m_Type = PCVariable::Type::Static;
-			variable.m_Name = std::format("sv{:X}", address);
+			variable.m_Type = KaraVariable::Type::Static;
+			variable.m_Address = address;
 
 			state.m_Blob->m_Variables.push_back(variable);
 		}
@@ -1373,7 +1571,7 @@ bool PCConverter::LoadOperand(State& state, const ILOperand& asmOperand, PCOpera
 	return false;
 }
 
-bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const
+bool KaraConverter::WriteOperand(State& state, const ILOperand& asmOperand, KaraOperand& pcOperand) const
 {
 	constexpr uint8_t multiplier[] = { 1, 2, 4, 8 };
 
@@ -1395,11 +1593,11 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
-					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Type = KaraVariable::Type::Argument;
+					variable.m_Index = static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start);
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1407,12 +1605,10 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
-					variable.m_Type = PCVariable::Type::Argument;
-					variable.m_Bind = 1;
+					variable.m_Type = KaraVariable::Type::Result;
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1433,11 +1629,11 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
-					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Type = KaraVariable::Type::Argument;
+					variable.m_Index = static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start);
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1445,12 +1641,10 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
-					variable.m_Type = PCVariable::Type::Argument;
-					variable.m_Bind = 1;
+					variable.m_Type = KaraVariable::Type::Result;
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1464,7 +1658,7 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 
 		if (base != 0 && index != 0)
 		{
-			pcOperand.m_Type = PCOperand::Type::Dereference;
+			pcOperand.m_Type = KaraOperand::Type::Dereference;
 
 			pcOperand.m_Expression.m_BaseVariable = (base == ~0) ? 0 : base;
 			pcOperand.m_Expression.m_IndexVariable = (index == ~0) ? 0 : index;
@@ -1474,17 +1668,16 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 			return true;
 		}
 
-		pcOperand.m_Type = PCOperand::Type::Variable;
+		pcOperand.m_Type = KaraOperand::Type::Variable;
 
 		MemSpace& memory = state.m_Memory[address];
 
 		memory.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-		PCVariable variable = {};
+		KaraVariable variable = {};
 
 		variable.m_Size = asmOperand.m_Scale;
-		variable.m_Name = "v" + std::to_string(memory.m_VariableIndex);
-		variable.m_Type = PCVariable::Type::Local;
+		variable.m_Type = KaraVariable::Type::Local;
 
 		state.m_Blob->m_Variables.push_back(variable);
 
@@ -1503,7 +1696,7 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 			return false;
 		}
 
-		pcOperand.m_Type = PCOperand::Type::Variable;
+		pcOperand.m_Type = KaraOperand::Type::Variable;
 
 		uint32_t base = 0;
 		if (asmOperand.m_Register.m_BaseHigh)
@@ -1512,11 +1705,10 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 
 			base = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable = {};
+			KaraVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
-			variable.m_Name = "v" + std::to_string(base);
-			variable.m_Type = PCVariable::Type::Local;
+			variable.m_Type = KaraVariable::Type::Local;
 
 			switch (asmOperand.m_Register.m_Base)
 			{
@@ -1553,11 +1745,10 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 
 			base = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable = {};
+			KaraVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
-			variable.m_Name = "v" + std::to_string(base);
-			variable.m_Type = PCVariable::Type::Local;
+			variable.m_Type = KaraVariable::Type::Local;
 
 			switch (asmOperand.m_Register.m_Base)
 			{
@@ -1596,18 +1787,18 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 	{
 		uint64_t address = reinterpret_cast<uintptr_t>(state.m_Cursor) + asmOperand.m_Relative.m_Value - state.m_CursorBase + state.m_ImageBase;
 
-		pcOperand.m_Type = PCOperand::Type::Variable;
+		pcOperand.m_Type = KaraOperand::Type::Variable;
 
 		MemSpace& space = state.m_Memory[address];
 		if (space.m_VariableIndex == 0)
 		{
 			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable = {};
+			KaraVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
-			variable.m_Type = PCVariable::Type::Static;
-			variable.m_Name = std::format("sv{:X}", address);
+			variable.m_Type = KaraVariable::Type::Static;
+			variable.m_Address = address;
 
 			state.m_Blob->m_Variables.push_back(variable);
 		}
@@ -1619,18 +1810,18 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 	{
 		uint64_t address = asmOperand.m_MemoryValue.m_Value;
 
-		pcOperand.m_Type = PCOperand::Type::Variable;
+		pcOperand.m_Type = KaraOperand::Type::Variable;
 
 		MemSpace& space = state.m_Memory[address];
 		if (space.m_VariableIndex == 0)
 		{
 			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable = {};
+			KaraVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
-			variable.m_Type = PCVariable::Type::Static;
-			variable.m_Name = std::format("sv{:X}", address);
+			variable.m_Type = KaraVariable::Type::Static;
+			variable.m_Address = address;
 
 			state.m_Blob->m_Variables.push_back(variable);
 		}
@@ -1643,7 +1834,7 @@ bool PCConverter::WriteOperand(State& state, const ILOperand& asmOperand, PCOper
 	return false;
 }
 
-bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOperand& pcOperand) const
+bool KaraConverter::ReadOperand(State& state, const ILOperand& asmOperand, KaraOperand& pcOperand) const
 {
 	constexpr uint8_t multiplier[] = { 1, 2, 4, 8 };
 
@@ -1665,11 +1856,11 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
-					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Type = KaraVariable::Type::Argument;
+					variable.m_Index = static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start);
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1677,12 +1868,10 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
-					variable.m_Type = PCVariable::Type::Argument;
-					variable.m_Bind = 1;
+					variable.m_Type = KaraVariable::Type::Result;
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1703,11 +1892,11 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
-					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Type = KaraVariable::Type::Argument;
+					variable.m_Index = static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start);
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1715,12 +1904,10 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
-					variable.m_Type = PCVariable::Type::Argument;
-					variable.m_Bind = 1;
+					variable.m_Type = KaraVariable::Type::Result;
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1734,7 +1921,7 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 
 		if (base != 0 && index != 0)
 		{
-			pcOperand.m_Type = PCOperand::Type::Dereference;
+			pcOperand.m_Type = KaraOperand::Type::Dereference;
 
 			pcOperand.m_Expression.m_BaseVariable = (base == ~0) ? 0 : base;
 			pcOperand.m_Expression.m_IndexVariable = (index == ~0) ? 0 : index;
@@ -1755,7 +1942,7 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 			return false;
 		}
 
-		pcOperand.m_Type = PCOperand::Type::Variable;
+		pcOperand.m_Type = KaraOperand::Type::Variable;
 		pcOperand.m_Variable.m_Index = memory->second.m_VariableIndex;
 		return true;
 	} break;
@@ -1766,7 +1953,7 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 			return false;
 		}
 
-		pcOperand.m_Type = PCOperand::Type::Variable;
+		pcOperand.m_Type = KaraOperand::Type::Variable;
 
 		uint32_t base = 0;
 		if (asmOperand.m_Register.m_BaseHigh)
@@ -1779,11 +1966,11 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableHigh = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
-					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Type = KaraVariable::Type::Argument;
+					variable.m_Index = static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start);
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1791,12 +1978,10 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableHigh = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "result" + std::to_string(reg.m_VariableHigh);
-					variable.m_Type = PCVariable::Type::Argument;
-					variable.m_Bind = 1;
+					variable.m_Type = KaraVariable::Type::Result;
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1818,11 +2003,11 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "a" + std::to_string(static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start));
-					variable.m_Type = PCVariable::Type::Argument;
+					variable.m_Type = KaraVariable::Type::Argument;
+					variable.m_Index = static_cast<uint32_t>(reg.m_Type) - static_cast<uint32_t>(SpaceType::Argument_Start);
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1830,12 +2015,10 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 				{
 					reg.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-					PCVariable variable = {};
+					KaraVariable variable = {};
 
 					variable.m_Size = asmOperand.m_Scale;
-					variable.m_Name = "result" + std::to_string(reg.m_VariableIndex);
-					variable.m_Type = PCVariable::Type::Argument;
-					variable.m_Bind = 1;
+					variable.m_Type = KaraVariable::Type::Result;
 
 					state.m_Blob->m_Variables.push_back(variable);
 				}
@@ -1853,13 +2036,13 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 	} break;
 	case ILOperandType_Value:
 	{
-		pcOperand.m_Type = PCOperand::Type::Literal;
+		pcOperand.m_Type = KaraOperand::Type::Literal;
 		pcOperand.m_Literal = asmOperand.m_Value;
 		return true;
 	} break;
 	case ILOperandType_ValueRelative:
 	{
-		pcOperand.m_Type = PCOperand::Type::Literal;
+		pcOperand.m_Type = KaraOperand::Type::Literal;
 		pcOperand.m_Literal = reinterpret_cast<uintptr_t>(state.m_Cursor) + asmOperand.m_Relative.m_Value - state.m_CursorBase + state.m_ImageBase;
 		return true;
 	} break;
@@ -1867,18 +2050,18 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 	{
 		uint64_t address = reinterpret_cast<uintptr_t>(state.m_Cursor) + asmOperand.m_Relative.m_Value - state.m_CursorBase + state.m_ImageBase;
 
-		pcOperand.m_Type = PCOperand::Type::Variable;
+		pcOperand.m_Type = KaraOperand::Type::Variable;
 
 		MemSpace& space = state.m_Memory[address];
 		if (space.m_VariableIndex == 0)
 		{
 			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable = {};
+			KaraVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
-			variable.m_Type = PCVariable::Type::Static;
-			variable.m_Name = std::format("sv{:X}", address);
+			variable.m_Type = KaraVariable::Type::Static;
+			variable.m_Address = address;
 
 			state.m_Blob->m_Variables.push_back(variable);
 		}
@@ -1890,18 +2073,18 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 	{
 		uint64_t address = asmOperand.m_MemoryValue.m_Value;
 
-		pcOperand.m_Type = PCOperand::Type::Variable;
+		pcOperand.m_Type = KaraOperand::Type::Variable;
 
 		MemSpace& space = state.m_Memory[address];
 		if (space.m_VariableIndex == 0)
 		{
 			space.m_VariableIndex = state.m_Blob->m_Variables.size() + 1;
 
-			PCVariable variable = {};
+			KaraVariable variable = {};
 
 			variable.m_Size = asmOperand.m_Scale;
-			variable.m_Type = PCVariable::Type::Static;
-			variable.m_Name = std::format("sv{:X}", address);
+			variable.m_Type = KaraVariable::Type::Static;
+			variable.m_Address = address;
 
 			state.m_Blob->m_Variables.push_back(variable);
 		}
@@ -1914,7 +2097,7 @@ bool PCConverter::ReadOperand(State& state, const ILOperand& asmOperand, PCOpera
 	return false;
 }
 
-bool PCConverter::ExecWriteOperand(const ILOperand& operand, State& state, uint64_t value) const
+bool KaraConverter::ExecWriteOperand(const ILOperand& operand, State& state, uint64_t value) const
 {
 	constexpr uint64_t masks[] = { 0, (1ull << 8) - 1, (1ull << 16) - 1, (1ull << 32) - 1, ~0 };
 	constexpr uint8_t multiplier[] = { 1, 2, 4, 8 };
@@ -2064,7 +2247,7 @@ bool PCConverter::ExecWriteOperand(const ILOperand& operand, State& state, uint6
 	return false;
 }
 
-bool PCConverter::ExecReadOperand(const ILOperand& operand, const State& state, uint64_t& value) const
+bool KaraConverter::ExecReadOperand(const ILOperand& operand, const State& state, uint64_t& value) const
 {
 	constexpr uint64_t masks[] = { 0, (1ull << 8) - 1, (1ull << 16) - 1, (1ull << 32) - 1, ~0 };
 	constexpr uint8_t multiplier[] = { 1, 2, 4, 8 };
@@ -2229,7 +2412,7 @@ bool PCConverter::ExecReadOperand(const ILOperand& operand, const State& state, 
 	return false;
 }
 
-bool PCConverter::ExecLoadOperand(const ILOperand& operand, const State& state, uint64_t& value) const
+bool KaraConverter::ExecLoadOperand(const ILOperand& operand, const State& state, uint64_t& value) const
 {
 	constexpr uint8_t multiplier[] = { 1, 2, 4, 8 };
 

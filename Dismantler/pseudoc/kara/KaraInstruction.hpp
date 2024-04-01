@@ -1,7 +1,7 @@
 #pragma once
-#include "PCOperand.hpp"
+#include "KaraOperand.hpp"
 
-struct PCInstruction
+struct KaraInstruction
 {
 	enum class Type
 	{
@@ -9,6 +9,8 @@ struct PCInstruction
 		Assign,
 		Subtract,
 		Addition,
+		Compare,
+		AndCompare,
 		Xor,
 		Or,
 		And,
@@ -40,5 +42,5 @@ struct PCInstruction
 	};
 
 	Type m_Type;
-	PCOperand m_Operands[2];
+	KaraOperand m_Operands[2];
 };
