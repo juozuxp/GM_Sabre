@@ -141,6 +141,11 @@
     <ClCompile Include="explorer\FunctionExplorer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="managed\ManagedExportInterface.cpp" />
+    <ClCompile Include="pseudoc\PCExpression.cpp" />
+    <ClCompile Include="pseudoc\PCVariable.cpp" />
+    <ClCompile Include="pseudoc\PCLine.cpp" />
+    <ClCompile Include="pseudoc\PCBlob.cpp" />
+    <ClCompile Include="pseudoc\PCConverter.cpp" />
     <ClCompile Include="pseudoc\kara\KaraConverter.cpp" />
     <ClCompile Include="pe\PERelocationEntry.cpp" />
     <ClCompile Include="pe\PERelocationTable.cpp" />
@@ -165,6 +170,11 @@
     <ClInclude Include="managed\ManagedArray.hpp" />
     <ClInclude Include="managed\ManagedString.hpp" />
     <ClInclude Include="managed\ManagedObject.hpp" />
+    <ClInclude Include="pseudoc\PCExpression.hpp" />
+    <ClInclude Include="pseudoc\PCVariable.hpp" />
+    <ClInclude Include="pseudoc\PCLine.hpp" />
+    <ClInclude Include="pseudoc\PCBlob.hpp" />
+    <ClInclude Include="pseudoc\PCConverter.hpp" />
     <ClInclude Include="pseudoc\kara\KaraOperand.hpp" />
     <ClInclude Include="pseudoc\kara\KaraVariable.hpp" />
     <ClInclude Include="pseudoc\kara\KaraInstruction.hpp" />

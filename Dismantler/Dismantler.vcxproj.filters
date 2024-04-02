@@ -63,6 +63,21 @@
     <ClCompile Include="pseudoc\kara\KaraConverter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="pseudoc\PCConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pseudoc\PCBlob.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pseudoc\PCLine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pseudoc\PCVariable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pseudoc\PCExpression.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="managed\ManagedObject.hpp">
@@ -126,6 +141,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pseudoc\kara\KaraOperand.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pseudoc\PCConverter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pseudoc\PCBlob.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pseudoc\PCLine.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pseudoc\PCVariable.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pseudoc\PCExpression.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
