@@ -20,14 +20,17 @@ struct PCLine
 	{
 		struct Assign
 		{
-			uint32_t m_Variable;
-			PCExpression m_Expression;
+			PCExpression m_Left;
+			PCExpression m_Right;
 		} m_Assign;
+
 		struct Conditional
 		{
 			PCExpression m_Left;
 			PCExpression m_Right;
 		} m_Conditional;
 	};
+
+	std::shared_ptr<PCLine> m_Next;
 };
 

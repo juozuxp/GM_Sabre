@@ -4,10 +4,10 @@ struct PCVariable
 {
 	enum class Size
 	{
-		uint8,
-		uint16,
-		uint32,
-		uint64,
+		int8,
+		int16,
+		int32,
+		int64,
 	};
 
 	enum class Type
@@ -17,6 +17,6 @@ struct PCVariable
 		Static
 	};
 
-	Size m_Type;
+	Type m_Type;
+	Size m_Size;
 };
-

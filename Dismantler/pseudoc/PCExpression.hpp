@@ -1,26 +1,54 @@
 #pragma once
-#include <vector>
+#include <memory>
 
-class PCExpression
+struct PCExpression
 {
-	enum class Operator : uint32_t
+	enum class Expression
 	{
 		Add,
-		Sub
+		Sub,
+		Mul,
+		Xor,
+		Or,
+		And,
+		Not,
 	};
 
-	struct Entry
+	enum class Type
 	{
-		bool m_IsLiteral;
-
-		union
-		{
-			uint32_t m_Literal;
-			uint32_t m_Variable;
-			Operator m_Operator;
-		};
+		None,
+		Literal,
+		Variable,
+		Operator,
+		Dereference,
+		Reference
 	};
 
-	std::vector<Entry> m_Expression;
+	PCExpression();
+	~PCExpression();
+
+	PCExpression(PCExpression&& move);
+	PCExpression(const PCExpression& copy) = delete;
+
+	PCExpression& operator=(PCExpression&& move);
+	PCExpression& operator=(const PCExpression& copy) = delete;
+
+	Type m_Type;
+
+	union
+	{
+		uint32_t m_Literal;
+		uint32_t m_Variable;
+
+		std::unique_ptr<PCExpression> m_Dereference;
+
+		struct Operator
+		{
+			Expression m_Expression;
+
+			std::unique_ptr<PCExpression> m_Left;
+			std::unique_ptr<PCExpression> m_Right;
+		} m_Operator;
+	};
 };
 

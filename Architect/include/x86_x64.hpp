@@ -923,10 +923,10 @@ struct Redirect
 #pragma pack(pop)
 
 #pragma pack(push, 1)
-	struct FullRedirect
-	{
-		uint16_t m_BaseIndex;
-	};
+struct FullRedirect
+{
+	uint16_t m_BaseIndex;
+};
 #pragma pack(pop)
 
 enum class PaType : uint8_t
