@@ -13,7 +13,14 @@ private:
 		KaraBlob m_Kara;
 		PCBlob m_Blob;
 
+		uint32_t m_Result;
+
+		std::shared_ptr<PCLine> m_Invoke;
+		std::shared_ptr<PCLine> m_Conditional;
+
+		std::vector<uint32_t> m_Arguments;
 		std::unordered_map<uint32_t, uint32_t> m_VariableMap;
+		std::unordered_map<uint32_t, std::shared_ptr<PCLine>> m_LineMap;
 	};
 
 public:

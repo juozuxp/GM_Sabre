@@ -7,13 +7,97 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 
 	m_Kara.Convert(buffer, function, state.m_Kara);
 
-	const PCLine* conditional = nullptr;
-
 	std::shared_ptr<PCLine>* next = &state.m_Blob.m_FirstLine;
-	for (const KaraInstruction& ins : state.m_Kara.m_Instructions)
+	for (uint32_t i = 0; i < state.m_Kara.m_Instructions.size(); i++)
 	{
+		const KaraInstruction& ins = state.m_Kara.m_Instructions[i];
 		switch (ins.m_Type)
 		{
+		case KaraInstruction::Type::Invoke:
+		{
+			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
+
+			line->m_Type = PCLine::Type::Invoke;
+
+			line->m_Invoke.m_Function = ConvertExpression(state, ins.m_Operands[0]);
+
+			for (uint32_t argument : state.m_Arguments)
+			{
+				if (argument == 0)
+				{
+					break;
+				}
+
+				PCExpression expression;
+
+				expression.m_Type = PCExpression::Type::Variable;
+				expression.m_Variable = argument - 1;
+
+				line->m_Invoke.m_Arguments.push_back(expression);
+			}
+
+			state.m_Arguments.clear();
+			state.m_Invoke = line;
+			state.m_Result = 0;
+
+			*next = line;
+			next = &line->m_Next;
+
+			state.m_LineMap[i] = line;
+		} break;
+		case KaraInstruction::Type::Return:
+		{
+			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
+
+			line->m_Type = PCLine::Type::Return;
+
+			if (state.m_Result != 0)
+			{
+				line->m_Return.m_Result.m_Type = PCExpression::Type::Variable;
+				line->m_Return.m_Result.m_Variable = state.m_Result - 1;
+			}
+
+			*next = line;
+			next = &line->m_Next;
+
+			state.m_LineMap[i] = line;
+		} break;
+		case KaraInstruction::Type::Assign:
+		{
+			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
+
+			const KaraOperand& lhs = ins.m_Operands[0];
+			const KaraOperand& rhs = ins.m_Operands[1];
+
+			line->m_Type = PCLine::Type::Assign;
+
+			line->m_Assign.m_Left = ConvertExpression(state, lhs);
+			line->m_Assign.m_Right = ConvertExpression(state, rhs);
+
+			if (lhs.m_Type == KaraOperand::Type::Variable)
+			{
+				const KaraVariable& variable = state.m_Kara.m_Variables[lhs.m_Variable.m_Index - 1];
+
+				if (variable.m_Bind == 1)
+				{
+					state.m_Result = state.m_VariableMap[lhs.m_Variable.m_Index];
+				}
+				else if (variable.m_Bind >= 2)
+				{
+					if (state.m_Arguments.size() < (variable.m_Bind - 1))
+					{
+						state.m_Arguments.resize(variable.m_Bind - 1);
+					}
+
+					state.m_Arguments[variable.m_Bind - 2] = state.m_VariableMap[lhs.m_Variable.m_Index];
+				}
+			}
+
+			*next = line;
+			next = &line->m_Next;
+
+			state.m_LineMap[i] = line;
+		} break;
 		case KaraInstruction::Type::Subtract:
 		{
 			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
@@ -31,8 +115,12 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			line->m_Assign.m_Left = ConvertExpression(state, ins.m_Operands[0]);
 			line->m_Assign.m_Right = std::move(operation);
 
+			state.m_Conditional = line;
+
 			*next = line;
 			next = &line->m_Next;
+
+			state.m_LineMap[i] = line;
 		} break;
 		case KaraInstruction::Type::Addition:
 		{
@@ -51,32 +139,78 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			line->m_Assign.m_Left = ConvertExpression(state, ins.m_Operands[0]);
 			line->m_Assign.m_Right = std::move(operation);
 
+			state.m_Conditional = line;
+
 			*next = line;
 			next = &line->m_Next;
+
+			state.m_LineMap[i] = line;
 		} break;
 		case KaraInstruction::Type::Compare:
 		{
 			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
 
+			PCVariable cvar;
+
+			cvar.m_Size = PCVariable::Size::int64;
+			cvar.m_Type = PCVariable::Type::Local;
+
+			state.m_Blob.m_Variables.push_back(cvar);
+
+			PCExpression operation;
+
+			operation.m_Type = PCExpression::Type::Operation;
+
+			operation.m_Operation.m_Expression = PCExpression::Expression::Sub;
+			operation.m_Operation.m_Left = std::make_unique<PCExpression>(std::move(ConvertExpression(state, ins.m_Operands[0])));
+			operation.m_Operation.m_Right = std::make_unique<PCExpression>(std::move(ConvertExpression(state, ins.m_Operands[1])));
+
 			line->m_Type = PCLine::Type::Assign;
 
-			line->m_Assign.m_Left = ConvertExpression(state, ins.m_Operands[0]);
-			line->m_Assign.m_Right = ConvertExpression(state, ins.m_Operands[1]);
+			line->m_Assign.m_Left.m_Type = PCExpression::Type::Variable;
+			line->m_Assign.m_Left.m_Variable = state.m_Blob.m_Variables.size() - 1;
+
+			line->m_Assign.m_Right = std::move(operation);
+
+			state.m_Conditional = line;
 
 			*next = line;
 			next = &line->m_Next;
+
+			state.m_LineMap[i] = line;
 		} break;
 		case KaraInstruction::Type::AndCompare:
 		{
 			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
 
+			PCVariable cvar;
+
+			cvar.m_Size = PCVariable::Size::int64;
+			cvar.m_Type = PCVariable::Type::Local;
+
+			state.m_Blob.m_Variables.push_back(cvar);
+
+			PCExpression operation;
+
+			operation.m_Type = PCExpression::Type::Operation;
+
+			operation.m_Operation.m_Expression = PCExpression::Expression::And;
+			operation.m_Operation.m_Left = std::make_unique<PCExpression>(std::move(ConvertExpression(state, ins.m_Operands[0])));
+			operation.m_Operation.m_Right = std::make_unique<PCExpression>(std::move(ConvertExpression(state, ins.m_Operands[1])));
+
 			line->m_Type = PCLine::Type::Assign;
 
-			line->m_Assign.m_Left = ConvertExpression(state, ins.m_Operands[0]);
-			line->m_Assign.m_Right = ConvertExpression(state, ins.m_Operands[1]);
+			line->m_Assign.m_Left.m_Type = PCExpression::Type::Variable;
+			line->m_Assign.m_Left.m_Variable = state.m_Blob.m_Variables.size() - 1;
+
+			line->m_Assign.m_Right = std::move(operation);
+
+			state.m_Conditional = line;
 
 			*next = line;
 			next = &line->m_Next;
+
+			state.m_LineMap[i] = line;
 		} break;
 		case KaraInstruction::Type::Xor:
 		{
@@ -95,8 +229,12 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			line->m_Assign.m_Left = ConvertExpression(state, ins.m_Operands[0]);
 			line->m_Assign.m_Right = std::move(operation);
 
+			state.m_Conditional = line;
+
 			*next = line;
 			next = &line->m_Next;
+
+			state.m_LineMap[i] = line;
 		} break;
 		case KaraInstruction::Type::Or:
 		{
@@ -115,8 +253,12 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			line->m_Assign.m_Left = ConvertExpression(state, ins.m_Operands[0]);
 			line->m_Assign.m_Right = std::move(operation);
 
+			state.m_Conditional = line;
+
 			*next = line;
 			next = &line->m_Next;
+
+			state.m_LineMap[i] = line;
 		} break;
 		case KaraInstruction::Type::And:
 		{
@@ -135,8 +277,12 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			line->m_Assign.m_Left = ConvertExpression(state, ins.m_Operands[0]);
 			line->m_Assign.m_Right = std::move(operation);
 
+			state.m_Conditional = line;
+
 			*next = line;
 			next = &line->m_Next;
+
+			state.m_LineMap[i] = line;
 		} break;
 		}
 	}
@@ -168,6 +314,14 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 			state.m_Blob.m_Variables.push_back(cvar);
 
 			index = state.m_Blob.m_Variables.size();
+
+			if (variable.m_Type == KaraVariable::Type::Result)
+			{
+				state.m_Result = index - 1;
+
+				state.m_Invoke->m_Invoke.m_Result.m_Type = PCExpression::Type::Variable;
+				state.m_Invoke->m_Invoke.m_Result.m_Variable = index - 1;
+			}
 		}
 
 		expression.m_Variable = index - 1;
@@ -188,6 +342,14 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 			state.m_Blob.m_Variables.push_back(cvar);
 
 			index = state.m_Blob.m_Variables.size();
+
+			if (variable.m_Type == KaraVariable::Type::Result)
+			{
+				state.m_Result = index - 1;
+
+				state.m_Invoke->m_Invoke.m_Result.m_Type = PCExpression::Type::Variable;
+				state.m_Invoke->m_Invoke.m_Result.m_Variable = index - 1;
+			}
 		}
 
 		expression.m_Variable = index - 1;
@@ -217,6 +379,14 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 				state.m_Blob.m_Variables.push_back(cvar);
 
 				index = state.m_Blob.m_Variables.size();
+
+				if (variable.m_Type == KaraVariable::Type::Result)
+				{
+					state.m_Result = index - 1;
+
+					state.m_Invoke->m_Invoke.m_Result.m_Type = PCExpression::Type::Variable;
+					state.m_Invoke->m_Invoke.m_Result.m_Variable = index - 1;
+				}
 			}
 
 			dereference->m_Type = PCExpression::Type::Variable;
@@ -253,6 +423,14 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 				state.m_Blob.m_Variables.push_back(cvar);
 
 				index = state.m_Blob.m_Variables.size();
+
+				if (variable.m_Type == KaraVariable::Type::Result)
+				{
+					state.m_Result = index - 1;
+
+					state.m_Invoke->m_Invoke.m_Result.m_Type = PCExpression::Type::Variable;
+					state.m_Invoke->m_Invoke.m_Result.m_Variable = index - 1;
+				}
 			}
 
 			if (dereference->m_Type == PCExpression::Type::None)
@@ -311,6 +489,14 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 				state.m_Blob.m_Variables.push_back(cvar);
 
 				index = state.m_Blob.m_Variables.size();
+
+				if (variable.m_Type == KaraVariable::Type::Result)
+				{
+					state.m_Result = index - 1;
+
+					state.m_Invoke->m_Invoke.m_Result.m_Type = PCExpression::Type::Variable;
+					state.m_Invoke->m_Invoke.m_Result.m_Variable = index - 1;
+				}
 			}
 
 			expression.m_Type = PCExpression::Type::Variable;
@@ -347,6 +533,14 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 				state.m_Blob.m_Variables.push_back(cvar);
 
 				index = state.m_Blob.m_Variables.size();
+
+				if (variable.m_Type == KaraVariable::Type::Result)
+				{
+					state.m_Result = index - 1;
+
+					state.m_Invoke->m_Invoke.m_Result.m_Type = PCExpression::Type::Variable;
+					state.m_Invoke->m_Invoke.m_Result.m_Variable = index - 1;
+				}
 			}
 
 			if (expression.m_Type == PCExpression::Type::None)

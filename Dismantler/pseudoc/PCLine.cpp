@@ -13,9 +13,18 @@ PCLine::~PCLine()
 	{
 		m_Assign.~Assign();
 	} break;
-	case Type::Conditional:
+	case Type::Invoke:
 	{
-		m_Conditional.~Conditional();
+		m_Invoke.~Invoke();
+	} break;
+	case Type::Equal:
+	case Type::NotEqual:
+	case Type::Less:
+	case Type::Greater:
+	case Type::LessEqual:
+	case Type::GreaterEqual:
+	{
+		m_Condition.~Condition();
 	} break;
 	}
 }
