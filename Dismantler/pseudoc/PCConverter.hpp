@@ -3,10 +3,24 @@
 #include "pe/PEBuffer.hpp"
 #include "PCBlob.hpp"
 
+#include <unordered_map>
+
 class PCConverter
 {
+private:
+	struct State
+	{
+		KaraBlob m_Kara;
+		PCBlob m_Blob;
+
+		std::unordered_map<uint32_t, uint32_t> m_VariableMap;
+	};
+
 public:
-	void Convert(const PEBuffer& buffer, uintptr_t function, PCBlob& blob) const;
+	PCBlob Convert(const PEBuffer& buffer, uintptr_t function) const;
+
+private:
+	PCExpression ConvertExpression(State& state, const KaraOperand& operand) const;
 
 private:
 	KaraConverter m_Kara;

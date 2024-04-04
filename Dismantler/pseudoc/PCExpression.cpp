@@ -1,8 +1,8 @@
 #include "PCExpression.hpp"
 
-PCExpression::PCExpression() :
-	m_Type(Type::None)
+PCExpression::PCExpression()
 {
+	memset(this, 0, sizeof(*this));
 }
 
 PCExpression::~PCExpression()
@@ -17,9 +17,9 @@ PCExpression::~PCExpression()
 	{
 		m_Variable.~uint32_t();
 	} break;
-	case Type::Operator:
+	case Type::Operation:
 	{
-		m_Operator.~Operator();
+		m_Operation.~Operation();
 	} break;
 	case Type::Dereference:
 	{
@@ -35,7 +35,7 @@ PCExpression::PCExpression(PCExpression&& move)
 
 PCExpression& PCExpression::operator=(PCExpression&& move)
 {
-	switch (m_Type)
+	switch (move.m_Type)
 	{
 	case Type::Literal:
 	{
@@ -45,9 +45,9 @@ PCExpression& PCExpression::operator=(PCExpression&& move)
 	{
 		m_Variable = move.m_Variable;
 	} break;
-	case Type::Operator:
+	case Type::Operation:
 	{
-		m_Operator = std::move(move.m_Operator);
+		m_Operation = std::move(move.m_Operation);
 	} break;
 	case Type::Dereference:
 	{
@@ -55,5 +55,7 @@ PCExpression& PCExpression::operator=(PCExpression&& move)
 	} break;
 	}
 
+	m_Type = move.m_Type;
+	move.m_Type = Type::None;
 	return *this;
 }

@@ -1,8 +1,8 @@
 #include "PCLine.hpp"
 
-PCLine::PCLine() :
-	m_Type(Type::None)
+PCLine::PCLine()
 {
+	memset(this, 0, sizeof(*this));
 }
 
 PCLine::~PCLine()

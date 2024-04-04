@@ -19,7 +19,7 @@ struct PCExpression
 		None,
 		Literal,
 		Variable,
-		Operator,
+		Operation,
 		Dereference,
 		Reference
 	};
@@ -42,13 +42,13 @@ struct PCExpression
 
 		std::unique_ptr<PCExpression> m_Dereference;
 
-		struct Operator
+		struct Operation
 		{
 			Expression m_Expression;
 
 			std::unique_ptr<PCExpression> m_Left;
 			std::unique_ptr<PCExpression> m_Right;
-		} m_Operator;
+		} m_Operation;
 	};
 };
 
