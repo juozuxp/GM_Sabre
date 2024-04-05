@@ -1,14 +1,13 @@
 #include "PCVisualizer.hpp"
 #include <sstream>
 #include <format>
-#include <unordered_map>
 
-void PCVisualizer::ToConsole(const PCBlob& blob)
+void PCVisualizer::ToConsole(const PCBlob& blob) const
 {
 	wprintf(ToString(blob).c_str());
 }
 
-std::wstring PCVisualizer::ToString(const PCBlob& blob)
+std::wstring PCVisualizer::ToString(const PCBlob& blob) const
 {
 	constexpr std::wstring_view sizeToString[] = { L"int8_t", L"int16_t", L"int32_t", L"int64_t" };
 
@@ -39,8 +38,8 @@ std::wstring PCVisualizer::ToString(const PCBlob& blob)
 
 	stream << std::format(L" f_{:016X}(", blob.m_Function);
 
-	std::vector<std::wstring> varNames;
 	std::vector<uint32_t> arguments;
+	State state;
 	
 	uint32_t variableIndex = 0;
 	for (uint32_t i = 0; i < blob.m_Variables.size(); i++)
@@ -50,19 +49,19 @@ std::wstring PCVisualizer::ToString(const PCBlob& blob)
 		{
 		case PCVariable::Type::None:
 		{
-			varNames.push_back(L"");
+			state.m_VariableNames.push_back(L"");
 		} break;
 		case PCVariable::Type::Local:
 		{
-			varNames.push_back(std::format(L"v{:}", variableIndex++));
+			state.m_VariableNames.push_back(std::format(L"v{:}", variableIndex++));
 		} break;
 		case PCVariable::Type::Static:
 		{
-			varNames.push_back(std::format(L"s_{:#016}", variable.m_Static));
+			state.m_VariableNames.push_back(std::format(L"s_{:016X}", variable.m_Static));
 		} break;
 		case PCVariable::Type::Argument:
 		{
-			varNames.push_back(std::format(L"a{:}", variable.m_Argument));
+			state.m_VariableNames.push_back(std::format(L"a{:}", variable.m_Argument));
 
 			if (arguments.size() < (variable.m_Argument + 1))
 			{
@@ -83,36 +82,187 @@ std::wstring PCVisualizer::ToString(const PCBlob& blob)
 
 		stream << sizeToString[static_cast<uint32_t>(blob.m_Variables[argument - 1].m_Size)];
 		stream << L' ';
-		stream << varNames[argument - 1];
+		stream << state.m_VariableNames[argument - 1];
 		stream << L", ";
 	}
 
-	stream.seekp(-2, std::ios_base::cur);
+	if (arguments.size() != 0)
+	{
+		stream.seekp(-2, std::ios_base::cur);
+	}
+
 	stream << L")\n{\n";
 
-	std::unordered_map<std::shared_ptr<PCLine>, std::wstring> labelNames;
+	for (uint32_t i = 0; i < blob.m_Variables.size(); i++)
+	{
+		const PCVariable& variable = blob.m_Variables[i];
+
+		if (variable.m_Type != PCVariable::Type::Local)
+		{
+			continue;
+		}
+
+		stream << L'\t' << sizeToString[static_cast<uint32_t>(blob.m_Variables[i].m_Size)] << L' ' << state.m_VariableNames[i] << L";\n";
+	}
+
+	stream << L"\n\n";
 
 	uint32_t labelIndex = 0;
 	for (const std::shared_ptr<PCLine>& label : blob.m_Labels)
 	{
-		labelNames[label] = std::format(L"Label_{:}", labelIndex++);
+		state.m_LabelNames[label] = std::format(L"Label_{:}", labelIndex++);
 	}
 
-	uint32_t indent = 1;
+	std::vector<std::shared_ptr<PCLine>> scope;
 	for (const std::shared_ptr<PCLine>& line : blob.m_Lines)
 	{
-		stream << std::wstring(indent, ' ');
+		if (scope.size() != 0 && line == scope[scope.size() - 1])
+		{
+			scope.pop_back();
+
+			stream << std::wstring(scope.size() + 1, '\t') << L"}\n";
+		}
+
+		const auto& label = state.m_LabelNames.find(line);
+		if (label != state.m_LabelNames.end())
+		{
+			stream << label->second << L":\n";
+		}
+
+		stream << std::wstring(scope.size() + 1, '\t');
 
 		switch (line->m_Type)
 		{
 		case PCLine::Type::Assign:
 		{
+			stream << ExpressionToString(state, line->m_Assign.m_Left) << L" = " << ExpressionToString(state, line->m_Assign.m_Right) << L';';
+		} break;
+		case PCLine::Type::Invoke:
+		{
+			if (line->m_Invoke.m_Result.m_Type != PCExpression::Type::None)
+			{
+				stream << std::format(L"{:} = ", ExpressionToString(state, line->m_Invoke.m_Result));
+			}
 
+			if (line->m_Invoke.m_Function.m_Type == PCExpression::Type::Literal)
+			{
+				stream << std::format(L"f_{:016X}(", line->m_Invoke.m_Function.m_Literal);
+			}
+			else
+			{
+				stream << std::format(L"f_{:}(", ExpressionToString(state, line->m_Invoke.m_Function));
+			}
+
+			for (const PCExpression& argument : line->m_Invoke.m_Arguments)
+			{
+				stream << std::format(L"{:}, ", ExpressionToString(state, argument));
+			}
+
+			if (line->m_Invoke.m_Arguments.size() != 0)
+			{
+				stream.seekp(-2, std::ios_base::cur);
+			}
+
+			stream << L");";
+		} break;
+		case PCLine::Type::Equal:
+		{
+			stream << std::format(L"if ({:} == {:})\n", ExpressionToString(state, line->m_Condition.m_Left), ExpressionToString(state, line->m_Condition.m_Right));
+			stream << std::wstring(scope.size() + 1, '\t') << L'{';
+
+			scope.push_back(line->m_Condition.m_Else);
+		} break;
+		case PCLine::Type::NotEqual:
+		{
+			stream << std::format(L"if ({:} != {:})\n", ExpressionToString(state, line->m_Condition.m_Left), ExpressionToString(state, line->m_Condition.m_Right));
+			stream << std::wstring(scope.size() + 1, '\t') << L'{';
+
+			scope.push_back(line->m_Condition.m_Else);
+		} break;
+		case PCLine::Type::Less:
+		{
+			stream << std::format(L"if ({:} < {:})\n", ExpressionToString(state, line->m_Condition.m_Left), ExpressionToString(state, line->m_Condition.m_Right));
+			stream << std::wstring(scope.size() + 1, '\t') << L'{';
+
+			scope.push_back(line->m_Condition.m_Else);
+		} break;
+		case PCLine::Type::Greater:
+		{
+			stream << std::format(L"if ({:} > {:})\n", ExpressionToString(state, line->m_Condition.m_Left), ExpressionToString(state, line->m_Condition.m_Right));
+			stream << std::wstring(scope.size() + 1, '\t') << L'{';
+
+			scope.push_back(line->m_Condition.m_Else);
+		} break;
+		case PCLine::Type::LessEqual:
+		{
+			stream << std::format(L"if ({:} <= {:})\n", ExpressionToString(state, line->m_Condition.m_Left), ExpressionToString(state, line->m_Condition.m_Right));
+			stream << std::wstring(scope.size() + 1, '\t') << L'{';
+
+			scope.push_back(line->m_Condition.m_Else);
+		} break;
+		case PCLine::Type::GreaterEqual:
+		{
+			stream << std::format(L"if ({:} >= {:})\n", ExpressionToString(state, line->m_Condition.m_Left), ExpressionToString(state, line->m_Condition.m_Right));
+			stream << std::wstring(scope.size() + 1, '\t') << L'{';
+
+			scope.push_back(line->m_Condition.m_Else);
+		} break;
+		case PCLine::Type::Goto:
+		{
+			stream << L"goto " << state.m_LabelNames[line->m_Goto.m_Destination] << L';';
+		} break;
+		case PCLine::Type::Return:
+		{
+			if (line->m_Return.m_Result.m_Type != PCExpression::Type::None)
+			{
+				stream << L"return " << ExpressionToString(state, line->m_Return.m_Result) << L';';
+			}
+			else
+			{
+				stream << L"return;";
+			}
 		} break;
 		}
 
 		stream << '\n';
 	}
 
+	stream << "}";
 	return stream.str();
+}
+
+std::wstring PCVisualizer::ExpressionToString(const State& state, const PCExpression& expression) const
+{
+	constexpr wchar_t expressionToChar[] = { L'+', L'-', L'*', L'^', L'|', L'&', L'~' };
+
+	switch (expression.m_Type)
+	{
+	case PCExpression::Type::Variable:
+	{
+		return state.m_VariableNames[expression.m_Variable];
+	} break;
+	case PCExpression::Type::Literal:
+	{
+		return std::format(L"{:}", expression.m_Literal);
+	} break;
+	case PCExpression::Type::Dereference:
+	{
+		return std::format(L"*{:}", ExpressionToString(state, *expression.m_Dereference));
+	} break;
+	case PCExpression::Type::Operation:
+	{
+		if (expression.m_Operation.m_Expression == PCExpression::Expression::Not)
+		{
+			return std::format(L"~({:})", ExpressionToString(state, *expression.m_Operation.m_Left));
+		}
+
+		return std::format(L"({:} {:} {:})", ExpressionToString(state, *expression.m_Operation.m_Left), expressionToChar[static_cast<uint32_t>(expression.m_Operation.m_Expression)], ExpressionToString(state, *expression.m_Operation.m_Right));
+	} break;
+	case PCExpression::Type::Reference:
+	{
+		return std::format(L"&{:}", state.m_VariableNames[expression.m_Variable]);
+	} break;
+	}
+
+	return L"";
 }

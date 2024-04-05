@@ -37,7 +37,7 @@ struct PCExpression
 
 	union
 	{
-		uint32_t m_Literal;
+		uint64_t m_Literal;
 		uint32_t m_Variable;
 
 		std::unique_ptr<PCExpression> m_Dereference;

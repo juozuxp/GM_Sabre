@@ -11,7 +11,7 @@ PCExpression::~PCExpression()
 	{
 	case Type::Literal:
 	{
-		m_Literal.~uint32_t();
+		m_Literal.~uint64_t();
 	} break;
 	case Type::Variable:
 	{
@@ -47,6 +47,7 @@ PCExpression& PCExpression::operator=(PCExpression&& move)
 		m_Literal = move.m_Literal;
 	} break;
 	case Type::Variable:
+	case Type::Reference:
 	{
 		m_Variable = move.m_Variable;
 	} break;

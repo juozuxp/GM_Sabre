@@ -68,20 +68,38 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			case PCExpression::Expression::Add:
 			case PCExpression::Expression::Mul:
 			case PCExpression::Expression::Or:
-			{
-				line->m_Condition.m_Left = state.m_Conditional->m_Assign.m_Left;
-
-				line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
-				line->m_Condition.m_Right.m_Literal = 0;
-			} break;
 			case PCExpression::Expression::Xor:
 			{
-				line->m_Type = PCLine::Type::Equal;
+				line->m_Condition.m_Left = expression;
 
-				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
-				line->m_Condition.m_Right = *expression.m_Operation.m_Right;
+				line->m_Condition.m_Right.m_Literal = 0;
+				line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
 			} break;
 			case PCExpression::Expression::And:
+			{
+				const PCExpression& lhs = *expression.m_Operation.m_Left;
+				const PCExpression& rhs = *expression.m_Operation.m_Right;
+
+				if (lhs.m_Type == rhs.m_Type)
+				{
+					if (lhs.m_Type != PCExpression::Type::Variable)
+					{
+						break;
+					}
+
+					line->m_Condition.m_Left = lhs;
+
+					line->m_Condition.m_Right.m_Literal = 0;
+					line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				}
+				else
+				{
+					line->m_Condition.m_Left = expression;
+
+					line->m_Condition.m_Right.m_Literal = 0;
+					line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				}
+			} break;
 			case PCExpression::Expression::Sub:
 			{
 				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
@@ -119,20 +137,38 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			case PCExpression::Expression::Add:
 			case PCExpression::Expression::Mul:
 			case PCExpression::Expression::Or:
+			case PCExpression::Expression::Xor:
 			{
-				line->m_Condition.m_Left = state.m_Conditional->m_Assign.m_Left;
+				line->m_Condition.m_Left = expression;
 
 				line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
 				line->m_Condition.m_Right.m_Literal = 0;
 			} break;
-			case PCExpression::Expression::Xor:
-			{
-				line->m_Type = PCLine::Type::NotEqual;
-
-				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
-				line->m_Condition.m_Right = *expression.m_Operation.m_Right;
-			} break;
 			case PCExpression::Expression::And:
+			{
+				const PCExpression& lhs = *expression.m_Operation.m_Left;
+				const PCExpression& rhs = *expression.m_Operation.m_Right;
+
+				if (lhs.m_Type == rhs.m_Type)
+				{
+					if (lhs.m_Type != PCExpression::Type::Variable)
+					{
+						break;
+					}
+
+					line->m_Condition.m_Left = lhs;
+
+					line->m_Condition.m_Right.m_Literal = 0;
+					line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				}
+				else
+				{
+					line->m_Condition.m_Left = expression;
+
+					line->m_Condition.m_Right.m_Literal = 0;
+					line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				}
+			} break;
 			case PCExpression::Expression::Sub:
 			{
 				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
@@ -167,6 +203,45 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			const PCExpression& expression = state.m_Conditional->m_Assign.m_Right;
 			switch (expression.m_Operation.m_Expression)
 			{
+			case PCExpression::Expression::Add:
+			case PCExpression::Expression::Mul:
+			case PCExpression::Expression::Or:
+			case PCExpression::Expression::Xor:
+			{
+				line->m_Type = PCLine::Type::Greater;
+
+				line->m_Condition.m_Left = expression;
+
+				line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				line->m_Condition.m_Right.m_Literal = 0;
+			} break;
+			case PCExpression::Expression::And:
+			{
+				line->m_Type = PCLine::Type::Greater;
+
+				const PCExpression& lhs = *expression.m_Operation.m_Left;
+				const PCExpression& rhs = *expression.m_Operation.m_Right;
+
+				if (lhs.m_Type == rhs.m_Type)
+				{
+					if (lhs.m_Type != PCExpression::Type::Variable)
+					{
+						break;
+					}
+
+					line->m_Condition.m_Left = lhs;
+
+					line->m_Condition.m_Right.m_Literal = 0;
+					line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				}
+				else
+				{
+					line->m_Condition.m_Left = expression;
+
+					line->m_Condition.m_Right.m_Literal = 0;
+					line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				}
+			} break;
 			case PCExpression::Expression::Sub:
 			{
 				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
@@ -201,6 +276,45 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			const PCExpression& expression = state.m_Conditional->m_Assign.m_Right;
 			switch (expression.m_Operation.m_Expression)
 			{
+			case PCExpression::Expression::Add:
+			case PCExpression::Expression::Mul:
+			case PCExpression::Expression::Or:
+			case PCExpression::Expression::Xor:
+			{
+				line->m_Type = PCLine::Type::GreaterEqual;
+
+				line->m_Condition.m_Left = expression;
+
+				line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				line->m_Condition.m_Right.m_Literal = 0;
+			} break;
+			case PCExpression::Expression::And:
+			{
+				line->m_Type = PCLine::Type::GreaterEqual;
+
+				const PCExpression& lhs = *expression.m_Operation.m_Left;
+				const PCExpression& rhs = *expression.m_Operation.m_Right;
+
+				if (lhs.m_Type == rhs.m_Type)
+				{
+					if (lhs.m_Type != PCExpression::Type::Variable)
+					{
+						break;
+					}
+
+					line->m_Condition.m_Left = lhs;
+
+					line->m_Condition.m_Right.m_Literal = 0;
+					line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				}
+				else
+				{
+					line->m_Condition.m_Left = expression;
+
+					line->m_Condition.m_Right.m_Literal = 0;
+					line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				}
+			} break;
 			case PCExpression::Expression::Sub:
 			{
 				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
@@ -235,6 +349,45 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			const PCExpression& expression = state.m_Conditional->m_Assign.m_Right;
 			switch (expression.m_Operation.m_Expression)
 			{
+			case PCExpression::Expression::Add:
+			case PCExpression::Expression::Mul:
+			case PCExpression::Expression::Or:
+			case PCExpression::Expression::Xor:
+			{
+				line->m_Type = PCLine::Type::Less;
+
+				line->m_Condition.m_Left = expression;
+
+				line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				line->m_Condition.m_Right.m_Literal = 0;
+			} break;
+			case PCExpression::Expression::And:
+			{
+				line->m_Type = PCLine::Type::Less;
+
+				const PCExpression& lhs = *expression.m_Operation.m_Left;
+				const PCExpression& rhs = *expression.m_Operation.m_Right;
+
+				if (lhs.m_Type == rhs.m_Type)
+				{
+					if (lhs.m_Type != PCExpression::Type::Variable)
+					{
+						break;
+					}
+
+					line->m_Condition.m_Left = lhs;
+
+					line->m_Condition.m_Right.m_Literal = 0;
+					line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				}
+				else
+				{
+					line->m_Condition.m_Left = expression;
+
+					line->m_Condition.m_Right.m_Literal = 0;
+					line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				}
+			} break;
 			case PCExpression::Expression::Sub:
 			{
 				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
@@ -269,6 +422,45 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			const PCExpression& expression = state.m_Conditional->m_Assign.m_Right;
 			switch (expression.m_Operation.m_Expression)
 			{
+			case PCExpression::Expression::Add:
+			case PCExpression::Expression::Mul:
+			case PCExpression::Expression::Or:
+			case PCExpression::Expression::Xor:
+			{
+				line->m_Type = PCLine::Type::LessEqual;
+
+				line->m_Condition.m_Left = expression;
+
+				line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				line->m_Condition.m_Right.m_Literal = 0;
+			} break;
+			case PCExpression::Expression::And:
+			{
+				line->m_Type = PCLine::Type::LessEqual;
+
+				const PCExpression& lhs = *expression.m_Operation.m_Left;
+				const PCExpression& rhs = *expression.m_Operation.m_Right;
+
+				if (lhs.m_Type == rhs.m_Type)
+				{
+					if (lhs.m_Type != PCExpression::Type::Variable)
+					{
+						break;
+					}
+
+					line->m_Condition.m_Left = lhs;
+
+					line->m_Condition.m_Right.m_Literal = 0;
+					line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				}
+				else
+				{
+					line->m_Condition.m_Left = expression;
+
+					line->m_Condition.m_Right.m_Literal = 0;
+					line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				}
+			} break;
 			case PCExpression::Expression::Sub:
 			{
 				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
@@ -387,6 +579,26 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			operation.m_Operation.m_Expression = PCExpression::Expression::Add;
 			operation.m_Operation.m_Left = std::make_unique<PCExpression>(std::move(ConvertExpression(state, ins.m_Operands[0])));
 			operation.m_Operation.m_Right = std::make_unique<PCExpression>(std::move(ConvertExpression(state, ins.m_Operands[1])));
+
+			line->m_Type = PCLine::Type::Assign;
+
+			line->m_Assign.m_Left = ConvertExpression(state, ins.m_Operands[0]);
+			line->m_Assign.m_Right = std::move(operation);
+
+			state.m_Conditional = line;
+
+			state.m_Blob.m_Lines.push_back(line);
+		} break;
+		case KaraInstruction::Type::Not:
+		{
+			line = std::make_shared<PCLine>();
+
+			PCExpression operation;
+
+			operation.m_Type = PCExpression::Type::Operation;
+
+			operation.m_Operation.m_Expression = PCExpression::Expression::Not;
+			operation.m_Operation.m_Left = std::make_unique<PCExpression>(std::move(ConvertExpression(state, ins.m_Operands[0])));
 
 			line->m_Type = PCLine::Type::Assign;
 
@@ -613,7 +825,7 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 		expression.m_Literal = operand.m_Literal;
 		expression.m_Type = PCExpression::Type::Literal;
 	} break;
-	case KaraOperand::Type::Expression:
+	case KaraOperand::Type::Dereference:
 	{
 		std::unique_ptr<PCExpression> dereference = std::make_unique<PCExpression>();
 
@@ -741,7 +953,7 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 		expression.m_Dereference = std::move(dereference);
 		expression.m_Type = PCExpression::Type::Dereference;
 	} break;
-	case KaraOperand::Type::Dereference:
+	case KaraOperand::Type::Expression:
 	{
 		if (operand.m_Expression.m_IndexVariable != 0)
 		{
