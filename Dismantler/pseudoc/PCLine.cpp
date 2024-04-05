@@ -26,5 +26,9 @@ PCLine::~PCLine()
 	{
 		m_Condition.~Condition();
 	} break;
+	case Type::Goto:
+	{
+		m_Goto.~Goto();
+	} break;
 	}
 }

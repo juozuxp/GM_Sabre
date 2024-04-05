@@ -5,17 +5,283 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 {
 	State state;
 
+	state.m_Blob.m_Function = function;
+
 	m_Kara.Convert(buffer, function, state.m_Kara);
 
-	std::shared_ptr<PCLine>* next = &state.m_Blob.m_FirstLine;
+	std::shared_ptr<PCLine> line;
 	for (uint32_t i = 0; i < state.m_Kara.m_Instructions.size(); i++)
 	{
 		const KaraInstruction& ins = state.m_Kara.m_Instructions[i];
 		switch (ins.m_Type)
 		{
-		case KaraInstruction::Type::Invoke:
+		case KaraInstruction::Type::Goto:
 		{
-			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
+			line = std::make_shared<PCLine>();
+
+			if (ins.m_Operands[0].m_Type != KaraOperand::Type::Literal)
+			{
+				break;
+			}
+
+			line->m_Type = PCLine::Type::Goto;
+
+			uint32_t index = ins.m_Operands[0].m_Literal;
+
+			const auto& jump = state.m_LineMap.find(index);
+			if (jump != state.m_LineMap.end())
+			{
+				line->m_Goto.m_Destination = jump->second;
+				state.m_Blob.m_Labels.insert(jump->second);
+			}
+			else
+			{
+				state.m_GotoMap[index].push_back(line);
+			}
+
+			state.m_Blob.m_Lines.push_back(line);
+		} break;
+		case KaraInstruction::Type::GotoE:
+		{
+			line = std::make_shared<PCLine>();
+
+			if (state.m_Conditional == nullptr)
+			{
+				break;
+			}
+
+			if (ins.m_Operands[0].m_Type != KaraOperand::Type::Literal)
+			{
+				break;
+			}
+
+			if (ins.m_Operands[0].m_Literal < i)
+			{
+				break;
+			}
+
+			line->m_Type = PCLine::Type::NotEqual;
+
+			const PCExpression& expression = state.m_Conditional->m_Assign.m_Right;
+			switch (expression.m_Operation.m_Expression)
+			{
+			case PCExpression::Expression::Add:
+			case PCExpression::Expression::Mul:
+			case PCExpression::Expression::Or:
+			{
+				line->m_Condition.m_Left = state.m_Conditional->m_Assign.m_Left;
+
+				line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				line->m_Condition.m_Right.m_Literal = 0;
+			} break;
+			case PCExpression::Expression::Xor:
+			{
+				line->m_Type = PCLine::Type::Equal;
+
+				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
+				line->m_Condition.m_Right = *expression.m_Operation.m_Right;
+			} break;
+			case PCExpression::Expression::And:
+			case PCExpression::Expression::Sub:
+			{
+				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
+				line->m_Condition.m_Right = *expression.m_Operation.m_Right;
+			} break;
+			}
+
+			state.m_GotoMap[ins.m_Operands[0].m_Literal].push_back(line);
+			state.m_Blob.m_Lines.push_back(line);
+		} break;
+		case KaraInstruction::Type::GotoNE:
+		{
+			line = std::make_shared<PCLine>();
+
+			if (state.m_Conditional == nullptr)
+			{
+				break;
+			}
+
+			if (ins.m_Operands[0].m_Type != KaraOperand::Type::Literal)
+			{
+				break;
+			}
+
+			if (ins.m_Operands[0].m_Literal < i)
+			{
+				break;
+			}
+
+			line->m_Type = PCLine::Type::Equal;
+
+			const PCExpression& expression = state.m_Conditional->m_Assign.m_Right;
+			switch (expression.m_Operation.m_Expression)
+			{
+			case PCExpression::Expression::Add:
+			case PCExpression::Expression::Mul:
+			case PCExpression::Expression::Or:
+			{
+				line->m_Condition.m_Left = state.m_Conditional->m_Assign.m_Left;
+
+				line->m_Condition.m_Right.m_Type = PCExpression::Type::Literal;
+				line->m_Condition.m_Right.m_Literal = 0;
+			} break;
+			case PCExpression::Expression::Xor:
+			{
+				line->m_Type = PCLine::Type::NotEqual;
+
+				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
+				line->m_Condition.m_Right = *expression.m_Operation.m_Right;
+			} break;
+			case PCExpression::Expression::And:
+			case PCExpression::Expression::Sub:
+			{
+				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
+				line->m_Condition.m_Right = *expression.m_Operation.m_Right;
+			} break;
+			}
+
+			state.m_GotoMap[ins.m_Operands[0].m_Literal].push_back(line);
+			state.m_Blob.m_Lines.push_back(line);
+		} break;
+		case KaraInstruction::Type::GotoGE:
+		{
+			line = std::make_shared<PCLine>();
+
+			if (state.m_Conditional == nullptr)
+			{
+				break;
+			}
+
+			if (ins.m_Operands[0].m_Type != KaraOperand::Type::Literal)
+			{
+				break;
+			}
+
+			if (ins.m_Operands[0].m_Literal < i)
+			{
+				break;
+			}
+
+			line->m_Type = PCLine::Type::Less;
+
+			const PCExpression& expression = state.m_Conditional->m_Assign.m_Right;
+			switch (expression.m_Operation.m_Expression)
+			{
+			case PCExpression::Expression::Sub:
+			{
+				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
+				line->m_Condition.m_Right = *expression.m_Operation.m_Right;
+			} break;
+			}
+
+			state.m_GotoMap[ins.m_Operands[0].m_Literal].push_back(line);
+			state.m_Blob.m_Lines.push_back(line);
+		} break;
+		case KaraInstruction::Type::GotoG:
+		{
+			line = std::make_shared<PCLine>();
+
+			if (state.m_Conditional == nullptr)
+			{
+				break;
+			}
+
+			if (ins.m_Operands[0].m_Type != KaraOperand::Type::Literal)
+			{
+				break;
+			}
+
+			if (ins.m_Operands[0].m_Literal < i)
+			{
+				break;
+			}
+
+			line->m_Type = PCLine::Type::LessEqual;
+
+			const PCExpression& expression = state.m_Conditional->m_Assign.m_Right;
+			switch (expression.m_Operation.m_Expression)
+			{
+			case PCExpression::Expression::Sub:
+			{
+				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
+				line->m_Condition.m_Right = *expression.m_Operation.m_Right;
+			} break;
+			}
+
+			state.m_GotoMap[ins.m_Operands[0].m_Literal].push_back(line);
+			state.m_Blob.m_Lines.push_back(line);
+		} break;
+		case KaraInstruction::Type::GotoLE:
+		{
+			line = std::make_shared<PCLine>();
+
+			if (state.m_Conditional == nullptr)
+			{
+				break;
+			}
+
+			if (ins.m_Operands[0].m_Type != KaraOperand::Type::Literal)
+			{
+				break;
+			}
+
+			if (ins.m_Operands[0].m_Literal < i)
+			{
+				break;
+			}
+
+			line->m_Type = PCLine::Type::Greater;
+
+			const PCExpression& expression = state.m_Conditional->m_Assign.m_Right;
+			switch (expression.m_Operation.m_Expression)
+			{
+			case PCExpression::Expression::Sub:
+			{
+				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
+				line->m_Condition.m_Right = *expression.m_Operation.m_Right;
+			} break;
+			}
+
+			state.m_GotoMap[ins.m_Operands[0].m_Literal].push_back(line);
+			state.m_Blob.m_Lines.push_back(line);
+		} break;
+		case KaraInstruction::Type::GotoL:
+		{
+			line = std::make_shared<PCLine>();
+
+			if (state.m_Conditional == nullptr)
+			{
+				break;
+			}
+
+			if (ins.m_Operands[0].m_Type != KaraOperand::Type::Literal)
+			{
+				break;
+			}
+
+			if (ins.m_Operands[0].m_Literal < i)
+			{
+				break;
+			}
+
+			line->m_Type = PCLine::Type::GreaterEqual;
+
+			const PCExpression& expression = state.m_Conditional->m_Assign.m_Right;
+			switch (expression.m_Operation.m_Expression)
+			{
+			case PCExpression::Expression::Sub:
+			{
+				line->m_Condition.m_Left = *expression.m_Operation.m_Left;
+				line->m_Condition.m_Right = *expression.m_Operation.m_Right;
+			} break;
+			}
+
+			state.m_GotoMap[ins.m_Operands[0].m_Literal].push_back(line);
+			state.m_Blob.m_Lines.push_back(line);
+		} break;
+		case KaraInstruction::Type::Invoke: 
+		{
+			line = std::make_shared<PCLine>();
 
 			line->m_Type = PCLine::Type::Invoke;
 
@@ -40,14 +306,11 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			state.m_Invoke = line;
 			state.m_Result = 0;
 
-			*next = line;
-			next = &line->m_Next;
-
-			state.m_LineMap[i] = line;
+			state.m_Blob.m_Lines.push_back(line);
 		} break;
 		case KaraInstruction::Type::Return:
 		{
-			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
+			line = std::make_shared<PCLine>();
 
 			line->m_Type = PCLine::Type::Return;
 
@@ -57,14 +320,11 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 				line->m_Return.m_Result.m_Variable = state.m_Result - 1;
 			}
 
-			*next = line;
-			next = &line->m_Next;
-
-			state.m_LineMap[i] = line;
+			state.m_Blob.m_Lines.push_back(line);
 		} break;
 		case KaraInstruction::Type::Assign:
 		{
-			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
+			line = std::make_shared<PCLine>();
 
 			const KaraOperand& lhs = ins.m_Operands[0];
 			const KaraOperand& rhs = ins.m_Operands[1];
@@ -93,14 +353,11 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 				}
 			}
 
-			*next = line;
-			next = &line->m_Next;
-
-			state.m_LineMap[i] = line;
+			state.m_Blob.m_Lines.push_back(line);
 		} break;
 		case KaraInstruction::Type::Subtract:
 		{
-			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
+			line = std::make_shared<PCLine>();
 
 			PCExpression operation;
 
@@ -117,14 +374,11 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 
 			state.m_Conditional = line;
 
-			*next = line;
-			next = &line->m_Next;
-
-			state.m_LineMap[i] = line;
+			state.m_Blob.m_Lines.push_back(line);
 		} break;
 		case KaraInstruction::Type::Addition:
 		{
-			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
+			line = std::make_shared<PCLine>();
 
 			PCExpression operation;
 
@@ -141,21 +395,11 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 
 			state.m_Conditional = line;
 
-			*next = line;
-			next = &line->m_Next;
-
-			state.m_LineMap[i] = line;
+			state.m_Blob.m_Lines.push_back(line);
 		} break;
 		case KaraInstruction::Type::Compare:
 		{
-			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
-
-			PCVariable cvar;
-
-			cvar.m_Size = PCVariable::Size::int64;
-			cvar.m_Type = PCVariable::Type::Local;
-
-			state.m_Blob.m_Variables.push_back(cvar);
+			state.m_Conditional = std::make_shared<PCLine>();
 
 			PCExpression operation;
 
@@ -165,30 +409,13 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			operation.m_Operation.m_Left = std::make_unique<PCExpression>(std::move(ConvertExpression(state, ins.m_Operands[0])));
 			operation.m_Operation.m_Right = std::make_unique<PCExpression>(std::move(ConvertExpression(state, ins.m_Operands[1])));
 
-			line->m_Type = PCLine::Type::Assign;
+			state.m_Conditional->m_Type = PCLine::Type::Assign;
 
-			line->m_Assign.m_Left.m_Type = PCExpression::Type::Variable;
-			line->m_Assign.m_Left.m_Variable = state.m_Blob.m_Variables.size() - 1;
-
-			line->m_Assign.m_Right = std::move(operation);
-
-			state.m_Conditional = line;
-
-			*next = line;
-			next = &line->m_Next;
-
-			state.m_LineMap[i] = line;
+			state.m_Conditional->m_Assign.m_Right = std::move(operation);
 		} break;
 		case KaraInstruction::Type::AndCompare:
 		{
-			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
-
-			PCVariable cvar;
-
-			cvar.m_Size = PCVariable::Size::int64;
-			cvar.m_Type = PCVariable::Type::Local;
-
-			state.m_Blob.m_Variables.push_back(cvar);
+			state.m_Conditional = std::make_shared<PCLine>();
 
 			PCExpression operation;
 
@@ -198,23 +425,13 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 			operation.m_Operation.m_Left = std::make_unique<PCExpression>(std::move(ConvertExpression(state, ins.m_Operands[0])));
 			operation.m_Operation.m_Right = std::make_unique<PCExpression>(std::move(ConvertExpression(state, ins.m_Operands[1])));
 
-			line->m_Type = PCLine::Type::Assign;
+			state.m_Conditional->m_Type = PCLine::Type::Assign;
 
-			line->m_Assign.m_Left.m_Type = PCExpression::Type::Variable;
-			line->m_Assign.m_Left.m_Variable = state.m_Blob.m_Variables.size() - 1;
-
-			line->m_Assign.m_Right = std::move(operation);
-
-			state.m_Conditional = line;
-
-			*next = line;
-			next = &line->m_Next;
-
-			state.m_LineMap[i] = line;
+			state.m_Conditional->m_Assign.m_Right = std::move(operation);
 		} break;
 		case KaraInstruction::Type::Xor:
 		{
-			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
+			line = std::make_shared<PCLine>();
 
 			PCExpression operation;
 
@@ -231,14 +448,11 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 
 			state.m_Conditional = line;
 
-			*next = line;
-			next = &line->m_Next;
-
-			state.m_LineMap[i] = line;
+			state.m_Blob.m_Lines.push_back(line);
 		} break;
 		case KaraInstruction::Type::Or:
 		{
-			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
+			line = std::make_shared<PCLine>();
 
 			PCExpression operation;
 
@@ -255,14 +469,11 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 
 			state.m_Conditional = line;
 
-			*next = line;
-			next = &line->m_Next;
-
-			state.m_LineMap[i] = line;
+			state.m_Blob.m_Lines.push_back(line);
 		} break;
 		case KaraInstruction::Type::And:
 		{
-			std::shared_ptr<PCLine> line = std::make_shared<PCLine>();
+			line = std::make_shared<PCLine>();
 
 			PCExpression operation;
 
@@ -279,12 +490,38 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 
 			state.m_Conditional = line;
 
-			*next = line;
-			next = &line->m_Next;
-
-			state.m_LineMap[i] = line;
+			state.m_Blob.m_Lines.push_back(line);
 		} break;
 		}
+
+		if (line == nullptr)
+		{
+			continue;
+		}
+
+		state.m_LineMap[i] = line;
+
+		const auto& jumpCollection = state.m_GotoMap.find(i);
+		if (jumpCollection == state.m_GotoMap.end())
+		{
+			continue;
+		}
+
+		for (const std::shared_ptr<PCLine>& jump : jumpCollection->second)
+		{
+			if (jump->m_Type >= PCLine::Type::Conditional_Start &&
+				jump->m_Type <= PCLine::Type::Conditional_End)
+			{
+				jump->m_Condition.m_Else = line;
+			}
+			else
+			{
+				jump->m_Goto.m_Destination = line;
+				state.m_Blob.m_Labels.insert(line);
+			}
+		}
+
+		state.m_GotoMap.erase(i);
 	}
 
 	return state.m_Blob;
@@ -293,7 +530,7 @@ PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
 PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& operand) const
 {
 	constexpr PCVariable::Size sizeMap[] = { PCVariable::Size::int8, PCVariable::Size::int8, PCVariable::Size::int16, PCVariable::Size::int32, PCVariable::Size::int64 };
-	constexpr PCVariable::Type typeMap[] = { PCVariable::Type::None, PCVariable::Type::Local, PCVariable::Type::Static, PCVariable::Type::Local, PCVariable::Type::Local };
+	constexpr PCVariable::Type typeMap[] = { PCVariable::Type::None, PCVariable::Type::Local, PCVariable::Type::Static, PCVariable::Type::Local, PCVariable::Type::Argument };
 
 	PCExpression expression;
 
@@ -311,9 +548,7 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 			cvar.m_Size = sizeMap[variable.m_Size];
 			cvar.m_Type = typeMap[static_cast<uint8_t>(variable.m_Type)];
 
-			state.m_Blob.m_Variables.push_back(cvar);
-
-			index = state.m_Blob.m_Variables.size();
+			index = state.m_Blob.m_Variables.size() + 1;
 
 			if (variable.m_Type == KaraVariable::Type::Result)
 			{
@@ -322,6 +557,16 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 				state.m_Invoke->m_Invoke.m_Result.m_Type = PCExpression::Type::Variable;
 				state.m_Invoke->m_Invoke.m_Result.m_Variable = index - 1;
 			}
+			else if (variable.m_Type == KaraVariable::Type::Static)
+			{
+				cvar.m_Static = variable.m_Address;
+			}
+			else if (variable.m_Type == KaraVariable::Type::Argument)
+			{
+				cvar.m_Argument = variable.m_Index;
+			}
+
+			state.m_Blob.m_Variables.push_back(cvar);
 		}
 
 		expression.m_Variable = index - 1;
@@ -339,9 +584,7 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 			cvar.m_Size = sizeMap[variable.m_Size];
 			cvar.m_Type = typeMap[static_cast<uint8_t>(variable.m_Type)];
 
-			state.m_Blob.m_Variables.push_back(cvar);
-
-			index = state.m_Blob.m_Variables.size();
+			index = state.m_Blob.m_Variables.size() + 1;
 
 			if (variable.m_Type == KaraVariable::Type::Result)
 			{
@@ -350,6 +593,16 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 				state.m_Invoke->m_Invoke.m_Result.m_Type = PCExpression::Type::Variable;
 				state.m_Invoke->m_Invoke.m_Result.m_Variable = index - 1;
 			}
+			else if (variable.m_Type == KaraVariable::Type::Static)
+			{
+				cvar.m_Static = variable.m_Address;
+			}
+			else if (variable.m_Type == KaraVariable::Type::Argument)
+			{
+				cvar.m_Argument = variable.m_Index;
+			}
+
+			state.m_Blob.m_Variables.push_back(cvar);
 		}
 
 		expression.m_Variable = index - 1;
@@ -376,9 +629,7 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 				cvar.m_Size = sizeMap[variable.m_Size];
 				cvar.m_Type = typeMap[static_cast<uint8_t>(variable.m_Type)];
 
-				state.m_Blob.m_Variables.push_back(cvar);
-
-				index = state.m_Blob.m_Variables.size();
+				index = state.m_Blob.m_Variables.size() + 1;
 
 				if (variable.m_Type == KaraVariable::Type::Result)
 				{
@@ -387,6 +638,16 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 					state.m_Invoke->m_Invoke.m_Result.m_Type = PCExpression::Type::Variable;
 					state.m_Invoke->m_Invoke.m_Result.m_Variable = index - 1;
 				}
+				else if (variable.m_Type == KaraVariable::Type::Static)
+				{
+					cvar.m_Static = variable.m_Address;
+				}
+				else if (variable.m_Type == KaraVariable::Type::Argument)
+				{
+					cvar.m_Argument = variable.m_Index;
+				}
+
+				state.m_Blob.m_Variables.push_back(cvar);
 			}
 
 			dereference->m_Type = PCExpression::Type::Variable;
@@ -420,9 +681,7 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 				cvar.m_Size = sizeMap[variable.m_Size];
 				cvar.m_Type = typeMap[static_cast<uint8_t>(variable.m_Type)];
 
-				state.m_Blob.m_Variables.push_back(cvar);
-
-				index = state.m_Blob.m_Variables.size();
+				index = state.m_Blob.m_Variables.size() + 1;
 
 				if (variable.m_Type == KaraVariable::Type::Result)
 				{
@@ -431,6 +690,16 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 					state.m_Invoke->m_Invoke.m_Result.m_Type = PCExpression::Type::Variable;
 					state.m_Invoke->m_Invoke.m_Result.m_Variable = index - 1;
 				}
+				else if (variable.m_Type == KaraVariable::Type::Static)
+				{
+					cvar.m_Static = variable.m_Address;
+				}
+				else if (variable.m_Type == KaraVariable::Type::Argument)
+				{
+					cvar.m_Argument = variable.m_Index;
+				}
+
+				state.m_Blob.m_Variables.push_back(cvar);
 			}
 
 			if (dereference->m_Type == PCExpression::Type::None)
@@ -486,9 +755,7 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 				cvar.m_Size = sizeMap[variable.m_Size];
 				cvar.m_Type = typeMap[static_cast<uint8_t>(variable.m_Type)];
 
-				state.m_Blob.m_Variables.push_back(cvar);
-
-				index = state.m_Blob.m_Variables.size();
+				index = state.m_Blob.m_Variables.size() + 1;
 
 				if (variable.m_Type == KaraVariable::Type::Result)
 				{
@@ -497,6 +764,16 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 					state.m_Invoke->m_Invoke.m_Result.m_Type = PCExpression::Type::Variable;
 					state.m_Invoke->m_Invoke.m_Result.m_Variable = index - 1;
 				}
+				else if (variable.m_Type == KaraVariable::Type::Static)
+				{
+					cvar.m_Static = variable.m_Address;
+				}
+				else if (variable.m_Type == KaraVariable::Type::Argument)
+				{
+					cvar.m_Argument = variable.m_Index;
+				}
+
+				state.m_Blob.m_Variables.push_back(cvar);
 			}
 
 			expression.m_Type = PCExpression::Type::Variable;
@@ -530,9 +807,7 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 				cvar.m_Size = sizeMap[variable.m_Size];
 				cvar.m_Type = typeMap[static_cast<uint8_t>(variable.m_Type)];
 
-				state.m_Blob.m_Variables.push_back(cvar);
-
-				index = state.m_Blob.m_Variables.size();
+				index = state.m_Blob.m_Variables.size() + 1;
 
 				if (variable.m_Type == KaraVariable::Type::Result)
 				{
@@ -541,6 +816,16 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 					state.m_Invoke->m_Invoke.m_Result.m_Type = PCExpression::Type::Variable;
 					state.m_Invoke->m_Invoke.m_Result.m_Variable = index - 1;
 				}
+				else if (variable.m_Type == KaraVariable::Type::Static)
+				{
+					cvar.m_Static = variable.m_Address;
+				}
+				else if (variable.m_Type == KaraVariable::Type::Argument)
+				{
+					cvar.m_Argument = variable.m_Index;
+				}
+
+				state.m_Blob.m_Variables.push_back(cvar);
 			}
 
 			if (expression.m_Type == PCExpression::Type::None)

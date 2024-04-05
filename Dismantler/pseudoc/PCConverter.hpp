@@ -21,6 +21,7 @@ private:
 		std::vector<uint32_t> m_Arguments;
 		std::unordered_map<uint32_t, uint32_t> m_VariableMap;
 		std::unordered_map<uint32_t, std::shared_ptr<PCLine>> m_LineMap;
+		std::unordered_map<uint32_t, std::vector<std::shared_ptr<PCLine>>> m_GotoMap;
 	};
 
 public:

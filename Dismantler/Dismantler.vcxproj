@@ -141,6 +141,7 @@
     <ClCompile Include="explorer\FunctionExplorer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="managed\ManagedExportInterface.cpp" />
+    <ClCompile Include="pseudoc\PCVisualizer.cpp" />
     <ClCompile Include="pseudoc\PCExpression.cpp" />
     <ClCompile Include="pseudoc\PCVariable.cpp" />
     <ClCompile Include="pseudoc\PCLine.cpp" />
@@ -170,6 +171,7 @@
     <ClInclude Include="managed\ManagedArray.hpp" />
     <ClInclude Include="managed\ManagedString.hpp" />
     <ClInclude Include="managed\ManagedObject.hpp" />
+    <ClInclude Include="pseudoc\PCVisualizer.hpp" />
     <ClInclude Include="pseudoc\PCExpression.hpp" />
     <ClInclude Include="pseudoc\PCVariable.hpp" />
     <ClInclude Include="pseudoc\PCLine.hpp" />

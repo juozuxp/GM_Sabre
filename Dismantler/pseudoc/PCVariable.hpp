@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 struct PCVariable
 {
@@ -14,9 +15,16 @@ struct PCVariable
 	{
 		None,
 		Local,
-		Static
+		Static,
+		Argument
 	};
 
 	Type m_Type;
 	Size m_Size;
+
+	union
+	{
+		uint64_t m_Static;
+		uint32_t m_Argument;
+	};
 };

@@ -9,13 +9,17 @@ struct PCLine
 		None,
 		Assign,
 		Invoke,
+		Goto,
 		Return,
 		Equal,
 		NotEqual,
 		Less,
 		Greater,
 		LessEqual,
-		GreaterEqual
+		GreaterEqual,
+
+		Conditional_Start = Equal,
+		Conditional_End = GreaterEqual
 	};
 
 	PCLine();
@@ -50,6 +54,11 @@ struct PCLine
 
 			std::shared_ptr<PCLine> m_Else;
 		} m_Condition;
+
+		struct Goto
+		{
+			std::shared_ptr<PCLine> m_Destination;
+		} m_Goto;
 	};
 
 	std::shared_ptr<PCLine> m_Next;
