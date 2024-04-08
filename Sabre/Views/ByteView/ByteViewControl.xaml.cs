@@ -102,5 +102,19 @@ namespace Sabre.Views.ByteView
 				JumpToAddress(address);
 			}
 		}
+
+		private void DismView_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.C)
+			{
+				ByteViewItem selected = m_DismView.SelectedItem as ByteViewItem;
+				if (selected == null || selected.m_Info == null)
+				{
+					return;
+				}
+
+				SabreController.SetPseudoCFunction(selected.m_Address);
+			}
+		}
 	}
 }

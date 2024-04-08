@@ -38,8 +38,8 @@
 			<ListView.View>
 				<GridView AllowsColumnReorder="true" >
 					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Name}" Width="200"/>
-					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Address}" Width="200"/>
-					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Size}" Width="Auto"/>
+					<GridViewColumn DisplayMemberBinding="{Binding Path=m_BaseName}" Width="200"/>
+					<GridViewColumn DisplayMemberBinding="{Binding Path=m_SizeName}" Width="Auto"/>
 				</GridView>
 			</ListView.View>
 		</ListView>

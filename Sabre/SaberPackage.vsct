@@ -24,30 +24,36 @@
     <GuidSymbol value="{0b1f213b-3690-4155-8722-d31177fdb5cb}" name="guidSabrePackage" />
   
     <GuidSymbol value="{fa4c2f58-3039-42e9-84b9-eca29e509d36}" name="guidSabrePackageCmdSet">
-      <IDSymbol value="256" name="cmdidDismantlerCommand" />
-      <IDSymbol value="257" name="cmdidDisassemblyCommand" />
-      <IDSymbol value="258" name="cmdidFunctionsCommand" />
+      <IDSymbol value="256" name="cmdidLoaderCommand" />
+      <IDSymbol value="257" name="cmdidByteViewCommand" />
+      <IDSymbol value="258" name="cmdidFunctionViewCommand" />
+      <IDSymbol value="259" name="cmdidPseudoCCommand" />
     </GuidSymbol>
-	  
   </Symbols>
   <Commands package="guidSabrePackage">
     <Buttons>
-      <Button guid="guidSabrePackageCmdSet" id="cmdidDismantlerCommand" priority="0x0100" type="Button">
+      <Button guid="guidSabrePackageCmdSet" id="cmdidLoaderCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Strings>
           <ButtonText>Sabre load</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidSabrePackageCmdSet" id="cmdidDisassemblyCommand" priority="0x0100" type="Button">
+      <Button guid="guidSabrePackageCmdSet" id="cmdidByteViewCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Strings>
           <ButtonText>Sabre byte view</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidSabrePackageCmdSet" id="cmdidFunctionsCommand" priority="0x0100" type="Button">
+      <Button guid="guidSabrePackageCmdSet" id="cmdidFunctionViewCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Strings>
           <ButtonText>Sabre function view</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="guidSabrePackageCmdSet" id="cmdidPseudoCCommand" priority="0x0100" type="Button">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+        <Strings>
+          <ButtonText>Sabre pseudo C view</ButtonText>
         </Strings>
       </Button>
     </Buttons>

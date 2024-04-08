@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace Sabre.Explorer.Objects
 {
-	[StructLayout(LayoutKind.Sequential)]
 	internal struct ExecutableFunction
 	{
 		public IntPtr m_Base;
 		public uint m_Size;
+		public string m_Name;
 	}
 }

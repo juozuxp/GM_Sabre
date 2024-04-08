@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Sabre.Utility;
+using Sabre.ListItems;
 
 namespace Sabre.Views.FunctionView
 {
@@ -26,10 +27,9 @@ namespace Sabre.Views.FunctionView
 		{
 			m_FunctionView.Items.Clear();
 
-			ExecutableFunction[] functions = SabreController.GetExecutableFunctions().OrderBy(x => x.m_Base.ToInt64()).ToArray();
-			for (int i = 0; i < functions.Length; i++)
+			foreach (ExecutableFunction function in SabreController.GetExecutableFunctions().OrderBy(x => x.m_Base.ToInt64()))
 			{
-				m_FunctionView.Items.Add(new { m_Name = $"f_{functions[i].m_Base.ToString("X16")}", m_Address = functions[i].m_Base.ToString("X16"), m_Size = functions[i].m_Size.ToString("X8") });
+				m_FunctionView.Items.Add(new FunctionViewItem(function));
 			}
 		}
 

@@ -132,3 +132,44 @@ PEHeaders* PEBuffer::GetHeaders() const
 
 	return new PEHeaders(m_Buffer);
 }
+
+const IMAGE_DOS_HEADER& PEBuffer::GetDosHeader() const
+{
+	return *reinterpret_cast<const IMAGE_DOS_HEADER*>(m_Buffer);
+}
+
+const IMAGE_FILE_HEADER& PEBuffer::GetFileHeader() const
+{
+	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(m_Buffer);
+	const IMAGE_NT_HEADERS32* nt = reinterpret_cast<const IMAGE_NT_HEADERS32*>(reinterpret_cast<uintptr_t>(dos) + dos->e_lfanew);
+	
+	return nt->FileHeader;
+}
+
+const IMAGE_NT_HEADERS32& PEBuffer::GetNtHeaders32() const
+{
+	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(m_Buffer);
+	return *reinterpret_cast<const IMAGE_NT_HEADERS32*>(reinterpret_cast<uintptr_t>(dos) + dos->e_lfanew);
+}
+
+const IMAGE_NT_HEADERS64& PEBuffer::GetNtHeaders64() const
+{
+	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(m_Buffer);
+	return *reinterpret_cast<const IMAGE_NT_HEADERS64*>(reinterpret_cast<uintptr_t>(dos) + dos->e_lfanew);
+}
+
+const IMAGE_OPTIONAL_HEADER32& PEBuffer::GetOptionalHeader32() const
+{
+	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(m_Buffer);
+	const IMAGE_NT_HEADERS32* nt = reinterpret_cast<const IMAGE_NT_HEADERS32*>(reinterpret_cast<uintptr_t>(dos) + dos->e_lfanew);
+
+	return nt->OptionalHeader;
+}
+
+const IMAGE_OPTIONAL_HEADER64& PEBuffer::GetOptionalHeader64() const
+{
+	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(m_Buffer);
+	const IMAGE_NT_HEADERS64* nt = reinterpret_cast<const IMAGE_NT_HEADERS64*>(reinterpret_cast<uintptr_t>(dos) + dos->e_lfanew);
+
+	return nt->OptionalHeader;
+}

@@ -23,7 +23,14 @@ ExecutableView* ExecutableExplorer_GetExecutableView(const ExecutableExplorer* i
 
 extern "C"
 __declspec(dllexport)
-ManagedArray<FunctionExplorer::Function>* ExecutableExplorer_GetExecutableFunctions(ExecutableExplorer* instance)
+ManagedArray<ExecutableExplorer::ManagedFunction>* ExecutableExplorer_GetExecutableFunctions(ExecutableExplorer* instance)
 {
 	return instance->GetExecutableFunctions();
+}
+
+extern "C"
+__declspec(dllexport)
+ManagedString* ExecutableExplorer_GetPCFunction(const ExecutableExplorer* instance, uintptr_t function)
+{
+	return instance->GetPCFunction(function);
 }

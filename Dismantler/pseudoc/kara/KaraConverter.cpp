@@ -5,33 +5,37 @@
 
 #define CHUNK_SIZE 0x200 
 
-void KaraConverter::Convert(const PEBuffer& buffer, uintptr_t function, KaraBlob& blob) const
+KaraConverter::KaraConverter(const PEBuffer& buffer)
+{
+	m_Buffer = &buffer;
+}
+
+KaraBlob KaraConverter::Convert(uintptr_t function) const
 {
 	constexpr uint64_t masks[] = { 0, (1ull << 8) - 1, (1ull << 16) - 1, (1ull << 32) - 1, ~0 };
 
-	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(buffer.GetBuffer());
-	const IMAGE_NT_HEADERS64* nt = reinterpret_cast<const IMAGE_NT_HEADERS64*>(reinterpret_cast<uintptr_t>(dos) + dos->e_lfanew);
-	const IMAGE_FILE_HEADER* file = &nt->FileHeader;
-
-	if (file->Machine != IMAGE_FILE_MACHINE_AMD64)
+	if (m_Buffer->GetFileHeader().Machine != IMAGE_FILE_MACHINE_AMD64)
 	{
-		return;
+		return {};
 	}
 
-	const IMAGE_OPTIONAL_HEADER64* optional = &nt->OptionalHeader;
+	const IMAGE_OPTIONAL_HEADER64& optional = m_Buffer->GetOptionalHeader64();
 
 	std::vector<ILInstruction> instructions;
 
 	std::vector<State> stack;
+
+	KaraBlob blob;
+
 	State state = {};
 
 	state.m_Blob = &blob;
 
-	state.m_Cursor = reinterpret_cast<const void*>(reinterpret_cast<uintptr_t>(dos) + function - optional->ImageBase);
+	state.m_Cursor = reinterpret_cast<const void*>(reinterpret_cast<uintptr_t>(m_Buffer->GetBuffer()) + function - optional.ImageBase);
 
-	state.m_ImageBase = optional->ImageBase;
-	state.m_ImageSize = optional->SizeOfImage;
-	state.m_CursorBase = reinterpret_cast<uintptr_t>(dos);
+	state.m_ImageBase = optional.ImageBase;
+	state.m_ImageSize = optional.SizeOfImage;
+	state.m_CursorBase = reinterpret_cast<uintptr_t>(m_Buffer->GetBuffer());
 
 	state.m_General[REG_RSP].m_Value = state.m_ImageBase + (1ull << 40) - 8;
 	state.m_StackBase = state.m_General[REG_RSP].m_Value;
@@ -1379,6 +1383,8 @@ void KaraConverter::Convert(const PEBuffer& buffer, uintptr_t function, KaraBlob
 
 		instruction.m_Operands[0].m_Literal = block.m_Index;
 	}
+
+	return blob;
 }
 
 bool KaraConverter::ClearOperand(State& state, const ILOperand& operand) const

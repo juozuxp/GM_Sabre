@@ -25,7 +25,11 @@ private:
 	};
 
 public:
-	PCBlob Convert(const PEBuffer& buffer, uintptr_t function) const;
+	PCConverter() = default;
+	PCConverter(const PEBuffer& buffer);
+
+public:
+	PCBlob Convert(uintptr_t function) const;
 
 private:
 	PCExpression ConvertExpression(State& state, const KaraOperand& operand) const;

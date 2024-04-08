@@ -12,14 +12,16 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 
 int main()
 {
-	ExecutableExplorer explorer = ExecutableExplorer(L"Injector.exe");
+	ExecutableExplorer explorer = ExecutableExplorer(L"kernel32.dll");
+
+	delete explorer.GetExecutableFunctions();
 	
-	PCConverter converter;
-	PCVisualizer visualizer;
+	/*PCConverter converter = PCConverter(explorer.GetBuffer());
+	PCVisualizer visualizer = PCVisualizer(explorer.GetBuffer());
 
-	PCBlob blob = converter.Convert(explorer.GetBuffer(), 0x14001A340);
+	PCBlob blob = converter.Convert(0x14001B9F0);
 
-	visualizer.ToConsole(blob);
+	visualizer.ToConsole(blob);*/
 
 	/*delete explorer.GetExecutableFunctions();
 

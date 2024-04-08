@@ -12,6 +12,7 @@ namespace Sabre.Controller
 	internal class SabreController
 	{
 		public delegate void OnLoad();
+		public delegate void OnConvertPseudoC(IntPtr function);
 
 		private static SabreController s_InstanceBacking = null;
 		private static object s_InstanceLock = new object();
@@ -39,10 +40,14 @@ namespace Sabre.Controller
 			}
 		}
 
-		private ExecutableExplorer m_Explorer;
+		private OnConvertPseudoC m_ConvertPseudoCEvents;
 		private OnLoad m_OnLoadEvents;
 
+		private ExecutableExplorer m_Explorer;
+
 		private string m_LoadedPath;
+
+		private IntPtr m_PseudoCFunction;
 
 		public static void LoadExecutable(string path)
 		{
@@ -52,6 +57,16 @@ namespace Sabre.Controller
 			if (s_Instance.m_OnLoadEvents != null)
 			{
 				s_Instance.m_OnLoadEvents();
+			}
+		}
+
+		public static void SetPseudoCFunction(IntPtr function)
+		{
+			s_Instance.m_PseudoCFunction = function;
+
+			if (s_Instance.m_ConvertPseudoCEvents != null)
+			{
+				s_Instance.m_ConvertPseudoCEvents(function);
 			}
 		}
 
@@ -85,6 +100,16 @@ namespace Sabre.Controller
 			return s_Instance.m_Explorer.GetExecutableFunctions();
 		}
 
+		public static string GetPseudoC(IntPtr function)
+		{
+			if (s_Instance.m_Explorer == null)
+			{
+				return string.Empty;
+			}
+
+			return s_Instance.m_Explorer.GetPCFunction(function);
+		}
+
 		public static void AddOnLoadEvent(OnLoad function)
 		{
 			if (s_Instance.m_LoadedPath != null)
@@ -93,6 +118,16 @@ namespace Sabre.Controller
 			}
 
 			s_Instance.m_OnLoadEvents += function;
+		}
+
+		public static void AddOnConvertCEvent(OnConvertPseudoC function)
+		{
+			if (s_Instance.m_PseudoCFunction != IntPtr.Zero)
+			{
+				function(s_Instance.m_PseudoCFunction);
+			}
+
+			s_Instance.m_ConvertPseudoCEvents += function;
 		}
 	}
 }

@@ -2,6 +2,11 @@
 #include <sstream>
 #include <format>
 
+PCVisualizer::PCVisualizer(const PEBuffer& buffer)
+{
+	m_Buffer = &buffer;
+}
+
 void PCVisualizer::ToConsole(const PCBlob& blob) const
 {
 	wprintf(ToString(blob).c_str());
@@ -40,6 +45,8 @@ std::wstring PCVisualizer::ToString(const PCBlob& blob) const
 
 	std::vector<uint32_t> arguments;
 	State state;
+
+	state.m_Blob = &blob;
 	
 	uint32_t variableIndex = 0;
 	for (uint32_t i = 0; i < blob.m_Variables.size(); i++)
@@ -150,7 +157,7 @@ std::wstring PCVisualizer::ToString(const PCBlob& blob) const
 			}
 			else
 			{
-				stream << std::format(L"f_{:}(", ExpressionToString(state, line->m_Invoke.m_Function));
+				stream << std::format(L"{:}(", ExpressionToString(state, line->m_Invoke.m_Function));
 			}
 
 			for (const PCExpression& argument : line->m_Invoke.m_Arguments)
@@ -231,6 +238,26 @@ std::wstring PCVisualizer::ToString(const PCBlob& blob) const
 	return stream.str();
 }
 
+bool PCVisualizer::IsString(uintptr_t address) const
+{
+	const char* string = reinterpret_cast<const char*>(m_Buffer->GetBuffer()) + (address - m_Buffer->GetOptionalHeader64().ImageBase);
+
+	for (; *string != '\0'; string++)
+	{
+		if (static_cast<unsigned char>(*string) > 127)
+		{
+			return false;
+		}
+
+		if (!std::isprint(*string))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 std::wstring PCVisualizer::ExpressionToString(const State& state, const PCExpression& expression) const
 {
 	constexpr wchar_t expressionToChar[] = { L'+', L'-', L'*', L'^', L'|', L'&', L'~' };
@@ -260,6 +287,23 @@ std::wstring PCVisualizer::ExpressionToString(const State& state, const PCExpres
 	} break;
 	case PCExpression::Type::Reference:
 	{
+		const PCVariable& variable = state.m_Blob->m_Variables[expression.m_Variable];
+
+		if (variable.m_Type == PCVariable::Type::Static && IsString(variable.m_Static))
+		{
+			const char* string = reinterpret_cast<const char*>(m_Buffer->GetBuffer()) + (variable.m_Static - m_Buffer->GetOptionalHeader64().ImageBase);
+			
+			uint32_t length = strlen(string);
+			std::wstring wide = std::wstring(length + 1, L'\0');
+
+			size_t converted;
+
+			mbstowcs_s(&converted, wide.data(), wide.size(), string, length);
+
+			wide.erase(wide.size() - 1);
+			return std::format(L"\"{:}\"", wide);
+		}
+
 		return std::format(L"&{:}", state.m_VariableNames[expression.m_Variable]);
 	} break;
 	}

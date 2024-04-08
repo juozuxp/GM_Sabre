@@ -1,13 +1,17 @@
 #include "PCConverter.hpp"
 #include <unordered_map>
 
-PCBlob PCConverter::Convert(const PEBuffer& buffer, uintptr_t function) const
+PCConverter::PCConverter(const PEBuffer& buffer)
+{
+	m_Kara = KaraConverter(buffer);
+}
+
+PCBlob PCConverter::Convert(uintptr_t function) const
 {
 	State state;
 
 	state.m_Blob.m_Function = function;
-
-	m_Kara.Convert(buffer, function, state.m_Kara);
+	state.m_Kara = m_Kara.Convert(function);
 
 	std::shared_ptr<PCLine> line;
 	for (uint32_t i = 0; i < state.m_Kara.m_Instructions.size(); i++)

@@ -325,6 +325,33 @@ namespace Sabre.Explorer
 			}
 		}
 
+		[StructLayout(LayoutKind.Sequential)]
+		internal struct NativeExecutableFunction : IDisposable
+		{
+			private readonly ManagedObject m_Base;
+
+			public readonly IntPtr m_FunctionBase;
+			public readonly uint m_FunctionSize;
+
+			public readonly ManagedString m_FunctionName;
+
+			public ExecutableFunction ToData()
+			{
+				ExecutableFunction data = new ExecutableFunction();
+
+				data.m_Base = m_FunctionBase;
+				data.m_Size = m_FunctionSize;
+				data.m_Name = m_FunctionName.ToString();
+
+				return data;
+			}
+
+			public void Dispose()
+			{
+				m_Base.Dispose();
+			}
+		}
+
 		[DllImport("Dismantler.dll", CharSet = CharSet.Unicode)]
 		private static extern IntPtr ExecutableExplorer_Init(string path);
 
@@ -336,6 +363,9 @@ namespace Sabre.Explorer
 
 		[DllImport("Dismantler.dll")]
 		private static extern IntPtr ExecutableExplorer_GetExecutableFunctions(IntPtr instance);
+
+		[DllImport("Dismantler.dll")]
+		private static extern IntPtr ExecutableExplorer_GetPCFunction(IntPtr instance, IntPtr function);
 
 		private readonly ManagedObject m_Instance;
 
@@ -387,7 +417,29 @@ namespace Sabre.Explorer
 
 			using (ManagedArray native = Marshal.PtrToStructure<ManagedArray>(pointer))
 			{
-				return native.ToArray<ExecutableFunction>();
+				NativeExecutableFunction[] array = native.ToArray<NativeExecutableFunction>();
+				ExecutableFunction[] functions = new ExecutableFunction[array.Length];
+
+				for (int i = 0; i < array.Length; i++)
+				{
+					functions[i] = array[i].ToData();
+				}
+				
+				return functions;
+			}
+		}
+
+		public string GetPCFunction(IntPtr function)
+		{
+			IntPtr pointer = ExecutableExplorer_GetPCFunction(m_Instance, function);
+			if (pointer == IntPtr.Zero)
+			{
+				return string.Empty;
+			}
+
+			using (ManagedString native = Marshal.PtrToStructure<ManagedString>(pointer))
+			{
+				return native.ToString();
 			}
 		}
 	}

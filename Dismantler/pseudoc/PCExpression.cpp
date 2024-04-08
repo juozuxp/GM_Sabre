@@ -28,12 +28,14 @@ PCExpression::~PCExpression()
 	}
 }
 
-PCExpression::PCExpression(PCExpression&& move)
+PCExpression::PCExpression(PCExpression&& move) :
+	PCExpression()
 {
 	operator=(std::move(move));
 }
 
-PCExpression::PCExpression(const PCExpression& copy)
+PCExpression::PCExpression(const PCExpression& copy) :
+	PCExpression()
 {
 	operator=(copy);
 }

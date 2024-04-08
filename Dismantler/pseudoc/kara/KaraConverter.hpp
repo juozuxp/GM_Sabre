@@ -77,7 +77,11 @@ private:
 	};
 
 public:
-	void Convert(const PEBuffer& buffer, uintptr_t function, KaraBlob& blob) const;
+	KaraConverter() = default;
+	KaraConverter(const PEBuffer& buffer);
+
+public:
+	KaraBlob Convert(uintptr_t function) const;
 
 private:
 	bool ClearOperand(State& state, const ILOperand& operand) const;
@@ -90,5 +94,6 @@ private:
 	bool ExecLoadOperand(const ILOperand& operand, const State& state, uint64_t& value) const;
 
 private:
+	const PEBuffer* m_Buffer;
 	Disassembler m_Disassembler;
 };

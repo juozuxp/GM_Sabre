@@ -1,7 +1,9 @@
 #pragma once
 #include <vector>
 #include <unordered_set>
+#include <unordered_map>
 #include <Disassembler.hpp>
+#include <string>
 
 #include "pe/PEBuffer.hpp"
 
@@ -15,6 +17,7 @@ public:
 
 		const void* m_Base;
 		uint32_t m_Size;
+		std::wstring m_Name;
 	};
 
 private:
@@ -53,7 +56,9 @@ private:
 
 private:
 	Disassembler m_Disassembler;
+
 	std::unordered_set<const void*> m_Explored;
+	std::unordered_map<const void*, std::wstring> m_Names;
 
 private:
 	static constexpr uint8_t c_MemoryMultiplier[] = { 1, 2, 4, 8 };

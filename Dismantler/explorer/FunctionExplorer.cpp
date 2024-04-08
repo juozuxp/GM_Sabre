@@ -1,4 +1,5 @@
 #include "FunctionExplorer.hpp"
+#include <format>
 
 #define CHUNK_SIZE 200
 
@@ -11,27 +12,25 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreExecutable(cons
 {
 	std::vector<FunctionExplorer::Function> found;
 
-	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(buffer.GetBuffer());
-	const IMAGE_NT_HEADERS64* nt = reinterpret_cast<const IMAGE_NT_HEADERS64*>(reinterpret_cast<const uint8_t*>(dos) + dos->e_lfanew);
-
-	if (nt->FileHeader.Machine != IMAGE_FILE_MACHINE_AMD64)
+	if (buffer.GetFileHeader().Machine != IMAGE_FILE_MACHINE_AMD64)
 	{
 		return std::vector<FunctionExplorer::Function>();
 	}
 
-	const IMAGE_OPTIONAL_HEADER64* optional = &nt->OptionalHeader;
+	const IMAGE_OPTIONAL_HEADER64& optional = buffer.GetOptionalHeader64();
 
 	std::vector<const void*> functions;
 
 	GatherExports(buffer, functions);
 	GatherVirtual(buffer, functions);
 
+	m_Names[reinterpret_cast<void*>(optional.ImageBase + optional.AddressOfEntryPoint)] = L"entry";
 	for (const void* function : functions)
 	{
 		ExploreFunction(buffer, function, found);
 	}
 
-	ExploreFunction(buffer, reinterpret_cast<const uint8_t*>(dos) + optional->AddressOfEntryPoint, found);
+	ExploreFunction(buffer, reinterpret_cast<const uint8_t*>(buffer.GetBuffer()) + optional.AddressOfEntryPoint, found);
 	return found;
 }
 
@@ -67,6 +66,16 @@ void FunctionExplorer::ExploreFunction(const PEBuffer& buffer, const void* funct
 	for (uint32_t i = cursor; i < functions.size(); i++)
 	{
 		functions[i].m_Base = reinterpret_cast<const uint8_t*>(reinterpret_cast<uintptr_t>(functions[i].m_Base) - reinterpret_cast<uintptr_t>(dos) + optional->ImageBase);
+
+		const auto& name = m_Names.find(functions[i].m_Base);
+		if (name != m_Names.end())
+		{
+			functions[i].m_Name = name->second;
+		}
+		else
+		{
+			functions[i].m_Name = std::format(L"f_{:016X}", reinterpret_cast<uintptr_t>(functions[i].m_Base));
+		}
 	}
 }
 
@@ -559,25 +568,24 @@ bool FunctionExplorer::ReadOperand(const ILOperand& operand, const State& state,
 
 void FunctionExplorer::GatherExports(const PEBuffer& buffer, std::vector<const void*>& functions)
 {
-	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(buffer.GetBuffer());
-	const IMAGE_NT_HEADERS64* nt = reinterpret_cast<const IMAGE_NT_HEADERS64*>(reinterpret_cast<const uint8_t*>(dos) + dos->e_lfanew);
-
-	if (nt->FileHeader.Machine != IMAGE_FILE_MACHINE_AMD64)
+	if (buffer.GetFileHeader().Machine != IMAGE_FILE_MACHINE_AMD64)
 	{
 		return;
 	}
 
-	const IMAGE_OPTIONAL_HEADER64* optional = &nt->OptionalHeader;
+	const IMAGE_OPTIONAL_HEADER64& optional = buffer.GetOptionalHeader64();
 
-	const IMAGE_DATA_DIRECTORY* exportDirectory = &optional->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+	const IMAGE_DATA_DIRECTORY* exportDirectory = &optional.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
 	if (exportDirectory->Size == 0)
 	{
 		return;
 	}
 
-	const IMAGE_EXPORT_DIRECTORY* exportTable = reinterpret_cast<const IMAGE_EXPORT_DIRECTORY*>(reinterpret_cast<uintptr_t>(dos) + exportDirectory->VirtualAddress);
+	const IMAGE_EXPORT_DIRECTORY* exportTable = reinterpret_cast<const IMAGE_EXPORT_DIRECTORY*>(reinterpret_cast<uintptr_t>(buffer.GetBuffer()) + exportDirectory->VirtualAddress);
 
-	const uint32_t* exports = reinterpret_cast<const uint32_t*>(reinterpret_cast<uintptr_t>(dos) + exportTable->AddressOfFunctions);
+	const uint32_t* names = reinterpret_cast<const uint32_t*>(reinterpret_cast<uintptr_t>(buffer.GetBuffer()) + exportTable->AddressOfNames);
+	const uint32_t* exports = reinterpret_cast<const uint32_t*>(reinterpret_cast<uintptr_t>(buffer.GetBuffer()) + exportTable->AddressOfFunctions);
+	const uint16_t* nameOrdinals = reinterpret_cast<const uint16_t*>(reinterpret_cast<uintptr_t>(buffer.GetBuffer()) + exportTable->AddressOfNameOrdinals);
 	for (uint16_t i = 0; i < exportTable->NumberOfFunctions; i++, exports++)
 	{
 		if (*exports >= exportDirectory->VirtualAddress &&
@@ -586,7 +594,36 @@ void FunctionExplorer::GatherExports(const PEBuffer& buffer, std::vector<const v
 			continue;
 		}
 
-		functions.push_back(reinterpret_cast<const uint8_t*>(dos) + *exports);
+		const char* name = nullptr;
+
+		const uint32_t* currentName = names;
+		const uint16_t* currentNameOrdinal = nameOrdinals;
+		for (uint16_t j = 0; j < exportTable->NumberOfNames; j++, currentName++, currentNameOrdinal++)
+		{
+			if (i == *currentNameOrdinal)
+			{
+				name = reinterpret_cast<const char*>(reinterpret_cast<uintptr_t>(buffer.GetBuffer()) + *currentName);
+				break;
+			}
+		}
+
+		if (name != nullptr)
+		{
+			uint32_t length = strlen(name);
+			std::wstring wide = std::wstring(length + 1, L'\0');
+			size_t converted;
+
+			mbstowcs_s(&converted, wide.data(), wide.size(), name, length);
+
+			wide.erase(wide.size() - 1);
+			m_Names[reinterpret_cast<const void*>(optional.ImageBase + *exports)] = wide;
+		}
+		else
+		{
+			m_Names[reinterpret_cast<const void*>(optional.ImageBase + *exports)] = std::format(L"export_{:}", exportTable->Base + i);
+		}
+
+		functions.push_back(reinterpret_cast<const uint8_t*>(buffer.GetBuffer()) + *exports);
 	}
 }
 

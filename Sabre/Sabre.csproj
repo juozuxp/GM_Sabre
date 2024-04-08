@@ -74,6 +74,7 @@
     <Compile Include="Explorer\PE\PERelocationEntry.cs" />
     <Compile Include="Explorer\PE\PERelocationTable.cs" />
     <Compile Include="ListItems\ByteViewItem.cs" />
+    <Compile Include="ListItems\FunctionViewItem.cs" />
     <Compile Include="Native\PE\IMAGE_BASE_RELOCATION.cs" />
     <Compile Include="Native\PE\IMAGE_DATA_DIRECTORY.cs" />
     <Compile Include="Native\PE\IMAGE_DELAYLOAD_DESCRIPTOR.cs" />
@@ -107,6 +108,11 @@
     <Compile Include="Native\Managed\ManagedString.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SabrePackage.cs" />
+    <Compile Include="Views\PseudoC\PCView.cs" />
+    <Compile Include="Views\PseudoC\PCCommand.cs" />
+    <Compile Include="Views\PseudoC\PCControl.xaml.cs">
+      <DependentUpon>PCControl.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="source.extension.vsixmanifest">
@@ -144,6 +150,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\ByteView\ByteViewControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PseudoC\PCControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
