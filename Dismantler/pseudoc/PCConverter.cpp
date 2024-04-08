@@ -184,6 +184,7 @@ PCBlob PCConverter::Convert(uintptr_t function) const
 			state.m_Blob.m_Lines.push_back(line);
 		} break;
 		case KaraInstruction::Type::GotoGE:
+		case KaraInstruction::Type::GotoAE:
 		{
 			line = std::make_shared<PCLine>();
 
@@ -257,6 +258,7 @@ PCBlob PCConverter::Convert(uintptr_t function) const
 			state.m_Blob.m_Lines.push_back(line);
 		} break;
 		case KaraInstruction::Type::GotoG:
+		case KaraInstruction::Type::GotoA:
 		{
 			line = std::make_shared<PCLine>();
 
@@ -330,6 +332,7 @@ PCBlob PCConverter::Convert(uintptr_t function) const
 			state.m_Blob.m_Lines.push_back(line);
 		} break;
 		case KaraInstruction::Type::GotoLE:
+		case KaraInstruction::Type::GotoBE:
 		{
 			line = std::make_shared<PCLine>();
 
@@ -403,6 +406,7 @@ PCBlob PCConverter::Convert(uintptr_t function) const
 			state.m_Blob.m_Lines.push_back(line);
 		} break;
 		case KaraInstruction::Type::GotoL:
+		case KaraInstruction::Type::GotoB:
 		{
 			line = std::make_shared<PCLine>();
 

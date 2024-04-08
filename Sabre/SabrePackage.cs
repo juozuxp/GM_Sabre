@@ -62,7 +62,7 @@ namespace Sabre
             await Sabre.Views.FunctionView.FunctionViewCommand.InitializeAsync(this);
             await Sabre.Views.PseudoC.PCCommand.InitializeAsync(this);
         }
-
+        
         #endregion
     }
 }

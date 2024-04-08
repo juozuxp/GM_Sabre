@@ -12,9 +12,9 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 
 int main()
 {
-	ExecutableExplorer explorer = ExecutableExplorer(L"kernel32.dll");
+	/*ExecutableExplorer explorer = ExecutableExplorer(L"kernel32.dll");
 
-	delete explorer.GetExecutableFunctions();
+	delete explorer.GetExecutableFunctions();*/
 	
 	/*PCConverter converter = PCConverter(explorer.GetBuffer());
 	PCVisualizer visualizer = PCVisualizer(explorer.GetBuffer());
@@ -27,4 +27,8 @@ int main()
 
 	delete explorer.GetHeaders();
 	delete explorer.GetExecutableView();*/
+
+	ExecutableExplorer explorer = ExecutableExplorer(L"Disassemblable.exe");
+
+	delete explorer.GetPCFunction(0x1400117B0);
 }

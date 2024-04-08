@@ -33,6 +33,11 @@ namespace Sabre.Views.ByteView
 
 		private void JumpToAddress(IntPtr address)
 		{
+			if (m_DismView.Items.Count == 0)
+			{
+				return;
+			}
+
 			for (int i = 0; i < m_DismView.Items.Count; i++)
 			{
 				ByteViewItem item = m_DismView.Items[i] as ByteViewItem;

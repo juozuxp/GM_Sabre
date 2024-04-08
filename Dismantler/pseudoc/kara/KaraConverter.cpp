@@ -905,6 +905,62 @@ KaraBlob KaraConverter::Convert(uintptr_t function) const
 
 				state.m_LastValid = address;
 			} break;
+			case InsType_dec:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				uint64_t value;
+				if (ExecReadOperand(lhs, state, value))
+				{
+					ExecWriteOperand(lhs, state, value - 1);
+				}
+
+				KaraInstruction pseudo = {};
+
+				pseudo.m_Type = KaraInstruction::Type::Subtract;
+
+				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					ClearOperand(state, lhs);
+					break;
+				}
+
+				pseudo.m_Operands[1].m_Type = KaraOperand::Type::Literal;
+				pseudo.m_Operands[1].m_Literal = 1;
+
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
+			} break;
+			case InsType_inc:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				uint64_t value;
+				if (ExecReadOperand(lhs, state, value))
+				{
+					ExecWriteOperand(lhs, state, value + 1);
+				}
+
+				KaraInstruction pseudo = {};
+
+				pseudo.m_Type = KaraInstruction::Type::Addition;
+
+				if (!ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					ClearOperand(state, lhs);
+					break;
+				}
+
+				pseudo.m_Operands[1].m_Type = KaraOperand::Type::Literal;
+				pseudo.m_Operands[1].m_Literal = 1;
+
+				block.m_Type = BlockType::Instruction;
+				block.m_Instruction = pseudo;
+
+				state.m_LastValid = address;
+			} break;
 			case InsType_sub:
 			{
 				const ILOperand& lhs = ins.m_Operands[0];
