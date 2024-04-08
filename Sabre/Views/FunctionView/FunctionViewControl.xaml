@@ -33,8 +33,8 @@
 			<RowDefinition Height="20"/>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
-		<TextBox Grid.Row="0" x:Name="m_SearchField" TextWrapping="NoWrap" AcceptsReturn="False"/>
-		<ListView Grid.Row="1" x:Name="m_FunctionView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="FunctionView_SizeChanged">
+		<TextBox Grid.Row="0" x:Name="m_SearchField" TextWrapping="NoWrap" AcceptsReturn="False" TextChanged="SearchField_TextChanged"/>
+		<ListView Grid.Row="1" x:Name="m_FunctionView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="FunctionView_SizeChanged" MouseDoubleClick="FunctionView_MouseDoubleClick">
 			<ListView.View>
 				<GridView AllowsColumnReorder="true" >
 					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Name}" Width="200"/>

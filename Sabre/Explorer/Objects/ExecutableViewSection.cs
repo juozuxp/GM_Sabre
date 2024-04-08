@@ -54,7 +54,7 @@ namespace Sabre.Explorer.Objects
 							builder.Append(bytes[i].ToString("X2"));
 						}
 
-						list[listIndex++] = new ByteViewItem(address, builder.ToString(), null);
+						list[listIndex++] = new ByteViewItem(address, builder.ToString(), null, IntPtr.Zero);
 
 						address += (int)(8 - (m_Start % 8));
 					}
@@ -76,7 +76,7 @@ namespace Sabre.Explorer.Objects
 							break;
 						}
 
-						list[listIndex++] = new ByteViewItem(address, $"{bytes[i].ToString("X2")} {bytes[i + 1].ToString("X2")} {bytes[i + 2].ToString("X2")} {bytes[i + 3].ToString("X2")} {bytes[i + 4].ToString("X2")} {bytes[i + 5].ToString("X2")} {bytes[i + 6].ToString("X2")} {bytes[i + 7].ToString("X2")}", null);
+						list[listIndex++] = new ByteViewItem(address, $"{bytes[i].ToString("X2")} {bytes[i + 1].ToString("X2")} {bytes[i + 2].ToString("X2")} {bytes[i + 3].ToString("X2")} {bytes[i + 4].ToString("X2")} {bytes[i + 5].ToString("X2")} {bytes[i + 6].ToString("X2")} {bytes[i + 7].ToString("X2")}", null, IntPtr.Zero);
 					}
 
 					return list;

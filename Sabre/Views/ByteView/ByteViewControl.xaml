@@ -32,7 +32,7 @@
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 		<TextBox Grid.Row="0" x:Name="m_AddressField" TextWrapping="NoWrap" AcceptsReturn="False" KeyDown="AddressField_KeyDown"/>
-		<ListView Grid.Row="1" x:Name="m_DismView" KeyDown="DismView_KeyDown" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="DismView_SizeChanged" SelectionChanged="DismView_SelectionChanged">
+		<ListView Grid.Row="1" x:Name="m_DismView" KeyDown="DismView_KeyDown" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="DismView_SizeChanged" SelectionChanged="DismView_SelectionChanged" MouseDoubleClick="DismView_MouseDoubleClick">
 			<ListView.View>
 				<GridView AllowsColumnReorder="true">
 					<GridViewColumn DisplayMemberBinding="{Binding Path=m_DisplayAddress}" Width="200"/>

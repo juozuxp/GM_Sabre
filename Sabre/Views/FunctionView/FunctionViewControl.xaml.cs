@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using Sabre.Utility;
 using Sabre.ListItems;
+using System.Windows.Input;
 
 namespace Sabre.Views.FunctionView
 {
@@ -16,6 +17,8 @@ namespace Sabre.Views.FunctionView
 	/// </summary>
 	public partial class FunctionsControl : UserControl
 	{
+		private FunctionViewItem[] m_FunctionItems;
+
 		public FunctionsControl()
 		{
 			this.InitializeComponent();
@@ -25,12 +28,14 @@ namespace Sabre.Views.FunctionView
 
 		private void OnExecutableLoad()
 		{
-			m_FunctionView.Items.Clear();
-
+			List<FunctionViewItem> items = new List<FunctionViewItem>();
 			foreach (ExecutableFunction function in SabreController.GetExecutableFunctions().OrderBy(x => x.m_Base.ToInt64()))
 			{
-				m_FunctionView.Items.Add(new FunctionViewItem(function));
+				items.Add(new FunctionViewItem(function));
 			}
+
+			m_FunctionItems = items.ToArray();
+			m_FunctionView.ItemsSource = m_FunctionItems;
 		}
 
 		private void FunctionView_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -50,6 +55,32 @@ namespace Sabre.Views.FunctionView
 			}
 
 			gridView.Columns[gridView.Columns.Count - 1].Width = width;
+		}
+
+		private void SearchField_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			TextBox textBox = sender as TextBox;
+
+			if (textBox.Text.Length <= 0)
+			{
+				m_FunctionView.ItemsSource = m_FunctionItems;
+				return;
+			}
+
+			m_FunctionView.ItemsSource = m_FunctionItems.Where(x => x.m_Name.Contains(textBox.Text));
+		}
+
+		private void FunctionView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+		{
+			if (e.ChangedButton != MouseButton.Left)
+			{
+				return;
+			}
+
+			ListView listView = sender as ListView;
+			FunctionViewItem item = listView.SelectedItem as FunctionViewItem;
+
+			SabreController.SetJumpToAddress(item.m_Base);
 		}
 	}
 }

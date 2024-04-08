@@ -97,6 +97,7 @@ namespace Sabre.Dismantler.Visuals
 		{
 			int offset = 0;
 			IntPtr address = options.m_Reference;
+			IntPtr jumpable = IntPtr.Zero;
 
 			bool operand = false;
 
@@ -132,9 +133,10 @@ namespace Sabre.Dismantler.Visuals
 
 						if (builder.Length != 0)
 						{
-							elements.Add(new ByteViewItem(currentAddress, bytesStr, builder.ToString()));
+							elements.Add(new ByteViewItem(currentAddress, bytesStr, builder.ToString(), jumpable));
 						}
 
+						jumpable = IntPtr.Zero;
 						currentAddress = address;
 						address += visual.m_Instruction.m_Size;
 
@@ -217,11 +219,13 @@ namespace Sabre.Dismantler.Visuals
 
 					case NativeVisual.Type.OperandMemoryValue:
 
+						jumpable = (IntPtr)visual.m_Value.m_Value;
 						builder.Append($"{c_MemoryScale[(byte)visual.m_Value.m_Size]}[{visual.m_Value.m_Value.ToString("X16")}]");
 						break;
 
 					case NativeVisual.Type.OperandAddressValue:
 
+						jumpable = (IntPtr)visual.m_Value.m_Value;
 						builder.Append(visual.m_Value.m_Value.ToString("X16"));
 						break;
 
@@ -259,7 +263,7 @@ namespace Sabre.Dismantler.Visuals
 
 			if (builder.Length != 0)
 			{
-				elements.Add(new ByteViewItem(address, bytesStr, builder.ToString()));
+				elements.Add(new ByteViewItem(address, bytesStr, builder.ToString(), jumpable));
 			}
 
 			return elements.ToArray();

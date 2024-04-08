@@ -12,6 +12,7 @@ namespace Sabre.Controller
 	internal class SabreController
 	{
 		public delegate void OnLoad();
+		public delegate void OnJumpTo(IntPtr address);
 		public delegate void OnConvertPseudoC(IntPtr function);
 
 		private static SabreController s_InstanceBacking = null;
@@ -41,6 +42,7 @@ namespace Sabre.Controller
 		}
 
 		private OnConvertPseudoC m_ConvertPseudoCEvents;
+		private OnJumpTo m_JumpToEvents;
 		private OnLoad m_OnLoadEvents;
 
 		private ExecutableExplorer m_Explorer;
@@ -48,6 +50,7 @@ namespace Sabre.Controller
 		private string m_LoadedPath;
 
 		private IntPtr m_PseudoCFunction;
+		private IntPtr m_JumpToAddress;
 
 		public static void LoadExecutable(string path)
 		{
@@ -67,6 +70,16 @@ namespace Sabre.Controller
 			if (s_Instance.m_ConvertPseudoCEvents != null)
 			{
 				s_Instance.m_ConvertPseudoCEvents(function);
+			}
+		}
+
+		public static void SetJumpToAddress(IntPtr address)
+		{
+			s_Instance.m_JumpToAddress = address;
+
+			if (s_Instance.m_JumpToEvents != null)
+			{
+				s_Instance.m_JumpToEvents(address);
 			}
 		}
 
@@ -128,6 +141,16 @@ namespace Sabre.Controller
 			}
 
 			s_Instance.m_ConvertPseudoCEvents += function;
+		}
+
+		public static void AddOnJumpToEvent(OnJumpTo function)
+		{
+			if (s_Instance.m_JumpToAddress != IntPtr.Zero)
+			{
+				function(s_Instance.m_JumpToAddress);
+			}
+
+			s_Instance.m_JumpToEvents += function;
 		}
 	}
 }

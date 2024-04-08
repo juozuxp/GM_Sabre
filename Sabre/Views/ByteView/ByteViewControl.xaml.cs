@@ -17,6 +17,7 @@ namespace Sabre.Views.ByteView
 			this.InitializeComponent();
 
 			SabreController.AddOnLoadEvent(OnExecutableLoad);
+			SabreController.AddOnJumpToEvent(JumpToAddress);
 		}
 
 		private void OnExecutableLoad()
@@ -115,6 +116,24 @@ namespace Sabre.Views.ByteView
 
 				SabreController.SetPseudoCFunction(selected.m_Address);
 			}
+		}
+
+		private void DismView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+		{
+			if (e.ChangedButton != MouseButton.Left)
+			{
+				return;
+			}
+
+			ListView listView = sender as ListView;
+			ByteViewItem item = listView.SelectedItem as ByteViewItem;
+
+			if (item.m_Jumpable == IntPtr.Zero)
+			{
+				return;
+			}
+
+			JumpToAddress(item.m_Jumpable);
 		}
 	}
 }
