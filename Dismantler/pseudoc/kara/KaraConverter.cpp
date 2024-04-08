@@ -170,6 +170,40 @@ KaraBlob KaraConverter::Convert(uintptr_t function) const
 				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
 				jump = true;
 			} break;
+			case InsType_je:
+			{
+				const ILOperand& lhs = ins.m_Operands[0];
+
+				if (lhs.m_Type != ILOperandType_ValueRelative)
+				{
+					if (stack.size() != 0)
+					{
+						state = stack[stack.size() - 1];
+						stack.pop_back();
+
+						reset = true;
+						break;
+					}
+
+					breakout = true;
+					break;
+				}
+
+				KaraInstruction pseudo = {};
+
+				pseudo.m_Type = KaraInstruction::Type::GotoE;
+
+				if (ReadOperand(state, lhs, pseudo.m_Operands[0]))
+				{
+					block.m_Type = BlockType::Instruction;
+					block.m_Instruction = pseudo;
+				}
+
+				stack.push_back(state);
+
+				state.m_Cursor = reinterpret_cast<const uint8_t*>(state.m_Cursor) + lhs.m_Relative.m_Value;
+				jump = true;
+			} break;
 			case InsType_ja:
 			{
 				const ILOperand& lhs = ins.m_Operands[0];
