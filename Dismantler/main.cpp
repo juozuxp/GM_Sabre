@@ -30,5 +30,5 @@ int main()
 
 	ExecutableExplorer explorer = ExecutableExplorer(L"Disassemblable.exe");
 
-	delete explorer.GetPCFunction(0x1400117B0);
+	delete explorer.GetPCFunction(0x140014F70);
 }

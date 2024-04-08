@@ -120,14 +120,19 @@ std::wstring PCVisualizer::ToString(const PCBlob& blob) const
 		state.m_LabelNames[label] = std::format(L"Label_{:}", labelIndex++);
 	}
 
-	std::vector<std::shared_ptr<PCLine>> scope;
+	uint32_t scopeIndex = 1;
+	std::unordered_map<std::shared_ptr<PCLine>, uint32_t> scope;
 	for (const std::shared_ptr<PCLine>& line : blob.m_Lines)
 	{
-		if (scope.size() != 0 && line == scope[scope.size() - 1])
+		const auto& closing = scope.find(line);
+		if (closing != scope.end())
 		{
-			scope.pop_back();
+			for (uint32_t i = 0; i < closing->second; i++, scopeIndex--)
+			{
+				stream << std::wstring(scopeIndex - 1, '\t') << L"}\n";
+			}
 
-			stream << std::wstring(scope.size() + 1, '\t') << L"}\n";
+			scope.erase(line);
 		}
 
 		const auto& label = state.m_LabelNames.find(line);
@@ -136,7 +141,7 @@ std::wstring PCVisualizer::ToString(const PCBlob& blob) const
 			stream << label->second << L":\n";
 		}
 
-		stream << std::wstring(scope.size() + 1, '\t');
+		stream << std::wstring(scopeIndex, '\t');
 
 		switch (line->m_Type)
 		{
@@ -175,44 +180,50 @@ std::wstring PCVisualizer::ToString(const PCBlob& blob) const
 		case PCLine::Type::Equal:
 		{
 			stream << std::format(L"if ({:} == {:})\n", ExpressionToString(state, line->m_Condition.m_Left), ExpressionToString(state, line->m_Condition.m_Right));
-			stream << std::wstring(scope.size() + 1, '\t') << L'{';
+			stream << std::wstring(scopeIndex, '\t') << L'{';
 
-			scope.push_back(line->m_Condition.m_Else);
+			scopeIndex++;
+			scope[line->m_Condition.m_Else]++;
 		} break;
 		case PCLine::Type::NotEqual:
 		{
 			stream << std::format(L"if ({:} != {:})\n", ExpressionToString(state, line->m_Condition.m_Left), ExpressionToString(state, line->m_Condition.m_Right));
-			stream << std::wstring(scope.size() + 1, '\t') << L'{';
+			stream << std::wstring(scopeIndex, '\t') << L'{';
 
-			scope.push_back(line->m_Condition.m_Else);
+			scopeIndex++;
+			scope[line->m_Condition.m_Else]++;
 		} break;
 		case PCLine::Type::Less:
 		{
 			stream << std::format(L"if ({:} < {:})\n", ExpressionToString(state, line->m_Condition.m_Left), ExpressionToString(state, line->m_Condition.m_Right));
-			stream << std::wstring(scope.size() + 1, '\t') << L'{';
+			stream << std::wstring(scopeIndex, '\t') << L'{';
 
-			scope.push_back(line->m_Condition.m_Else);
+			scopeIndex++;
+			scope[line->m_Condition.m_Else]++;
 		} break;
 		case PCLine::Type::Greater:
 		{
 			stream << std::format(L"if ({:} > {:})\n", ExpressionToString(state, line->m_Condition.m_Left), ExpressionToString(state, line->m_Condition.m_Right));
-			stream << std::wstring(scope.size() + 1, '\t') << L'{';
+			stream << std::wstring(scopeIndex, '\t') << L'{';
 
-			scope.push_back(line->m_Condition.m_Else);
+			scopeIndex++;
+			scope[line->m_Condition.m_Else]++;
 		} break;
 		case PCLine::Type::LessEqual:
 		{
 			stream << std::format(L"if ({:} <= {:})\n", ExpressionToString(state, line->m_Condition.m_Left), ExpressionToString(state, line->m_Condition.m_Right));
-			stream << std::wstring(scope.size() + 1, '\t') << L'{';
+			stream << std::wstring(scopeIndex, '\t') << L'{';
 
-			scope.push_back(line->m_Condition.m_Else);
+			scopeIndex++;
+			scope[line->m_Condition.m_Else]++;
 		} break;
 		case PCLine::Type::GreaterEqual:
 		{
 			stream << std::format(L"if ({:} >= {:})\n", ExpressionToString(state, line->m_Condition.m_Left), ExpressionToString(state, line->m_Condition.m_Right));
-			stream << std::wstring(scope.size() + 1, '\t') << L'{';
+			stream << std::wstring(scopeIndex, '\t') << L'{';
 
-			scope.push_back(line->m_Condition.m_Else);
+			scopeIndex++;
+			scope[line->m_Condition.m_Else]++;
 		} break;
 		case PCLine::Type::Goto:
 		{

@@ -7,11 +7,14 @@ using Sabre.Controller;
 using Sabre.Explorer;
 using Sabre.ListItems;
 using Sabre.Explorer.Objects;
+using Sabre.Containers;
 
 namespace Sabre.Views.ByteView
 {
 	public partial class ByteViewControl : UserControl
 	{
+		private RollingStack<int> m_JumpHistory = new RollingStack<int>(100);
+
 		public ByteViewControl()
 		{
 			this.InitializeComponent();
@@ -28,6 +31,7 @@ namespace Sabre.Views.ByteView
 				return;
 			}
 
+			m_JumpHistory.Reset();
 			m_DismView.ItemsSource = view.Value.ToListElements();
 		}
 
@@ -36,6 +40,11 @@ namespace Sabre.Views.ByteView
 			if (m_DismView.Items.Count == 0)
 			{
 				return;
+			}
+
+			if (m_DismView.SelectedItem != null)
+			{
+				m_JumpHistory.Push(m_DismView.SelectedIndex);
 			}
 
 			for (int i = 0; i < m_DismView.Items.Count; i++)
@@ -121,7 +130,18 @@ namespace Sabre.Views.ByteView
 
 				SabreController.SetPseudoCFunction(selected.m_Address);
 			}
-		}
+			else if (e.Key == Key.Escape)
+            {
+				int index;
+                if (!m_JumpHistory.TryPop(out index))
+				{
+					return;
+				}
+
+				m_DismView.SelectedIndex = index;
+				m_DismView.ScrollIntoView(m_DismView.SelectedItem);
+            }
+        }
 
 		private void DismView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
 		{
