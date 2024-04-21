@@ -2,7 +2,7 @@
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
         <Identity Id="216a5533-7394-4308-a9c1-810312cc62de" Version="1.0" Language="en-US" Publisher="Company" />
-        <DisplayName>Sabre</DisplayName>
+        <DisplayName>Saber</DisplayName>
         <Description xml:space="preserve">Empty VSIX Project.</Description>
     </Metadata>
     <Installation>

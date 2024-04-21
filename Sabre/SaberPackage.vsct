@@ -35,25 +35,25 @@
       <Button guid="guidSabrePackageCmdSet" id="cmdidLoaderCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Strings>
-          <ButtonText>Sabre load</ButtonText>
+          <ButtonText>Saber load</ButtonText>
         </Strings>
       </Button>
       <Button guid="guidSabrePackageCmdSet" id="cmdidByteViewCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Strings>
-          <ButtonText>Sabre byte view</ButtonText>
+          <ButtonText>Saber byte view</ButtonText>
         </Strings>
       </Button>
       <Button guid="guidSabrePackageCmdSet" id="cmdidFunctionViewCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Strings>
-          <ButtonText>Sabre function view</ButtonText>
+          <ButtonText>Saber function view</ButtonText>
         </Strings>
       </Button>
       <Button guid="guidSabrePackageCmdSet" id="cmdidPseudoCCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Strings>
-          <ButtonText>Sabre pseudo C view</ButtonText>
+          <ButtonText>Saber pseudo C view</ButtonText>
         </Strings>
       </Button>
     </Buttons>
