@@ -40,7 +40,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -135,6 +135,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="utility\CString.cpp" />
+    <ClCompile Include="utility\LowTrustString.cpp" />
     <ClCompile Include="explorer\ExecutableView.cpp" />
     <ClCompile Include="explorer\ExecutableExplorerExportInterface.cpp" />
     <ClCompile Include="explorer\ExecutableExplorer.cpp" />
@@ -157,6 +159,7 @@
     <ClCompile Include="pe\PEImportTable.cpp" />
     <ClCompile Include="pe\PEBuffer.cpp" />
     <ClCompile Include="pe\PEHeaders.cpp" />
+    <ClCompile Include="explorer\StringExplorer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Architect\Architect.vcxproj">
@@ -164,6 +167,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="utility\CString.hpp" />
+    <ClInclude Include="utility\LowTrustString.hpp" />
     <ClInclude Include="explorer\ExecutableViewSection.hpp" />
     <ClInclude Include="explorer\ExecutableView.hpp" />
     <ClInclude Include="explorer\ExecutableExplorer.hpp" />
@@ -191,6 +196,7 @@
     <ClInclude Include="pe\PEImportTable.hpp" />
     <ClInclude Include="pe\PEBuffer.hpp" />
     <ClInclude Include="pe\PEHeaders.hpp" />
+    <ClInclude Include="explorer\StringExplorer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,9 +1,12 @@
-#include <Windows.h>
+﻿#include <Windows.h>
 
 #include "explorer/ExecutableExplorer.hpp"
 
 #include "pseudoc/PCConverter.hpp"
 #include "pseudoc/PCVisualizer.hpp"
+
+#include "utility/LowTrustString.hpp"
+#include "utility/CString.hpp"
 
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 {
@@ -12,6 +15,7 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 
 int main()
 {
+
 	/*ExecutableExplorer explorer = ExecutableExplorer(L"kernel32.dll");
 
 	delete explorer.GetExecutableFunctions();*/

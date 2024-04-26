@@ -24,9 +24,6 @@ public:
 	std::wstring ToString(const PCBlob& blob) const;
 
 private:
-	bool IsString(uintptr_t address) const;
-
-private:
 	std::wstring ExpressionToString(const State& state, const PCExpression& expression) const;
 
 private:

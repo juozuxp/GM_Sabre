@@ -2,6 +2,9 @@
 #include <sstream>
 #include <format>
 
+#include "utility/LowTrustString.hpp"
+#include "utility/CString.hpp"
+
 PCVisualizer::PCVisualizer(const PEBuffer& buffer)
 {
 	m_Buffer = &buffer;
@@ -249,26 +252,6 @@ std::wstring PCVisualizer::ToString(const PCBlob& blob) const
 	return stream.str();
 }
 
-bool PCVisualizer::IsString(uintptr_t address) const
-{
-	const char* string = reinterpret_cast<const char*>(m_Buffer->GetBuffer()) + (address - m_Buffer->GetOptionalHeader64().ImageBase);
-
-	for (; *string != '\0'; string++)
-	{
-		if (static_cast<unsigned char>(*string) > 127)
-		{
-			return false;
-		}
-
-		if (!std::isprint(*string))
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
 std::wstring PCVisualizer::ExpressionToString(const State& state, const PCExpression& expression) const
 {
 	constexpr wchar_t expressionToChar[] = { L'+', L'-', L'*', L'^', L'|', L'&', L'~' };
@@ -300,19 +283,29 @@ std::wstring PCVisualizer::ExpressionToString(const State& state, const PCExpres
 	{
 		const PCVariable& variable = state.m_Blob->m_Variables[expression.m_Variable];
 
-		if (variable.m_Type == PCVariable::Type::Static && IsString(variable.m_Static))
+		const void* string = reinterpret_cast<const char*>(m_Buffer->GetBuffer()) + (variable.m_Static - m_Buffer->GetOptionalHeader64().ImageBase);
+		if (variable.m_Type == PCVariable::Type::Static)
 		{
-			const char* string = reinterpret_cast<const char*>(m_Buffer->GetBuffer()) + (variable.m_Static - m_Buffer->GetOptionalHeader64().ImageBase);
-			
-			uint32_t length = strlen(string);
-			std::wstring wide = std::wstring(length + 1, L'\0');
+			size_t length;
 
-			size_t converted;
+			if (LowTrustString::GetStringLength(reinterpret_cast<const char*>(string), length) && length >= 3)
+			{
+				std::string cstring = CString::ConvertDefinition(std::string_view(reinterpret_cast<const char*>(string), length));
+				std::wstring wide = std::wstring(length + 1, L'\0');
 
-			mbstowcs_s(&converted, wide.data(), wide.size(), string, length);
+				size_t converted;
 
-			wide.erase(wide.size() - 1);
-			return std::format(L"\"{:}\"", wide);
+				mbstowcs_s(&converted, wide.data(), wide.size(), cstring.c_str(), length);
+
+				wide.erase(wide.size() - 1);
+				return std::format(L"\"{:}\"", wide);
+			}
+			else if (LowTrustString::GetStringLength(reinterpret_cast<const wchar_t*>(string), length) && length >= 3)
+			{
+				std::wstring cstring = CString::ConvertDefinition(reinterpret_cast<const wchar_t*>(string));
+
+				return std::format(L"\"{:}\"", cstring);
+			}
 		}
 
 		return std::format(L"&{:}", state.m_VariableNames[expression.m_Variable]);
