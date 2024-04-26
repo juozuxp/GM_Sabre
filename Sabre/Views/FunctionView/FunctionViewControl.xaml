@@ -28,7 +28,7 @@
 	</UserControl.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="20"/>
+			<RowDefinition Height="23"/>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 		<TextBox Grid.Row="0" x:Name="m_SearchField" TextWrapping="NoWrap" AcceptsReturn="False" TextChanged="SearchField_TextChanged"/>

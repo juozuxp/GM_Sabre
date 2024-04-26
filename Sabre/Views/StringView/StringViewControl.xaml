@@ -28,11 +28,11 @@
 	</UserControl.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="20"/>
+            <RowDefinition Height="23"/>
 			<RowDefinition Height="6*"/>
 			<RowDefinition Height="4*"/>
 		</Grid.RowDefinitions>
-		<TextBox Grid.Row="0" x:Name="m_SearchField" TextWrapping="NoWrap" AcceptsReturn="False"/>
+		<TextBox Grid.Row="0" x:Name="m_SearchField" TextWrapping="NoWrap" AcceptsReturn="False" TextChanged="SearchField_TextChanged"/>
         <ListView Grid.Row="1" x:Name="m_StringView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="ListView_SizeChanged" SelectionChanged="StringView_SelectionChanged" MouseDoubleClick="StringView_MouseDoubleClick">
 			<ListView.View>
 				<GridView AllowsColumnReorder="true" >
