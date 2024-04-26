@@ -63,6 +63,7 @@
     <Compile Include="Dismantler\Visuals\NativeVisual.cs" />
     <Compile Include="Dismantler\Visuals\Visualizer.cs" />
     <Compile Include="Explorer\ExecutableExplorer.cs" />
+    <Compile Include="Explorer\Objects\ExecutableString.cs" />
     <Compile Include="Explorer\Objects\ExecutableFunction.cs" />
     <Compile Include="Explorer\Objects\ExecutableView.cs" />
     <Compile Include="Explorer\Objects\ExecutableViewSection.cs" />
@@ -75,7 +76,9 @@
     <Compile Include="Explorer\PE\PERelocationEntry.cs" />
     <Compile Include="Explorer\PE\PERelocationTable.cs" />
     <Compile Include="ListItems\ByteViewItem.cs" />
+    <Compile Include="ListItems\CrossRefViewItem.cs" />
     <Compile Include="ListItems\FunctionViewItem.cs" />
+    <Compile Include="ListItems\StringViewItem.cs" />
     <Compile Include="Native\PE\IMAGE_BASE_RELOCATION.cs" />
     <Compile Include="Native\PE\IMAGE_DATA_DIRECTORY.cs" />
     <Compile Include="Native\PE\IMAGE_DELAYLOAD_DESCRIPTOR.cs" />
@@ -113,6 +116,11 @@
     <Compile Include="Views\PseudoC\PCCommand.cs" />
     <Compile Include="Views\PseudoC\PCControl.xaml.cs">
       <DependentUpon>PCControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\StringView\StringViewView.cs" />
+    <Compile Include="Views\StringView\StringViewCommand.cs" />
+    <Compile Include="Views\StringView\StringViewControl.xaml.cs">
+      <DependentUpon>StringViewControl.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +163,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\PseudoC\PCControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\StringView\StringViewControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

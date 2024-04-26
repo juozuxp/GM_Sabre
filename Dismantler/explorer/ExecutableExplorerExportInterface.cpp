@@ -30,7 +30,14 @@ ManagedArray<ExecutableExplorer::ManagedFunction>* ExecutableExplorer_GetExecuta
 
 extern "C"
 __declspec(dllexport)
-ManagedString* ExecutableExplorer_GetPCFunction(const ExecutableExplorer* instance, uintptr_t function)
+ManagedString* ExecutableExplorer_GetPCFunction(ExecutableExplorer* instance, uintptr_t function)
 {
 	return instance->GetPCFunction(function);
+}
+
+extern "C"
+__declspec(dllexport)
+ManagedArray<ExecutableExplorer::ManagedStringEntry>* ExecutableExplorer_GetExecutableStrings(ExecutableExplorer* instance)
+{
+	return instance->GetExecutableStrings();
 }

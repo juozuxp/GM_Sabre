@@ -13,10 +13,11 @@ public:
 	struct Function
 	{
 		Function() = default;
+		Function(uintptr_t base, uint32_t size);
 		Function(const void* base, uint32_t size);
 
-		const void* m_Base;
 		uint32_t m_Size;
+		uintptr_t m_Base;
 		std::wstring m_Name;
 	};
 
@@ -58,7 +59,7 @@ private:
 	Disassembler m_Disassembler;
 
 	std::unordered_set<const void*> m_Explored;
-	std::unordered_map<const void*, std::wstring> m_Names;
+	std::unordered_map<uintptr_t, std::wstring> m_Names;
 
 private:
 	static constexpr uint8_t c_MemoryMultiplier[] = { 1, 2, 4, 8 };

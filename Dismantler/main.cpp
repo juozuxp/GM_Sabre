@@ -8,6 +8,8 @@
 #include "utility/LowTrustString.hpp"
 #include "utility/CString.hpp"
 
+#include "explorer/StringExplorer.hpp"
+
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 {
 	return true;
@@ -15,6 +17,10 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 
 int main()
 {
+	ExecutableExplorer explorer = ExecutableExplorer(L"Disassemblable.exe");
+
+	//lowTrust.GetStringLength(L"ここで虚がいた", length);
+
 
 	/*ExecutableExplorer explorer = ExecutableExplorer(L"kernel32.dll");
 
@@ -32,7 +38,8 @@ int main()
 	delete explorer.GetHeaders();
 	delete explorer.GetExecutableView();*/
 
-	ExecutableExplorer explorer = ExecutableExplorer(L"Disassemblable.exe");
+	delete explorer.GetExecutableStrings();
+	delete explorer.GetExecutableFunctions();
 
 	delete explorer.GetPCFunction(0x140014F70);
 }

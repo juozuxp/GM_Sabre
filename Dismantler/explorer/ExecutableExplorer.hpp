@@ -6,6 +6,7 @@
 
 #include "FunctionExplorer.hpp"
 #include "ExecutableView.hpp"
+#include "StringExplorer.hpp"
 
 #include "pseudoc/PCVisualizer.hpp"
 #include "pseudoc/PCConverter.hpp"
@@ -15,9 +16,18 @@ class ExecutableExplorer : public ManagedObject
 public:
 	struct ManagedFunction : public ManagedObject
 	{
-		const void* m_Base;
 		uint32_t m_Size;
+		uintptr_t m_Base;
 		ManagedString m_Name;
+	};
+
+	struct ManagedStringEntry : public ManagedObject
+	{
+		bool m_IsWide;
+		uintptr_t m_Base;
+
+		ManagedString m_String;
+		ManagedArray<uintptr_t> m_CrossReferences;
 	};
 
 public:
@@ -27,8 +37,9 @@ public:
 public:
 	PEHeaders* GetHeaders() const;
 	ExecutableView* GetExecutableView() const;
-	ManagedString* GetPCFunction(uintptr_t function) const;
+	ManagedString* GetPCFunction(uintptr_t function);
 	ManagedArray<ManagedFunction>* GetExecutableFunctions();
+	ManagedArray<ManagedStringEntry>* GetExecutableStrings();
 
 	const PEBuffer& GetBuffer() const;
 
@@ -38,6 +49,7 @@ private:
 	Visualizer m_Visualizer;
 	Disassembler m_Disassembler;
 
+	StringExplorer m_StringExplorer;
 	FunctionExplorer m_FunctionExplorer;
 
 	PCConverter m_PCCoverter;

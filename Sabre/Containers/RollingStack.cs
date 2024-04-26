@@ -31,7 +31,7 @@ namespace Sabre.Containers
 			{
 				m_Cursor = 0;
 			}
-
+			
 			if (m_Count < m_Stack.Length)
 			{
 				m_Count++;

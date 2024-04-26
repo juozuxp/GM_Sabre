@@ -2,7 +2,6 @@
 #include <sstream>
 #include <format>
 
-#include "utility/LowTrustString.hpp"
 #include "utility/CString.hpp"
 
 PCVisualizer::PCVisualizer(const PEBuffer& buffer)
@@ -10,12 +9,12 @@ PCVisualizer::PCVisualizer(const PEBuffer& buffer)
 	m_Buffer = &buffer;
 }
 
-void PCVisualizer::ToConsole(const PCBlob& blob) const
+void PCVisualizer::ToConsole(const PCBlob& blob)
 {
 	wprintf(ToString(blob).c_str());
 }
 
-std::wstring PCVisualizer::ToString(const PCBlob& blob) const
+std::wstring PCVisualizer::ToString(const PCBlob& blob)
 {
 	constexpr std::wstring_view sizeToString[] = { L"int8_t", L"int16_t", L"int32_t", L"int64_t" };
 
@@ -252,7 +251,7 @@ std::wstring PCVisualizer::ToString(const PCBlob& blob) const
 	return stream.str();
 }
 
-std::wstring PCVisualizer::ExpressionToString(const State& state, const PCExpression& expression) const
+std::wstring PCVisualizer::ExpressionToString(const State& state, const PCExpression& expression)
 {
 	constexpr wchar_t expressionToChar[] = { L'+', L'-', L'*', L'^', L'|', L'&', L'~' };
 
@@ -288,7 +287,7 @@ std::wstring PCVisualizer::ExpressionToString(const State& state, const PCExpres
 		{
 			size_t length;
 
-			if (LowTrustString::GetStringLength(reinterpret_cast<const char*>(string), length) && length >= 3)
+			if (m_LowTrustString.GetStringLength(reinterpret_cast<const char*>(string), length) && length >= 3)
 			{
 				std::string cstring = CString::ConvertDefinition(std::string_view(reinterpret_cast<const char*>(string), length));
 				std::wstring wide = std::wstring(length + 1, L'\0');
@@ -300,11 +299,11 @@ std::wstring PCVisualizer::ExpressionToString(const State& state, const PCExpres
 				wide.erase(wide.size() - 1);
 				return std::format(L"\"{:}\"", wide);
 			}
-			else if (LowTrustString::GetStringLength(reinterpret_cast<const wchar_t*>(string), length) && length >= 3)
+			else if (m_LowTrustString.GetStringLength(reinterpret_cast<const wchar_t*>(string), length) && length >= 3)
 			{
 				std::wstring cstring = CString::ConvertDefinition(reinterpret_cast<const wchar_t*>(string));
 
-				return std::format(L"\"{:}\"", cstring);
+				return std::format(L"L\"{:}\"", cstring);
 			}
 		}
 

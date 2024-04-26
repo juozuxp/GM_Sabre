@@ -1,0 +1,60 @@
+﻿<UserControl x:Class="Sabre.Views.StringViewControl"
+			 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
+			 xmlns:local="clr-namespace:Sabre.Utility"
+			 local:VsTheme.UseVsTheme="True"
+			 mc:Ignorable="d"
+			 d:DesignHeight="300" d:DesignWidth="300"
+			 Name="MyToolWindow">
+	<UserControl.Resources>
+		<Style TargetType="ListViewItem">
+			<Style.Setters>
+				<Setter Property="Margin" Value="0"></Setter>
+			</Style.Setters>
+			<Style.Triggers>
+				<Trigger Property="IsSelected" Value="True">
+					<Setter Property="Background" Value="DimGray"/>
+					<Setter Property="BorderBrush" Value="Black"/>
+				</Trigger>
+				<Trigger Property="IsMouseOver" Value="True">
+					<Setter Property="Background" Value="DimGray" />
+					<Setter Property="BorderBrush" Value="Black"/>
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+	</UserControl.Resources>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="20"/>
+			<RowDefinition Height="6*"/>
+			<RowDefinition Height="4*"/>
+		</Grid.RowDefinitions>
+		<TextBox Grid.Row="0" x:Name="m_SearchField" TextWrapping="NoWrap" AcceptsReturn="False"/>
+        <ListView Grid.Row="1" x:Name="m_StringView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="ListView_SizeChanged" SelectionChanged="StringView_SelectionChanged" MouseDoubleClick="StringView_MouseDoubleClick">
+			<ListView.View>
+				<GridView AllowsColumnReorder="true" >
+					<GridViewColumn DisplayMemberBinding="{Binding Path=m_BaseName}" Width="200"/>
+					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Type}" Width="200"/>
+					<GridViewColumn Width="Auto">
+						<GridViewColumn.CellTemplate>
+							<DataTemplate>
+								<TextBlock Width="Auto" TextWrapping="Wrap" Text="{Binding Path=m_String}"></TextBlock>
+							</DataTemplate>
+						</GridViewColumn.CellTemplate>
+					</GridViewColumn>
+				</GridView>
+			</ListView.View>
+        </ListView>
+        <ListView Grid.Row="2" x:Name="m_CrossRefView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="ListView_SizeChanged" MouseDoubleClick="CrossRefView_MouseDoubleClick">
+            <ListView.View>
+                <GridView AllowsColumnReorder="true" >
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=m_Type}" Width="200"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=m_AddressName}" Width="Auto"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</UserControl>

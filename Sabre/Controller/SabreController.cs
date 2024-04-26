@@ -113,6 +113,16 @@ namespace Sabre.Controller
 			return s_Instance.m_Explorer.GetExecutableFunctions();
 		}
 
+		public static ExecutableString[] GetExecutableStrings()
+		{
+			if (s_Instance.m_Explorer == null)
+			{
+				return Array.Empty<ExecutableString>();
+			}
+
+			return s_Instance.m_Explorer.GetExecutableStrings();
+		}
+
 		public static string GetPseudoC(IntPtr function)
 		{
 			if (s_Instance.m_Explorer == null)

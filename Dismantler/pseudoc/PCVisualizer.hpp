@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include "pe/PEBuffer.hpp"
 
+#include "utility/LowTrustString.hpp"
+
 class PCVisualizer
 {
 private:
@@ -20,12 +22,13 @@ public:
 	PCVisualizer(const PEBuffer& buffer);
 
 public:
-	void ToConsole(const PCBlob& blob) const;
-	std::wstring ToString(const PCBlob& blob) const;
+	void ToConsole(const PCBlob& blob);
+	std::wstring ToString(const PCBlob& blob);
 
 private:
-	std::wstring ExpressionToString(const State& state, const PCExpression& expression) const;
+	std::wstring ExpressionToString(const State& state, const PCExpression& expression);
 
 private:
 	const PEBuffer* m_Buffer;
+	LowTrustString m_LowTrustString;
 };

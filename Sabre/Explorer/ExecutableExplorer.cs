@@ -5,6 +5,7 @@ using Sabre.Native.PE;
 using System;
 using System.Runtime.InteropServices;
 using Sabre.Explorer.Objects;
+using static Sabre.Explorer.ExecutableExplorer;
 
 namespace Sabre.Explorer
 {
@@ -330,8 +331,8 @@ namespace Sabre.Explorer
 		{
 			private readonly ManagedObject m_Base;
 
-			public readonly IntPtr m_FunctionBase;
 			public readonly uint m_FunctionSize;
+			public readonly IntPtr m_FunctionBase;
 
 			public readonly ManagedString m_FunctionName;
 
@@ -352,6 +353,36 @@ namespace Sabre.Explorer
 			}
 		}
 
+		[StructLayout(LayoutKind.Sequential)]
+		internal struct NativeExecutableString : IDisposable
+        {
+			public readonly ManagedObject m_Base;
+
+            public readonly byte m_IsWide;
+			public readonly IntPtr m_BaseAddress;
+
+			public readonly ManagedString m_String;
+			public readonly ManagedArray m_CrossReferences;
+
+			public ExecutableString ToData()
+			{
+				ExecutableString data = new ExecutableString();
+
+				data.m_Base = m_BaseAddress;
+				data.m_IsWide = m_IsWide == 1 ? true : false;
+
+				data.m_String = m_String.ToString();
+				data.m_CrossReferences = m_CrossReferences.ToArray<IntPtr>();
+				
+				return data;
+            }
+
+            public void Dispose()
+            {
+                m_Base.Dispose();
+            }
+        }
+
 		[DllImport("Dismantler.dll", CharSet = CharSet.Unicode)]
 		private static extern IntPtr ExecutableExplorer_Init(string path);
 
@@ -367,7 +398,10 @@ namespace Sabre.Explorer
 		[DllImport("Dismantler.dll")]
 		private static extern IntPtr ExecutableExplorer_GetPCFunction(IntPtr instance, IntPtr function);
 
-		private readonly ManagedObject m_Instance;
+		[DllImport("Dismantler.dll")]
+		private static extern IntPtr ExecutableExplorer_GetExecutableStrings(IntPtr instance);
+
+        private readonly ManagedObject m_Instance;
 
 		public ExecutableExplorer(string path) 
 		{
@@ -442,5 +476,27 @@ namespace Sabre.Explorer
 				return native.ToString();
 			}
 		}
-	}
+
+		public ExecutableString[] GetExecutableStrings()
+		{
+			IntPtr pointer = ExecutableExplorer_GetExecutableStrings(m_Instance);
+            if (pointer == IntPtr.Zero)
+            {
+                return Array.Empty<ExecutableString>();
+            }
+
+			using (ManagedArray native = Marshal.PtrToStructure<ManagedArray>(pointer))
+			{
+				NativeExecutableString[] array = native.ToArray<NativeExecutableString>();
+				ExecutableString[] strings = new ExecutableString[array.Length];
+
+				for (int i = 0; i < array.Length; i++)
+				{
+					strings[i] = array[i].ToData();
+				}
+
+				return strings;
+			}
+        }
+    }
 }

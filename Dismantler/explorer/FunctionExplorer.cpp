@@ -3,8 +3,13 @@
 
 #define CHUNK_SIZE 200
 
-FunctionExplorer::Function::Function(const void* base, uint32_t size) :
+FunctionExplorer::Function::Function(uintptr_t base, uint32_t size) :
 	m_Base(base), m_Size(size)
+{
+}
+
+FunctionExplorer::Function::Function(const void* base, uint32_t size) :
+	Function(reinterpret_cast<uintptr_t>(base), size)
 {
 }
 
@@ -24,7 +29,7 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreExecutable(cons
 	GatherExports(buffer, functions);
 	GatherVirtual(buffer, functions);
 
-	m_Names[reinterpret_cast<void*>(optional.ImageBase + optional.AddressOfEntryPoint)] = L"entry";
+	m_Names[optional.ImageBase + optional.AddressOfEntryPoint] = L"entry";
 	for (const void* function : functions)
 	{
 		ExploreFunction(buffer, function, found);
@@ -65,7 +70,7 @@ void FunctionExplorer::ExploreFunction(const PEBuffer& buffer, const void* funct
 
 	for (uint32_t i = cursor; i < functions.size(); i++)
 	{
-		functions[i].m_Base = reinterpret_cast<const uint8_t*>(reinterpret_cast<uintptr_t>(functions[i].m_Base) - reinterpret_cast<uintptr_t>(dos) + optional->ImageBase);
+		functions[i].m_Base = functions[i].m_Base - reinterpret_cast<uintptr_t>(dos) + optional->ImageBase;
 
 		const auto& name = m_Names.find(functions[i].m_Base);
 		if (name != m_Names.end())
@@ -74,7 +79,7 @@ void FunctionExplorer::ExploreFunction(const PEBuffer& buffer, const void* funct
 		}
 		else
 		{
-			functions[i].m_Name = std::format(L"f_{:016X}", reinterpret_cast<uintptr_t>(functions[i].m_Base));
+			functions[i].m_Name = std::format(L"f_{:016X}", functions[i].m_Base);
 		}
 	}
 }
@@ -616,11 +621,11 @@ void FunctionExplorer::GatherExports(const PEBuffer& buffer, std::vector<const v
 			mbstowcs_s(&converted, wide.data(), wide.size(), name, length);
 
 			wide.erase(wide.size() - 1);
-			m_Names[reinterpret_cast<const void*>(optional.ImageBase + *exports)] = wide;
+			m_Names[optional.ImageBase + *exports] = wide;
 		}
 		else
 		{
-			m_Names[reinterpret_cast<const void*>(optional.ImageBase + *exports)] = std::format(L"export_{:}", exportTable->Base + i);
+			m_Names[optional.ImageBase + *exports] = std::format(L"export_{:}", exportTable->Base + i);
 		}
 
 		functions.push_back(reinterpret_cast<const uint8_t*>(buffer.GetBuffer()) + *exports);
