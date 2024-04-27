@@ -403,7 +403,10 @@ namespace Sabre.Explorer
 		[DllImport("Dismantler.dll")]
 		private static extern IntPtr ExecutableExplorer_GetExecutableStrings(IntPtr instance);
 
-        private readonly ManagedObject m_Instance;
+		[DllImport("Dismantler.dll")]
+		private static extern IntPtr ExecutableExplorer_GetAddressXRefs(IntPtr instance, IntPtr address);
+
+		private readonly ManagedObject m_Instance;
 
 		public ExecutableExplorer(string path) 
 		{
@@ -500,5 +503,19 @@ namespace Sabre.Explorer
 				return strings;
 			}
         }
+
+		public ExecutableXRef[] GetExecutableXRefs(IntPtr address)
+		{
+			IntPtr pointer = ExecutableExplorer_GetAddressXRefs(m_Instance, address);
+			if (pointer == IntPtr.Zero)
+			{
+				return Array.Empty<ExecutableXRef>();
+			}
+
+			using (ManagedArray native = Marshal.PtrToStructure<ManagedArray>(pointer))
+			{
+				return native.ToArray<ExecutableXRef>();
+			}
+		}
     }
 }

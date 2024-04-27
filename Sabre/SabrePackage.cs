@@ -34,6 +34,7 @@ namespace Sabre
 	[ProvideToolWindow(typeof(Sabre.Views.FunctionView.FunctionViewView))]
 	[ProvideToolWindow(typeof(Sabre.Views.PseudoC.PCView))]
 	[ProvideToolWindow(typeof(Sabre.Views.StringViewView))]
+	[ProvideToolWindow(typeof(Sabre.Views.XRefView.XRefView))]
 	public sealed class SabrePackage : AsyncPackage
     {
         /// <summary>
@@ -62,6 +63,7 @@ namespace Sabre
             await Sabre.Views.FunctionView.FunctionViewCommand.InitializeAsync(this);
             await Sabre.Views.PseudoC.PCCommand.InitializeAsync(this);
             await Sabre.Views.StringViewCommand.InitializeAsync(this);
+            await Sabre.Views.XRefView.XRefViewCommand.InitializeAsync(this);
         }
         
         #endregion

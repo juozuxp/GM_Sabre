@@ -29,6 +29,7 @@
       <IDSymbol value="258" name="cmdidFunctionViewCommand" />
       <IDSymbol value="259" name="cmdidPseudoCCommand" />
       <IDSymbol value="260" name="cmdidStringViewCommand" />
+      <IDSymbol value="261" name="cmdidXRefViewCommand" />
     </GuidSymbol>
   </Symbols>
   <Commands package="guidSabrePackage">
@@ -61,6 +62,12 @@
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Strings>
           <ButtonText>Saber string view</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="guidSabrePackageCmdSet" id="cmdidXRefViewCommand" priority="0x0100" type="Button">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+        <Strings>
+          <ButtonText>Saber xref view</ButtonText>
         </Strings>
       </Button>
     </Buttons>

@@ -13,6 +13,7 @@ namespace Sabre.Controller
 	{
 		public delegate void OnLoad();
 		public delegate void OnJumpTo(IntPtr address);
+		public delegate void OnGatherXRefs(IntPtr address);
 		public delegate void OnConvertPseudoC(IntPtr function);
 
 		private static SabreController s_InstanceBacking = null;
@@ -42,6 +43,7 @@ namespace Sabre.Controller
 		}
 
 		private OnConvertPseudoC m_ConvertPseudoCEvents;
+		private OnGatherXRefs m_GatherXRefsEvents;
 		private OnJumpTo m_JumpToEvents;
 		private OnLoad m_OnLoadEvents;
 
@@ -51,6 +53,7 @@ namespace Sabre.Controller
 
 		private IntPtr m_PseudoCFunction;
 		private IntPtr m_JumpToAddress;
+		private IntPtr m_XrefAddress;
 
 		public static void LoadExecutable(string path)
 		{
@@ -80,6 +83,16 @@ namespace Sabre.Controller
 			if (s_Instance.m_JumpToEvents != null)
 			{
 				s_Instance.m_JumpToEvents(address);
+			}
+		}
+
+		public static void SetXrefAddress(IntPtr address)
+		{
+			s_Instance.m_XrefAddress = address;
+
+			if (s_Instance.m_GatherXRefsEvents != null)
+			{
+				s_Instance.m_GatherXRefsEvents(address);
 			}
 		}
 
@@ -133,6 +146,16 @@ namespace Sabre.Controller
 			return s_Instance.m_Explorer.GetPCFunction(function);
 		}
 
+		public static ExecutableXRef[] GetExecutableXRefs(IntPtr address)
+		{
+			if (s_Instance.m_Explorer == null)
+			{
+				return Array.Empty<ExecutableXRef>();
+			}
+
+			return s_Instance.m_Explorer.GetExecutableXRefs(address);
+		}
+
 		public static void AddOnLoadEvent(OnLoad function)
 		{
 			if (s_Instance.m_LoadedPath != null)
@@ -161,6 +184,16 @@ namespace Sabre.Controller
 			}
 
 			s_Instance.m_JumpToEvents += function;
+		}
+
+		public static void AddOnGatherXRefsEvent(OnGatherXRefs function)
+		{
+			if (s_Instance.m_XrefAddress != IntPtr.Zero)
+			{
+				function(s_Instance.m_XrefAddress);
+			}
+
+			s_Instance.m_GatherXRefsEvents += function;
 		}
 	}
 }

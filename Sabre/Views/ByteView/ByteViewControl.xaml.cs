@@ -116,9 +116,13 @@ namespace Sabre.Views.ByteView
 		{
 			if (e.Key == Key.Enter)
 			{
-				IntPtr address = new IntPtr(long.Parse(m_AddressField.Text, NumberStyles.HexNumber));
+				long address;
+				if (!long.TryParse(m_AddressField.Text, NumberStyles.HexNumber, NumberFormatInfo.CurrentInfo, out address))
+				{
+					return;
+				}
 
-				JumpToAddress(address);
+				JumpToAddress(new IntPtr(address));
 			}
 		}
 
@@ -134,6 +138,16 @@ namespace Sabre.Views.ByteView
 
 				SabreController.SetPseudoCFunction(selected.m_Address);
 			}
+			else if (e.Key == Key.X)
+			{
+				ByteViewItem selected = m_DismView.SelectedItem as ByteViewItem;
+				if (selected == null)
+				{
+					return;
+				}
+
+				SabreController.SetXrefAddress(selected.m_Address);
+			}	
 			else if (e.Key == Key.Escape)
             {
 				int index;

@@ -26,19 +26,6 @@ namespace Sabre.WPF
 		private static readonly ConcurrentDictionary<uint, SolidColorBrush> m_Brushes = new ConcurrentDictionary<uint, SolidColorBrush>();
 		public static readonly DependencyProperty m_DynamicText = DependencyProperty.Register("DynamicText", typeof(string), typeof(BetterTextBlock), new UIPropertyMetadata(null, OnPropertyChanged));
 
-		//public BetterTextBlock()
-		//{
-		//	IsVisibleChanged += Visible;
-		//}
-
-		//void Visible(object sender, DependencyPropertyChangedEventArgs e)
-		//{
-		//	if (!(bool)e.NewValue)
-		//	{
-		//		return;
-		//	}
-		//}
-
 		private static uint GetColor(string number, int index)
 		{
 			uint value = 0;
@@ -106,15 +93,6 @@ namespace Sabre.WPF
 			{
 				block.Inlines.Add(new Run() { Text = value.Substring(closer + 1) });
 			}
-
-			//IEnumerable<Inline> list = e.NewValue as ObservableCollection<Inline>;
-			//
-
-			//block.Inlines.Clear();
-			//foreach (Inline inline in (e.NewValue as IEnumerable<Inline>))
-			//{
-			//	block.Inlines.Add(inline);
-			//}
 		}
 	}
 }

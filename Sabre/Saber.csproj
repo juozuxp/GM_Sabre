@@ -124,6 +124,11 @@
     <Compile Include="Views\StringView\StringViewControl.xaml.cs">
       <DependentUpon>StringViewControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\XRefView\XRefView.cs" />
+    <Compile Include="Views\XRefView\XRefViewCommand.cs" />
+    <Compile Include="Views\XRefView\XRefViewControl.xaml.cs">
+      <DependentUpon>XRefViewControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WPF\BetterTextBlock.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +179,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\StringView\StringViewControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\XRefView\XRefViewControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
