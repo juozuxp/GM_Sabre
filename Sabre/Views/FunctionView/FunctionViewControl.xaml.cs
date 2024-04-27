@@ -59,8 +59,12 @@ namespace Sabre.Views.FunctionView
 
 		private void SearchField_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			TextBox textBox = sender as TextBox;
+			if (m_FunctionItems == null)
+			{
+				return;
+			}
 
+			TextBox textBox = sender as TextBox;
 			if (textBox.Text.Length <= 0)
 			{
 				m_FunctionView.ItemsSource = m_FunctionItems;

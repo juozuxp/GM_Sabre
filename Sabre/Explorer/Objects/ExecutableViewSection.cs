@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Markup;
+using Microsoft.VisualStudio.VCProjectEngine;
 using Sabre.Dismantler.Visuals;
 using Sabre.ListItems;
 
@@ -19,6 +20,26 @@ namespace Sabre.Explorer.Objects
 			Code
 		}
 
+		private static readonly bool[] c_ValidAscii = 
+		{ 
+			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 
+			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 
+			false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, 
+			true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, 
+			true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, 
+			true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, 
+			true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, 
+			true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, 
+			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 
+			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 
+			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 
+			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 
+			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 
+			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 
+			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 
+			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false
+		};
+
 		public Type m_Type;
 
 		public uint m_Start;
@@ -28,14 +49,13 @@ namespace Sabre.Explorer.Objects
 
 		public ByteViewItem[] ToListElements(ExecutableView view)
 		{
+			StringBuilder builder = new StringBuilder();
 			switch (m_Type)
 			{
 				case Type.Bytes:
 
 					byte[] bytes = new byte[m_Size];
 					Marshal.Copy(view.m_DataAddress + (int)m_Start, bytes, 0, (int)m_Size);
-
-					StringBuilder builder = new StringBuilder();
 
 					IntPtr address = view.m_BaseAddress + (int)m_Start;
 
@@ -44,6 +64,7 @@ namespace Sabre.Explorer.Objects
 					int listIndex = 0;
 					if (m_Start % 8 != 0)
 					{
+						builder.Clear();
 						for (int i = 0; i < 8 - (m_Start % 8); i++)
 						{
 							if (i != 0)
@@ -54,7 +75,27 @@ namespace Sabre.Explorer.Objects
 							builder.Append(bytes[i].ToString("X2"));
 						}
 
-						list[listIndex++] = new ByteViewItem(address, builder.ToString(), null, IntPtr.Zero);
+						string byteView = builder.ToString();
+
+						builder.Clear();
+						for (int i = 0; i < 8 - (m_Start % 8); i++)
+						{
+							if (i != 0)
+							{
+								builder.Append(' ');
+							}
+
+							if (c_ValidAscii[bytes[i]])
+							{
+								builder.Append((char)bytes[i]);
+							}
+							else
+							{
+								builder.Append('.');
+							}
+						}
+
+						list[listIndex++] = new ByteViewItem(address, ByteViewItem.Type.Data, byteView, builder.ToString(), IntPtr.Zero);
 
 						address += (int)(8 - (m_Start % 8));
 					}
@@ -63,6 +104,7 @@ namespace Sabre.Explorer.Objects
 					{
 						if (m_Size - i < 8)
 						{
+							builder.Clear();
 							for (int j = 0; j < bytes.Length - i; j++)
 							{
 								if (j != 0)
@@ -73,10 +115,47 @@ namespace Sabre.Explorer.Objects
 								builder.Append(bytes[i + j].ToString("X2"));
 							}
 
+							string byteView = builder.ToString();
+							for (int j = 0; j < bytes.Length - i; j++)
+							{
+								if (j != 0)
+								{
+									builder.Append(' ');
+								}
+
+								if (c_ValidAscii[bytes[i + j]])
+								{
+									builder.Append((char)bytes[i + j]);
+								}
+								else
+								{
+									builder.Append('.');
+								}
+							}
+
+							list[listIndex++] = new ByteViewItem(address, ByteViewItem.Type.Data, byteView, builder.ToString(), IntPtr.Zero);
 							break;
 						}
 
-						list[listIndex++] = new ByteViewItem(address, $"{bytes[i].ToString("X2")} {bytes[i + 1].ToString("X2")} {bytes[i + 2].ToString("X2")} {bytes[i + 3].ToString("X2")} {bytes[i + 4].ToString("X2")} {bytes[i + 5].ToString("X2")} {bytes[i + 6].ToString("X2")} {bytes[i + 7].ToString("X2")}", null, IntPtr.Zero);
+						builder.Clear();
+						for (int j = 0; j < 8; j++)
+						{
+							if (j != 0)
+							{
+								builder.Append(' ');
+							}
+
+							if (c_ValidAscii[bytes[i + j]])
+							{
+								builder.Append((char)bytes[i + j]);
+							}
+							else
+							{
+								builder.Append('.');
+							}
+						}
+
+						list[listIndex++] = new ByteViewItem(address, ByteViewItem.Type.Data, $"{bytes[i].ToString("X2")} {bytes[i + 1].ToString("X2")} {bytes[i + 2].ToString("X2")} {bytes[i + 3].ToString("X2")} {bytes[i + 4].ToString("X2")} {bytes[i + 5].ToString("X2")} {bytes[i + 6].ToString("X2")} {bytes[i + 7].ToString("X2")}", builder.ToString(), IntPtr.Zero);
 					}
 
 					return list;

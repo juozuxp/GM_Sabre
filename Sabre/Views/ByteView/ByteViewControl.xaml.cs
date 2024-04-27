@@ -8,6 +8,10 @@ using Sabre.Explorer;
 using Sabre.ListItems;
 using Sabre.Explorer.Objects;
 using Sabre.Containers;
+using System.IO.Packaging;
+using System.Reflection;
+using Sabre.Utility;
+using System.Windows.Media;
 
 namespace Sabre.Views.ByteView
 {
@@ -123,7 +127,7 @@ namespace Sabre.Views.ByteView
 			if (e.Key == Key.C)
 			{
 				ByteViewItem selected = m_DismView.SelectedItem as ByteViewItem;
-				if (selected == null || selected.m_Info == null)
+				if (selected == null || selected.m_Type != ByteViewItem.Type.Code)
 				{
 					return;
 				}
@@ -151,6 +155,11 @@ namespace Sabre.Views.ByteView
 			}
 
 			ListView listView = sender as ListView;
+			if (listView.SelectedItem == null)
+			{
+				return;
+			}
+
 			ByteViewItem item = listView.SelectedItem as ByteViewItem;
 
 			if (item.m_Jumpable == IntPtr.Zero)

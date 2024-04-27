@@ -4,16 +4,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
-			 xmlns:local="clr-namespace:Sabre.Utility"
-             local:VsTheme.UseVsTheme="True"
+			 xmlns:utility="clr-namespace:Sabre.Utility"
+             utility:VsTheme.UseVsTheme="True"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
-             Name="MyToolWindow">
-	<UserControl.Resources>
-		<Style TargetType="ListViewItem">
-			<Style.Setters>
-				<Setter Property="Margin" Value="0"></Setter>
-			</Style.Setters>
+             Name="MyToolWindow"
+             FontSize="14"
+             FontFamily="pack://application:,,,/Saber;component/fonts/ubuntumono-regular.ttf #Ubuntu Mono">
+    <UserControl.Resources>
+        <Style TargetType="ListViewItem">
+            <Style.Setters>
+                <Setter Property="Margin" Value="0"></Setter>
+            </Style.Setters>
 			<Style.Triggers>
 				<Trigger Property="IsSelected" Value="True">
 					<Setter Property="Background" Value="DimGray"/>

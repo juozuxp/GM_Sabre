@@ -4,16 +4,19 @@
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
-			 xmlns:local="clr-namespace:Sabre.Utility"
-             local:VsTheme.UseVsTheme="True"
+			 xmlns:utility="clr-namespace:Sabre.Utility"
+             xmlns:customwpf="clr-namespace:Sabre.WPF"
+             utility:VsTheme.UseVsTheme="True"
 			 mc:Ignorable="d"
 			 d:DesignHeight="300" d:DesignWidth="627.493"
-			 Name="MyToolWindow">
-	<UserControl.Resources>
-		<Style TargetType="ListViewItem">
+			 Name="MyToolWindow"
+             FontSize="14"
+             FontFamily="pack://application:,,,/Saber;component/fonts/ubuntumono-regular.ttf #Ubuntu Mono">
+    <UserControl.Resources>
+        <Style TargetType="ListViewItem">
 			<Style.Setters>
-				<Setter Property="Margin" Value="0"></Setter>
-			</Style.Setters>
+                <Setter Property="Margin" Value="0"></Setter>
+            </Style.Setters>
 			<Style.Triggers>
 				<Trigger Property="IsSelected" Value="True">
 					<Setter Property="Background" Value="DimGray"/>
@@ -31,14 +34,20 @@
             <RowDefinition Height="23"/>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
-		<TextBox Grid.Row="0" x:Name="m_AddressField" TextWrapping="NoWrap" AcceptsReturn="False" KeyDown="AddressField_KeyDown"/>
-		<ListView Grid.Row="1" x:Name="m_DismView" KeyDown="DismView_KeyDown" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="DismView_SizeChanged" SelectionChanged="DismView_SelectionChanged" MouseDoubleClick="DismView_MouseDoubleClick">
+        <TextBox Grid.Row="0" x:Name="m_AddressField" TextWrapping="NoWrap" AcceptsReturn="False" KeyDown="AddressField_KeyDown"/>
+        <ListView Grid.Row="1" x:Name="m_DismView" KeyDown="DismView_KeyDown" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="DismView_SizeChanged" SelectionChanged="DismView_SelectionChanged" MouseDoubleClick="DismView_MouseDoubleClick">
 			<ListView.View>
 				<GridView AllowsColumnReorder="true">
 					<GridViewColumn DisplayMemberBinding="{Binding Path=m_DisplayAddress}" Width="200"/>
-					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Bytes}" Width="200"/>
-					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Info}" Width="Auto"/>
-				</GridView>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=m_Bytes}" Width="300"/>
+                    <GridViewColumn Width="Auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <customwpf:BetterTextBlock Width="Auto" TextWrapping="NoWrap" DynamicText="{Binding Path=m_Info}"></customwpf:BetterTextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
 			</ListView.View>
 		</ListView>
 	</Grid>

@@ -93,6 +93,11 @@ namespace Sabre.Dismantler.Visuals
 			"oword ptr "
 		};
 
+		private static readonly string c_NumberColor = "FFFF00FF";
+		private static readonly string c_RegisterColor = "FF80FF80";
+		private static readonly string c_MemorySizeColor = "FFADD8E6";
+		private static readonly string c_InstructionColor = "FFFFFFFF";
+
 		public static ByteViewItem[] ToListElements(NativeVisual[] visuals, Options options)
 		{
 			int offset = 0;
@@ -133,7 +138,7 @@ namespace Sabre.Dismantler.Visuals
 
 						if (builder.Length != 0)
 						{
-							elements.Add(new ByteViewItem(currentAddress, bytesStr, builder.ToString(), jumpable));
+							elements.Add(new ByteViewItem(currentAddress, ByteViewItem.Type.Code, bytesStr, builder.ToString(), jumpable));
 						}
 
 						jumpable = IntPtr.Zero;
@@ -157,16 +162,16 @@ namespace Sabre.Dismantler.Visuals
 
 						builder.Clear();
 
-						builder.Append(c_InstructionName[visual.m_Instruction.m_Type]);
+						builder.Append($"\0{c_InstructionColor}{c_InstructionName[visual.m_Instruction.m_Type]}\x1");
 						break;
 
 					case NativeVisual.Type.OperandMemory:
 
-						builder.Append($"{c_MemoryScale[(byte)visual.m_Memory.m_Size]}");
+						builder.Append($"\0{c_MemorySizeColor}{c_MemoryScale[(byte)visual.m_Memory.m_Size]}\x1");
 
 						if (visual.m_Memory.m_Segment != NativeVisual.c_InvalidRegister)
 						{
-							builder.Append($"{c_Registers[visual.m_Memory.m_Segment]}:[");
+							builder.Append($"\0{c_RegisterColor}{c_Registers[visual.m_Memory.m_Segment]}\x1:[");
 						}
 						else
 						{
@@ -175,7 +180,7 @@ namespace Sabre.Dismantler.Visuals
 
 						if (visual.m_Memory.m_Base != NativeVisual.c_InvalidRegister)
 						{
-							builder.Append(c_Registers[visual.m_Memory.m_Base]);
+							builder.Append($"\0{c_RegisterColor}{c_Registers[visual.m_Memory.m_Base]}\x1");
 						}
 
 						if (visual.m_Memory.m_Index != NativeVisual.c_InvalidRegister)
@@ -185,11 +190,11 @@ namespace Sabre.Dismantler.Visuals
 								builder.Append(" + ");
 							}
 
-							builder.Append(c_Registers[visual.m_Memory.m_Index]);
+							builder.Append($"\0{c_RegisterColor}{c_Registers[visual.m_Memory.m_Index]}\x1");
 
 							if (visual.m_Memory.m_Multiplier != 0)
 							{
-								builder.Append($" * {visual.m_Memory.m_Multiplier}");
+								builder.Append($" * \0{c_NumberColor}{visual.m_Memory.m_Multiplier}\x1");
 							}
 						}
 
@@ -206,7 +211,7 @@ namespace Sabre.Dismantler.Visuals
 								builder.Append(sign ? " - " : " + ");
 							}
 
-							builder.Append(value.ToString("X8"));
+							builder.Append($"\0{c_NumberColor}{value.ToString("X8")}\x1");
 						}
 
 						builder.Append(']');
@@ -214,19 +219,19 @@ namespace Sabre.Dismantler.Visuals
 
 					case NativeVisual.Type.OperandRegister:
 
-						builder.Append(c_Registers[visual.m_Register]);
+						builder.Append($"\0{c_RegisterColor}{c_Registers[visual.m_Register]}\x1");
 						break;
 
 					case NativeVisual.Type.OperandMemoryValue:
 
 						jumpable = (IntPtr)visual.m_Value.m_Value;
-						builder.Append($"{c_MemoryScale[(byte)visual.m_Value.m_Size]}[{visual.m_Value.m_Value.ToString("X16")}]");
+						builder.Append($"\0{c_MemorySizeColor}{c_MemoryScale[(byte)visual.m_Value.m_Size]}\x1[\0{c_NumberColor}{visual.m_Value.m_Value.ToString("X16")}\x1]");
 						break;
 
 					case NativeVisual.Type.OperandAddressValue:
 
 						jumpable = (IntPtr)visual.m_Value.m_Value;
-						builder.Append(visual.m_Value.m_Value.ToString("X16"));
+						builder.Append($"\0{c_NumberColor}{visual.m_Value.m_Value.ToString("X16")}\x1");
 						break;
 
 					case NativeVisual.Type.OperandValue:
@@ -256,14 +261,14 @@ namespace Sabre.Dismantler.Visuals
 								break;
 						}
 
-						builder.Append(local.ToString(size));
+						builder.Append($"\0{c_NumberColor}{local.ToString(size)}\x1");
 						break;
 				}
 			}
 
 			if (builder.Length != 0)
 			{
-				elements.Add(new ByteViewItem(address, bytesStr, builder.ToString(), jumpable));
+				elements.Add(new ByteViewItem(address, ByteViewItem.Type.Code, bytesStr, builder.ToString(), jumpable));
 			}
 
 			return elements.ToArray();

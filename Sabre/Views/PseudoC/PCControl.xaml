@@ -4,12 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
-			 xmlns:local="clr-namespace:Sabre.Utility"
-             local:VsTheme.UseVsTheme="True"
+			 xmlns:utility="clr-namespace:Sabre.Utility"
+             utility:VsTheme.UseVsTheme="True"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
              Name="MyToolWindow">
     <Grid>
-		<TextBox IsReadOnly="True" x:Name="m_Display"></TextBox>
+        <TextBox IsReadOnly="True" x:Name="m_Display" FontFamily="pack://application:,,,/Saber;component/fonts/ubuntumono-regular.ttf #Ubuntu Mono" FontSize="14"></TextBox>
     </Grid>
 </UserControl>

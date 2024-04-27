@@ -92,8 +92,12 @@ namespace Sabre.Views
 
 		private void SearchField_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			TextBox textBox = sender as TextBox;
+			if (m_StringItems == null)
+			{
+				return;
+			}
 
+			TextBox textBox = sender as TextBox;
 			if (textBox.Text.Length <= 0)
 			{
 				m_StringView.ItemsSource = m_StringItems;

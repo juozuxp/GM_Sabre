@@ -1,8 +1,10 @@
 ﻿using Microsoft.VisualStudio.Shell;
+using Sabre.Utility;
 using Sabre.Views.ByteView;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows;
 using Task = System.Threading.Tasks.Task;
 
 namespace Sabre
@@ -39,8 +41,6 @@ namespace Sabre
         /// </summary>
         public const string PackageGuidString = "0b1f213b-3690-4155-8722-d31177fdb5cb";
 
-        public static SabrePackage s_Instance { get; private set; }
-
         #region Package Members
 
         /// <summary>
@@ -52,7 +52,6 @@ namespace Sabre
         /// <returns>A task representing the async work of package initialization, or an already completed task if there is none. Do not return null from this method.</returns>
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            s_Instance = this;
 
 			// When initialized asynchronously, the current thread may be a background thread at this point.
 			// Do any initialization that requires the UI thread after switching to the UI thread.
