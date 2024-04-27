@@ -109,11 +109,6 @@ void StringExplorer::SearchASCII(std::vector<Entry>& entries)
 			std::string cstring = CString::ConvertReadable(std::string_view(reinterpret_cast<const char*>(cursor), length));
 			std::wstring wide = std::wstring(cstring.length() + 1, L'\0');
 
-			if (cstring.find("Visual Studio") != std::string::npos)
-			{
-				int i = 0;
-			}
-
 			size_t converted;
 
 			mbstowcs_s(&converted, wide.data(), wide.size(), cstring.c_str(), cstring.length());
