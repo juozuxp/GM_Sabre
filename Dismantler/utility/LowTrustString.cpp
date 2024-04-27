@@ -13,6 +13,7 @@ bool LowTrustString::GetStringLength(const char* string, size_t& length)
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER)
 	{
+		length = (1 << 12) - (reinterpret_cast<uintptr_t>(string) & ((1 << 12) - 1));
 		return false;
 	}
 
@@ -46,6 +47,7 @@ bool LowTrustString::GetStringLength(const wchar_t* string, size_t& length)
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER)
 	{
+		length = (1 << 12) - (reinterpret_cast<uintptr_t>(string) & ((1 << 12) - 1));
 		return false;
 	}
 
