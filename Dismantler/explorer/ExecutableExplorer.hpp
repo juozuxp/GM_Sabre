@@ -27,7 +27,7 @@ public:
 		uintptr_t m_Base;
 
 		ManagedString m_String;
-		ManagedArray<uintptr_t> m_CrossReferences;
+		ManagedArray<StringExplorer::CrossReference> m_CrossReferences;
 	};
 
 public:

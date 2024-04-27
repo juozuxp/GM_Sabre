@@ -51,7 +51,7 @@
         <ListView Grid.Row="2" x:Name="m_CrossRefView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="ListView_SizeChanged" MouseDoubleClick="CrossRefView_MouseDoubleClick">
             <ListView.View>
                 <GridView AllowsColumnReorder="true" >
-                    <GridViewColumn DisplayMemberBinding="{Binding Path=m_Type}" Width="200"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=m_Origin}" Width="200"/>
                     <GridViewColumn DisplayMemberBinding="{Binding Path=m_AddressName}" Width="Auto"/>
                 </GridView>
             </ListView.View>

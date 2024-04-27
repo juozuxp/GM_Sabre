@@ -54,7 +54,7 @@ ManagedArray<ExecutableExplorer::ManagedStringEntry>* ExecutableExplorer::GetExe
 		managed.m_Base = entry.m_Base;
 		managed.m_IsWide = entry.m_IsWide;
 		managed.m_String = ManagedString(entry.m_String);
-		managed.m_CrossReferences = ManagedArray<uintptr_t>(entry.m_CrossReferences);
+		managed.m_CrossReferences = ManagedArray<StringExplorer::CrossReference>(entry.m_CrossReferences);
 
 		array->Add(std::move(managed));
 	}

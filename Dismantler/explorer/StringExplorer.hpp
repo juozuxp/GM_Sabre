@@ -1,5 +1,6 @@
 #pragma once
 #include <unordered_set>
+#include <unordered_map>
 #include <string>
 #include <vector>
 #include <Disassembler.hpp>
@@ -10,13 +11,29 @@
 class StringExplorer
 {
 public:
+	enum class CrossReferenceOrigin : uint8_t
+	{
+		None,
+		Data,
+		Code
+	};
+
+	struct CrossReference
+	{
+		CrossReference() = default;
+		CrossReference(uintptr_t base, CrossReferenceOrigin origin);
+
+		uintptr_t m_Base;
+		CrossReferenceOrigin m_Origin;
+	};
+
 	struct Entry
 	{
 		bool m_IsWide;
 		uintptr_t m_Base;
 
 		std::wstring m_String;
-		std::vector<uintptr_t> m_CrossReferences;
+		std::vector<CrossReference> m_CrossReferences;
 	};
 
 public:
@@ -31,12 +48,13 @@ private:
 	void SearchASCII(std::vector<Entry>& entries);
 
 private:
-	void FindCrossReferences(Entry& entry);
+	void CollectCodeCrossReferences();
+	void CollectRelocationCrossReferences();
 
 private:
 	const PEBuffer* m_Buffer;
 	LowTrustString m_LowTrustString;
 
 	std::unordered_set<const void*> m_Explored;
-	std::vector<std::pair<uintptr_t, uintptr_t>> m_ReferenceAddresses;
+	std::unordered_map<uintptr_t, std::vector<CrossReference>> m_ReferenceAddresses;
 };

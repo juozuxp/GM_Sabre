@@ -12,6 +12,6 @@ namespace Sabre.Explorer.Objects
         public IntPtr m_Base;
 
         public string m_String;
-        public IntPtr[] m_CrossReferences;
+        public ExecutableCrossReference[] m_CrossReferences;
     }
 }

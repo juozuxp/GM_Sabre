@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sabre.Explorer.Objects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,24 +9,17 @@ namespace Sabre.ListItems
 {
 	internal class CrossRefViewItem
 	{
-		public enum Type
+		public CrossRefViewItem(ExecutableCrossReference crossReference)
 		{
-			None,
-			Data,
-			Code
-		}
+			m_Address = crossReference.m_Address;
 
-		public CrossRefViewItem(Type type, IntPtr address)
-		{
-			m_Address = address;
-
-			m_Type = type;
-			m_AddressName = address.ToString("X16");
+			m_Origin = crossReference.m_Origin;
+			m_AddressName = crossReference.m_Address.ToString("X16");
 		}
 
 		public readonly IntPtr m_Address;
 
-		public Type m_Type { get; private set; }
 		public string m_AddressName { get; private set; }
+		public ExecutableCrossReference.Origin m_Origin { get; private set; }
 	}
 }

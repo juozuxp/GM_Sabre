@@ -63,6 +63,7 @@
     <Compile Include="Dismantler\Visuals\NativeVisual.cs" />
     <Compile Include="Dismantler\Visuals\Visualizer.cs" />
     <Compile Include="Explorer\ExecutableExplorer.cs" />
+    <Compile Include="Explorer\Objects\ExecutableCrossReference.cs" />
     <Compile Include="Explorer\Objects\ExecutableString.cs" />
     <Compile Include="Explorer\Objects\ExecutableFunction.cs" />
     <Compile Include="Explorer\Objects\ExecutableView.cs" />

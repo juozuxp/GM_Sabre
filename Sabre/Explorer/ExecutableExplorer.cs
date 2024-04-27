@@ -370,9 +370,9 @@ namespace Sabre.Explorer
 
 				data.m_Base = m_BaseAddress;
 				data.m_IsWide = m_IsWide == 1 ? true : false;
-
+				
 				data.m_String = m_String.ToString();
-				data.m_CrossReferences = m_CrossReferences.ToArray<IntPtr>();
+				data.m_CrossReferences = m_CrossReferences.ToArray<ExecutableCrossReference>();
 				
 				return data;
             }

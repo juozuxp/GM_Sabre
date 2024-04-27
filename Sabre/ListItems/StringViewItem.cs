@@ -20,7 +20,7 @@ namespace Sabre.ListItems
 			m_CrossReferences = new CrossRefViewItem[executableString.m_CrossReferences.Length];
 			for (int i = 0; i < m_CrossReferences.Length; i++)
 			{
-				m_CrossReferences[i] = new CrossRefViewItem(CrossRefViewItem.Type.Code, executableString.m_CrossReferences[i]);
+				m_CrossReferences[i] = new CrossRefViewItem(executableString.m_CrossReferences[i]);
 			}
 		}
 
