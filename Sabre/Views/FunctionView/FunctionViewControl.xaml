@@ -27,12 +27,13 @@
 		</Style>
 	</UserControl.Resources>
 	<Grid>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="23"/>
-			<RowDefinition Height="*"/>
-		</Grid.RowDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="23"/>
+            <RowDefinition Height="6*"/>
+            <RowDefinition Height="4*"/>
+        </Grid.RowDefinitions>
 		<TextBox Grid.Row="0" x:Name="m_SearchField" TextWrapping="NoWrap" AcceptsReturn="False" TextChanged="SearchField_TextChanged"/>
-		<ListView Grid.Row="1" x:Name="m_FunctionView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="FunctionView_SizeChanged" MouseDoubleClick="FunctionView_MouseDoubleClick">
+        <ListView Grid.Row="1" x:Name="m_FunctionView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="ListView_SizeChanged" MouseDoubleClick="FunctionView_MouseDoubleClick" SelectionChanged="FunctionView_SelectionChanged">
 			<ListView.View>
 				<GridView AllowsColumnReorder="true" >
 					<GridViewColumn DisplayMemberBinding="{Binding Path=m_Name}" Width="200"/>
@@ -40,6 +41,14 @@
 					<GridViewColumn DisplayMemberBinding="{Binding Path=m_SizeName}" Width="Auto"/>
 				</GridView>
 			</ListView.View>
-		</ListView>
-	</Grid>
+        </ListView>
+        <ListView Grid.Row="2" x:Name="m_XRefView" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" SelectionMode="Single" SizeChanged="ListView_SizeChanged" MouseDoubleClick="XRefView_MouseDoubleClick">
+            <ListView.View>
+                <GridView AllowsColumnReorder="true" >
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=m_Origin}" Width="200"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=m_AddressName}" Width="Auto"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
 </UserControl>

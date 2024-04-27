@@ -8,16 +8,16 @@ using System.Threading.Tasks;
 namespace Sabre.Explorer.Objects
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct ExecutableCrossReference
+	internal struct ExecutableXRef
 	{
 		public enum Origin : byte
 		{
 			None,
-			Data,
-			Code
+			Code,
+			Data
 		}
 
-		public readonly IntPtr m_Address;
 		public readonly Origin m_Origin;
+		public readonly IntPtr m_Address;
 	}
 }

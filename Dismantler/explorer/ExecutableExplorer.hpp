@@ -7,6 +7,7 @@
 #include "FunctionExplorer.hpp"
 #include "ExecutableView.hpp"
 #include "StringExplorer.hpp"
+#include "XRefExplorer.hpp"
 
 #include "pseudoc/PCVisualizer.hpp"
 #include "pseudoc/PCConverter.hpp"
@@ -19,6 +20,7 @@ public:
 		uint32_t m_Size;
 		uintptr_t m_Base;
 		ManagedString m_Name;
+		ManagedArray<XRefExplorer::Entry> m_XRefs;
 	};
 
 	struct ManagedStringEntry : public ManagedObject
@@ -27,7 +29,7 @@ public:
 		uintptr_t m_Base;
 
 		ManagedString m_String;
-		ManagedArray<StringExplorer::CrossReference> m_CrossReferences;
+		ManagedArray<XRefExplorer::Entry> m_XRefs;
 	};
 
 public:
@@ -40,11 +42,13 @@ public:
 	ManagedString* GetPCFunction(uintptr_t function);
 	ManagedArray<ManagedFunction>* GetExecutableFunctions();
 	ManagedArray<ManagedStringEntry>* GetExecutableStrings();
+	ManagedArray<XRefExplorer::Entry>* GetAddressXRefs(uintptr_t address) const;
 
 	const PEBuffer& GetBuffer() const;
 
 private:
 	PEBuffer m_Buffer;
+	XRefExplorer m_XRefExplorer;
 
 	Visualizer m_Visualizer;
 	Disassembler m_Disassembler;

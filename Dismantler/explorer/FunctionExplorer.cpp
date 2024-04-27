@@ -13,48 +13,53 @@ FunctionExplorer::Function::Function(const void* base, uint32_t size) :
 {
 }
 
-std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreExecutable(const PEBuffer& buffer)
+FunctionExplorer::FunctionExplorer(const PEBuffer& buffer, const XRefExplorer& xref) :
+	m_Buffer(&buffer), m_XRefExplorer(&xref)
+{
+}
+
+std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreExecutable()
 {
 	std::vector<FunctionExplorer::Function> found;
 
-	if (buffer.GetFileHeader().Machine != IMAGE_FILE_MACHINE_AMD64)
+	if (m_Buffer->GetFileHeader().Machine != IMAGE_FILE_MACHINE_AMD64)
 	{
 		return std::vector<FunctionExplorer::Function>();
 	}
 
-	const IMAGE_OPTIONAL_HEADER64& optional = buffer.GetOptionalHeader64();
+	const IMAGE_OPTIONAL_HEADER64& optional = m_Buffer->GetOptionalHeader64();
 
 	std::vector<const void*> functions;
 
-	GatherExports(buffer, functions);
-	GatherVirtual(buffer, functions);
+	GatherExports(functions);
+	GatherVirtual(functions);
 
 	m_Names[optional.ImageBase + optional.AddressOfEntryPoint] = L"entry";
 	for (const void* function : functions)
 	{
-		ExploreFunction(buffer, function, found);
+		CollectFunctions(function, found);
 	}
 
-	ExploreFunction(buffer, reinterpret_cast<const uint8_t*>(buffer.GetBuffer()) + optional.AddressOfEntryPoint, found);
+	CollectFunctions(reinterpret_cast<const uint8_t*>(m_Buffer->GetBuffer()) + optional.AddressOfEntryPoint, found);
 	return found;
 }
 
-std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreFunction(const PEBuffer& buffer, const void* function)
+std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreFunction(const void* function)
 {
 	std::vector<FunctionExplorer::Function> functions;
 
-	ExploreFunction(buffer, function, functions);
+	CollectFunctions(function, functions);
 	return functions;
 }
 
-void FunctionExplorer::ExploreFunction(const PEBuffer& buffer, const void* function, std::vector<Function>& functions)
+void FunctionExplorer::CollectFunctions(const void* function, std::vector<Function>& functions)
 {
 	if (!m_Explored.insert(function).second)
 	{
 		return;
 	}
 
-	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(buffer.GetBuffer());
+	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(m_Buffer->GetBuffer());
 	const IMAGE_NT_HEADERS64* nt = reinterpret_cast<const IMAGE_NT_HEADERS64*>(reinterpret_cast<const uint8_t*>(dos) + dos->e_lfanew);
 
 	if (nt->FileHeader.Machine != IMAGE_FILE_MACHINE_AMD64)
@@ -81,6 +86,8 @@ void FunctionExplorer::ExploreFunction(const PEBuffer& buffer, const void* funct
 		{
 			functions[i].m_Name = std::format(L"f_{:016X}", functions[i].m_Base);
 		}
+
+		functions[i].m_XRefs = m_XRefExplorer->GetXReferences(functions[i].m_Base);
 	}
 }
 
@@ -571,14 +578,14 @@ bool FunctionExplorer::ReadOperand(const ILOperand& operand, const State& state,
 	return false;
 }
 
-void FunctionExplorer::GatherExports(const PEBuffer& buffer, std::vector<const void*>& functions)
+void FunctionExplorer::GatherExports(std::vector<const void*>& functions)
 {
-	if (buffer.GetFileHeader().Machine != IMAGE_FILE_MACHINE_AMD64)
+	if (m_Buffer->GetFileHeader().Machine != IMAGE_FILE_MACHINE_AMD64)
 	{
 		return;
 	}
 
-	const IMAGE_OPTIONAL_HEADER64& optional = buffer.GetOptionalHeader64();
+	const IMAGE_OPTIONAL_HEADER64& optional = m_Buffer->GetOptionalHeader64();
 
 	const IMAGE_DATA_DIRECTORY* exportDirectory = &optional.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
 	if (exportDirectory->Size == 0)
@@ -586,11 +593,11 @@ void FunctionExplorer::GatherExports(const PEBuffer& buffer, std::vector<const v
 		return;
 	}
 
-	const IMAGE_EXPORT_DIRECTORY* exportTable = reinterpret_cast<const IMAGE_EXPORT_DIRECTORY*>(reinterpret_cast<uintptr_t>(buffer.GetBuffer()) + exportDirectory->VirtualAddress);
+	const IMAGE_EXPORT_DIRECTORY* exportTable = reinterpret_cast<const IMAGE_EXPORT_DIRECTORY*>(reinterpret_cast<uintptr_t>(m_Buffer->GetBuffer()) + exportDirectory->VirtualAddress);
 
-	const uint32_t* names = reinterpret_cast<const uint32_t*>(reinterpret_cast<uintptr_t>(buffer.GetBuffer()) + exportTable->AddressOfNames);
-	const uint32_t* exports = reinterpret_cast<const uint32_t*>(reinterpret_cast<uintptr_t>(buffer.GetBuffer()) + exportTable->AddressOfFunctions);
-	const uint16_t* nameOrdinals = reinterpret_cast<const uint16_t*>(reinterpret_cast<uintptr_t>(buffer.GetBuffer()) + exportTable->AddressOfNameOrdinals);
+	const uint32_t* names = reinterpret_cast<const uint32_t*>(reinterpret_cast<uintptr_t>(m_Buffer->GetBuffer()) + exportTable->AddressOfNames);
+	const uint32_t* exports = reinterpret_cast<const uint32_t*>(reinterpret_cast<uintptr_t>(m_Buffer->GetBuffer()) + exportTable->AddressOfFunctions);
+	const uint16_t* nameOrdinals = reinterpret_cast<const uint16_t*>(reinterpret_cast<uintptr_t>(m_Buffer->GetBuffer()) + exportTable->AddressOfNameOrdinals);
 	for (uint16_t i = 0; i < exportTable->NumberOfFunctions; i++, exports++)
 	{
 		if (*exports >= exportDirectory->VirtualAddress &&
@@ -607,7 +614,7 @@ void FunctionExplorer::GatherExports(const PEBuffer& buffer, std::vector<const v
 		{
 			if (i == *currentNameOrdinal)
 			{
-				name = reinterpret_cast<const char*>(reinterpret_cast<uintptr_t>(buffer.GetBuffer()) + *currentName);
+				name = reinterpret_cast<const char*>(reinterpret_cast<uintptr_t>(m_Buffer->GetBuffer()) + *currentName);
 				break;
 			}
 		}
@@ -628,13 +635,13 @@ void FunctionExplorer::GatherExports(const PEBuffer& buffer, std::vector<const v
 			m_Names[optional.ImageBase + *exports] = std::format(L"export_{:}", exportTable->Base + i);
 		}
 
-		functions.push_back(reinterpret_cast<const uint8_t*>(buffer.GetBuffer()) + *exports);
+		functions.push_back(reinterpret_cast<const uint8_t*>(m_Buffer->GetBuffer()) + *exports);
 	}
 }
 
-void FunctionExplorer::GatherVirtual(const PEBuffer& buffer, std::vector<const void*>& functions)
+void FunctionExplorer::GatherVirtual(std::vector<const void*>& functions)
 {
-	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(buffer.GetBuffer());
+	const IMAGE_DOS_HEADER* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(m_Buffer->GetBuffer());
 	const IMAGE_NT_HEADERS64* nt = reinterpret_cast<const IMAGE_NT_HEADERS64*>(reinterpret_cast<const uint8_t*>(dos) + dos->e_lfanew);
 	const IMAGE_FILE_HEADER* file = &nt->FileHeader;
 

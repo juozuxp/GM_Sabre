@@ -63,7 +63,7 @@
     <Compile Include="Dismantler\Visuals\NativeVisual.cs" />
     <Compile Include="Dismantler\Visuals\Visualizer.cs" />
     <Compile Include="Explorer\ExecutableExplorer.cs" />
-    <Compile Include="Explorer\Objects\ExecutableCrossReference.cs" />
+    <Compile Include="Explorer\Objects\ExecutableXRef.cs" />
     <Compile Include="Explorer\Objects\ExecutableString.cs" />
     <Compile Include="Explorer\Objects\ExecutableFunction.cs" />
     <Compile Include="Explorer\Objects\ExecutableView.cs" />
@@ -77,7 +77,7 @@
     <Compile Include="Explorer\PE\PERelocationEntry.cs" />
     <Compile Include="Explorer\PE\PERelocationTable.cs" />
     <Compile Include="ListItems\ByteViewItem.cs" />
-    <Compile Include="ListItems\CrossRefViewItem.cs" />
+    <Compile Include="ListItems\XRefViewItem.cs" />
     <Compile Include="ListItems\FunctionViewItem.cs" />
     <Compile Include="ListItems\StringViewItem.cs" />
     <Compile Include="Native\PE\IMAGE_BASE_RELOCATION.cs" />

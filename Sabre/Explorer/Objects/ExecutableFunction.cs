@@ -9,8 +9,10 @@ namespace Sabre.Explorer.Objects
 {
 	internal struct ExecutableFunction
 	{
-		public IntPtr m_Base;
 		public uint m_Size;
+		public IntPtr m_Base;
 		public string m_Name;
+
+		public ExecutableXRef[] m_XRefs;
 	}
 }

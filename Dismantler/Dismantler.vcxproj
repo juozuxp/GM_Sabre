@@ -160,6 +160,7 @@
     <ClCompile Include="pe\PEBuffer.cpp" />
     <ClCompile Include="pe\PEHeaders.cpp" />
     <ClCompile Include="explorer\StringExplorer.cpp" />
+    <ClCompile Include="explorer\XRefExplorer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Architect\Architect.vcxproj">
@@ -197,6 +198,7 @@
     <ClInclude Include="pe\PEBuffer.hpp" />
     <ClInclude Include="pe\PEHeaders.hpp" />
     <ClInclude Include="explorer\StringExplorer.hpp" />
+    <ClInclude Include="explorer\XRefExplorer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

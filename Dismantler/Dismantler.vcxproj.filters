@@ -90,6 +90,9 @@
     <ClCompile Include="utility\CString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="explorer\XRefExplorer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="managed\ManagedObject.hpp">
@@ -180,6 +183,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="utility\CString.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="explorer\XRefExplorer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

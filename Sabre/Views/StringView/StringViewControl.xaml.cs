@@ -61,7 +61,7 @@ namespace Sabre.Views
 
 			StringViewItem item = e.AddedItems[0] as StringViewItem;
 
-			m_CrossRefView.ItemsSource = item.m_CrossReferences;
+			m_XRefView.ItemsSource = item.m_XRefs;
 		}
 
 		private void StringView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -77,7 +77,7 @@ namespace Sabre.Views
 			SabreController.SetJumpToAddress(item.m_Base);
 		}
 
-		private void CrossRefView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+		private void XRefView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton != MouseButton.Left)
 			{
@@ -85,7 +85,7 @@ namespace Sabre.Views
 			}
 
 			ListView listView = sender as ListView;
-			CrossRefViewItem item = listView.SelectedItem as CrossRefViewItem;
+			XRefViewItem item = listView.SelectedItem as XRefViewItem;
 
 			SabreController.SetJumpToAddress(item.m_Address);
 		}

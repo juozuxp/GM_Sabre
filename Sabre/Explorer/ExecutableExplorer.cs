@@ -335,6 +335,7 @@ namespace Sabre.Explorer
 			public readonly IntPtr m_FunctionBase;
 
 			public readonly ManagedString m_FunctionName;
+			public readonly ManagedArray m_XRefs;
 
 			public ExecutableFunction ToData()
 			{
@@ -343,6 +344,7 @@ namespace Sabre.Explorer
 				data.m_Base = m_FunctionBase;
 				data.m_Size = m_FunctionSize;
 				data.m_Name = m_FunctionName.ToString();
+				data.m_XRefs = m_XRefs.ToArray<ExecutableXRef>();
 
 				return data;
 			}
@@ -362,7 +364,7 @@ namespace Sabre.Explorer
 			public readonly IntPtr m_BaseAddress;
 
 			public readonly ManagedString m_String;
-			public readonly ManagedArray m_CrossReferences;
+			public readonly ManagedArray m_XRefs;
 
 			public ExecutableString ToData()
 			{
@@ -372,7 +374,7 @@ namespace Sabre.Explorer
 				data.m_IsWide = m_IsWide == 1 ? true : false;
 				
 				data.m_String = m_String.ToString();
-				data.m_CrossReferences = m_CrossReferences.ToArray<ExecutableCrossReference>();
+				data.m_XRefs = m_XRefs.ToArray<ExecutableXRef>();
 				
 				return data;
             }

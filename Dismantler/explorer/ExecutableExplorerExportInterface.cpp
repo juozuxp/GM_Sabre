@@ -41,3 +41,10 @@ ManagedArray<ExecutableExplorer::ManagedStringEntry>* ExecutableExplorer_GetExec
 {
 	return instance->GetExecutableStrings();
 }
+
+extern "C"
+__declspec(dllexport)
+ManagedArray<XRefExplorer::Entry>* ExecutableExplorer_GetAddressXRefs(const ExecutableExplorer* instance, uintptr_t address)
+{
+	return instance->GetAddressXRefs(address);
+}

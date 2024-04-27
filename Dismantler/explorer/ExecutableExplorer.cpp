@@ -3,9 +3,12 @@
 ExecutableExplorer::ExecutableExplorer(const std::wstring_view& path)
 {
 	m_Buffer = PEBuffer(path);
+	m_XRefExplorer = XRefExplorer(m_Buffer);
+
 	m_PCCoverter = PCConverter(m_Buffer);
 	m_PCVisualizer = PCVisualizer(m_Buffer);
-	m_StringExplorer = StringExplorer(m_Buffer);
+	m_StringExplorer = StringExplorer(m_Buffer, m_XRefExplorer);
+	m_FunctionExplorer = FunctionExplorer(m_Buffer, m_XRefExplorer);
 }
 
 PEHeaders* ExecutableExplorer::GetHeaders() const
@@ -25,7 +28,7 @@ ManagedString* ExecutableExplorer::GetPCFunction(uintptr_t function)
 
 ManagedArray<ExecutableExplorer::ManagedFunction>* ExecutableExplorer::GetExecutableFunctions()
 {
-	std::vector<FunctionExplorer::Function> functions = m_FunctionExplorer.ExploreExecutable(m_Buffer);
+	std::vector<FunctionExplorer::Function> functions = m_FunctionExplorer.ExploreExecutable();
 	ManagedArray<ManagedFunction>* array = new ManagedArray<ManagedFunction>(functions.size());
 
 	for (const FunctionExplorer::Function& function : functions)
@@ -35,6 +38,7 @@ ManagedArray<ExecutableExplorer::ManagedFunction>* ExecutableExplorer::GetExecut
 		managed.m_Base = function.m_Base;
 		managed.m_Size = function.m_Size;
 		managed.m_Name = ManagedString(function.m_Name);
+		managed.m_XRefs = ManagedArray<XRefExplorer::Entry>(function.m_XRefs);
 
 		array->Add(std::move(managed));
 	}
@@ -54,12 +58,17 @@ ManagedArray<ExecutableExplorer::ManagedStringEntry>* ExecutableExplorer::GetExe
 		managed.m_Base = entry.m_Base;
 		managed.m_IsWide = entry.m_IsWide;
 		managed.m_String = ManagedString(entry.m_String);
-		managed.m_CrossReferences = ManagedArray<StringExplorer::CrossReference>(entry.m_CrossReferences);
+		managed.m_XRefs = ManagedArray<XRefExplorer::Entry>(entry.m_XRefs);
 
 		array->Add(std::move(managed));
 	}
 
 	return array;
+}
+
+ManagedArray<XRefExplorer::Entry>* ExecutableExplorer::GetAddressXRefs(uintptr_t address) const
+{
+	return new ManagedArray<XRefExplorer::Entry>(m_XRefExplorer.GetXReferences(address));
 }
 
 const PEBuffer& ExecutableExplorer::GetBuffer() const

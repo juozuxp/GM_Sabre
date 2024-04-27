@@ -38,7 +38,7 @@ namespace Sabre.Views.FunctionView
 			m_FunctionView.ItemsSource = m_FunctionItems;
 		}
 
-		private void FunctionView_SizeChanged(object sender, SizeChangedEventArgs e)
+		private void ListView_SizeChanged(object sender, SizeChangedEventArgs e)
 		{
 			ListView listView = sender as ListView;
 			GridView gridView = listView.View as GridView;
@@ -81,6 +81,31 @@ namespace Sabre.Views.FunctionView
 			FunctionViewItem item = listView.SelectedItem as FunctionViewItem;
 
 			SabreController.SetJumpToAddress(item.m_Base);
+		}
+
+		private void FunctionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (e.AddedItems.Count == 0)
+			{
+				return;
+			}
+
+			FunctionViewItem item = e.AddedItems[0] as FunctionViewItem;
+
+			m_XRefView.ItemsSource = item.m_XRefs;
+		}
+
+		private void XRefView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+		{
+			if (e.ChangedButton != MouseButton.Left)
+			{
+				return;
+			}
+
+			ListView listView = sender as ListView;
+			XRefViewItem item = listView.SelectedItem as XRefViewItem;
+
+			SabreController.SetJumpToAddress(item.m_Address);
 		}
 	}
 }
