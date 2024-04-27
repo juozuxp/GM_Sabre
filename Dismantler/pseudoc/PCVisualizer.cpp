@@ -290,11 +290,11 @@ std::wstring PCVisualizer::ExpressionToString(const State& state, const PCExpres
 			if (m_LowTrustString.GetStringLength(reinterpret_cast<const char*>(string), length) && length >= 3)
 			{
 				std::string cstring = CString::ConvertDefinition(std::string_view(reinterpret_cast<const char*>(string), length));
-				std::wstring wide = std::wstring(length + 1, L'\0');
+				std::wstring wide = std::wstring(cstring.length() + 1, L'\0');
 
 				size_t converted;
 
-				mbstowcs_s(&converted, wide.data(), wide.size(), cstring.c_str(), length);
+				mbstowcs_s(&converted, wide.data(), wide.size(), cstring.c_str(), cstring.length());
 
 				wide.erase(wide.size() - 1);
 				return std::format(L"\"{:}\"", wide);
