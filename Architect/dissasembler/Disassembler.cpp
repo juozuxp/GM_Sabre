@@ -59,18 +59,19 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 		{
 			if (prefixes.m_REX)
 			{
-				resolved.m_Size = 1;
-				return resolved;
+				ILInstruction invalid = {};
+
+				invalid.m_Size = 1;
+				return invalid;
 			}
 
 			if (package->m_Prefix.m_Instruction != InsType_invalid)
 			{
 				if (prefixes.m_Instruction != InsType_invalid)
 				{
-					ILInstruction bytes;
-
-					bytes.m_Type = prefixes.m_Instruction;
-					return bytes;
+					resolved.m_Type = package->m_Prefix.m_Instruction;
+					resolved.m_Size = 1;
+					return resolved;
 				}
 
 				prefixes.m_Instruction = package->m_Prefix.m_Instruction;
@@ -95,22 +96,20 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 				{
 					if (!redirect.m_Prefix.m_ValidDefault)
 					{
-						resolved.m_Size = 1;
-						return resolved;
+						ILInstruction invalid = {};
+
+						invalid.m_Size = 1;
+						return invalid;
 					}
 
 					package = &core[redirect.m_BaseIndex + redirect.m_Prefix.m_IndexDefault];
 				}
-				else if (((redirect.m_Prefix.m_Value >> count) & 1) != 0)
-				{
-					uint8_t index = ((redirect.m_Prefix.m_Value >> 8) >> (count * 3)) & ((1 << 3) - 1);
-
-					package = &core[redirect.m_BaseIndex + index];
-				}
 				else
 				{
-					resolved.m_Size = 1;
-					return resolved;
+					uint8_t index = ((redirect.m_Prefix.m_Value >> 8) >> (count * 3)) & ((1 << 3) - 1);
+					package = &core[redirect.m_BaseIndex + index];
+
+					prefixes.m_Instruction = InsType_invalid;
 				}
 			}
 			else if (redirect.m_Type == ReType::X0F383A)
@@ -119,11 +118,15 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 				{
 					uint8_t index = ((redirect.m_x0F383A.m_Value >> 4) >> (x0F383A * 2)) & ((1 << 2) - 1);
 					package = &core[redirect.m_BaseIndex + index];
+
+					x0F383A = X0F383A_None;
 				}
 				else
 				{
-					resolved.m_Size = 1;
-					return resolved;
+					ILInstruction invalid = {};
+
+					invalid.m_Size = 1;
+					return invalid;
 				}
 			}
 			else
@@ -149,8 +152,10 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 					}
 					else
 					{
-						resolved.m_Size = 1;
-						return resolved;
+						ILInstruction invalid = {};
+
+						invalid.m_Size = 1;
+						return invalid;
 					}
 				} break;
 				case ReType::Reg:
@@ -161,8 +166,10 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 					}
 					else
 					{
-						resolved.m_Size = 1;
-						return resolved;
+						ILInstruction invalid = {};
+
+						invalid.m_Size = 1;
+						return invalid;
 					}
 				} break;
 				case ReType::Mod:
@@ -173,8 +180,10 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 					}
 					else
 					{
-						resolved.m_Size = 1;
-						return resolved;
+						ILInstruction invalid = {};
+
+						invalid.m_Size = 1;
+						return invalid;
 					}
 				} break;
 				}
@@ -184,6 +193,21 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 		}
 
 		break;
+	}
+
+	if (x0F383A != X0F383A_None)
+	{
+		ILInstruction invalid = {};
+
+		invalid.m_Size = 1;
+		return invalid;
+	}
+
+	if (prefixes.m_Instruction != InsType_invalid)
+	{
+		resolved.m_Size = 1;
+		resolved.m_Type = prefixes.m_Instruction;
+		return resolved;
 	}
 
 	uint8_t sib_base = ~0;
@@ -229,8 +253,10 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 
 				if (resolved.m_Operands[i].m_Register.m_Base >= registerCount[static_cast<uint8_t>(operand.m_Register)])
 				{
-					resolved.m_Size = 1;
-					return resolved;
+					ILInstruction invalid = {};
+
+					invalid.m_Size = 1;
+					return invalid;
 				}
 
 				break;
@@ -367,8 +393,10 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 
 			if (resolved.m_Operands[i].m_Register.m_Base >= registerCount[static_cast<uint8_t>(operand.m_Register)])
 			{
-				resolved.m_Size = 1;
-				return resolved;
+				ILInstruction invalid = {};
+
+				invalid.m_Size = 1;
+				return invalid;
 			}
 		} break;
 		}

@@ -127,10 +127,10 @@ struct ILInstruction
 #define REG_CL 0x01 // cl
 #define REG_DL 0x02 // dl
 #define REG_BL 0x03 // bl
-#define REG_AH 0x04 // ah
-#define REG_CH 0x05 // ch
-#define REG_DH 0x06 // dh
-#define REG_BH 0x07 // bh
+#define REG_AH 0x00 // ah
+#define REG_CH 0x01 // ch
+#define REG_DH 0x02 // dh
+#define REG_BH 0x03 // bh
 
 #define REG_SPL 0x04 // spl REX extention
 #define REG_BPL 0x05 // bpl REX extention
@@ -172,6 +172,24 @@ struct ILInstruction
 #define REG_R13B 0x0D // r13b REX extention
 #define REG_R14B 0x0E // r14b REX extention
 #define REG_R15B 0x0F // r15b REX extention
+
+#define REG_ST0 0x00 // st(0)
+#define REG_ST1 0x01 // st(1)
+#define REG_ST2 0x02 // st(2)
+#define REG_ST3 0x03 // st(3)
+#define REG_ST4 0x04 // st(4)
+#define REG_ST5 0x05 // st(5)
+#define REG_ST6 0x06 // st(6)
+#define REG_ST7 0x07 // st(7)
+
+#define REG_MM0 0x00 // mm0
+#define REG_MM1 0x01 // mm1
+#define REG_MM2 0x02 // mm2
+#define REG_MM3 0x03 // mm3
+#define REG_MM4 0x04 // mm4
+#define REG_MM5 0x05 // mm5
+#define REG_MM6 0x06 // mm6
+#define REG_MM7 0x07 // mm7
 
 #define REG_XMM0 0x00 // xmm0
 #define REG_XMM1 0x01 // xmm1
@@ -226,3 +244,10 @@ struct ILInstruction
 #define REG_DR13 0x0D // dr13 REX extention
 #define REG_DR14 0x0E // dr14 REX extention
 #define REG_DR15 0x0F // dr15 REX extention
+
+#define REG_CS 0 // cs
+#define REG_SS 1 // ss
+#define REG_DS 2 // ds
+#define REG_ES 3 // es
+#define REG_GS 4 // gs
+#define REG_FS 5 // fs
