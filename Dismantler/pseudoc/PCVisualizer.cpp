@@ -263,7 +263,7 @@ std::wstring PCVisualizer::ExpressionToString(const State& state, const PCExpres
 	} break;
 	case PCExpression::Type::Literal:
 	{
-		return std::format(L"{:}", expression.m_Literal);
+		return std::format(L"0x{:X}", expression.m_Literal);
 	} break;
 	case PCExpression::Type::Dereference:
 	{

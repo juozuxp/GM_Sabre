@@ -752,6 +752,8 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 	constexpr PCVariable::Size sizeMap[] = { PCVariable::Size::int8, PCVariable::Size::int8, PCVariable::Size::int16, PCVariable::Size::int32, PCVariable::Size::int64 };
 	constexpr PCVariable::Type typeMap[] = { PCVariable::Type::None, PCVariable::Type::Local, PCVariable::Type::Static, PCVariable::Type::Local, PCVariable::Type::Argument };
 
+	constexpr uint64_t mask[] = { 0ull, (1ull << 8) - 1, (1ull << 16) - 1, (1ull << 32) - 1, ~0ull };
+
 	PCExpression expression;
 
 	switch (operand.m_Type)
@@ -830,7 +832,7 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 	} break;
 	case KaraOperand::Type::Literal:
 	{
-		expression.m_Literal = operand.m_Literal;
+		expression.m_Literal = operand.m_Literal & mask[operand.m_Scale];
 		expression.m_Type = PCExpression::Type::Literal;
 	} break;
 	case KaraOperand::Type::Dereference:
@@ -1074,11 +1076,13 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 			std::unique_ptr<PCExpression> expLhs = std::make_unique<PCExpression>(std::move(expression));
 			std::unique_ptr<PCExpression> expRhs = std::make_unique<PCExpression>();
 
+			bool sign = operand.m_Expression.m_Offset < 0;
+
 			expRhs->m_Type = PCExpression::Type::Literal;
-			expRhs->m_Variable = operand.m_Expression.m_Offset;
+			expRhs->m_Literal = sign ? -operand.m_Expression.m_Offset : operand.m_Expression.m_Offset;
 
 			expression.m_Type = PCExpression::Type::Operation;
-			expression.m_Operation.m_Expression = PCExpression::Expression::Add;
+			expression.m_Operation.m_Expression = sign ? PCExpression::Expression::Sub : PCExpression::Expression::Add;
 
 			expression.m_Operation.m_Left = std::move(expLhs);
 			expression.m_Operation.m_Right = std::move(expRhs);
