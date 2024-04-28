@@ -8,8 +8,10 @@
              utility:VsTheme.UseVsTheme="True"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
-             Name="MyToolWindow">
+             Name="MyToolWindow"
+             FontFamily="pack://application:,,,/Saber;component/fonts/ubuntumono-regular.ttf #Ubuntu Mono" 
+             FontSize="14">
     <Grid>
-        <TextBox IsReadOnly="True" x:Name="m_Display" FontFamily="pack://application:,,,/Saber;component/fonts/ubuntumono-regular.ttf #Ubuntu Mono" FontSize="14"></TextBox>
+        <TextBox IsReadOnly="True" x:Name="m_Display"  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"></TextBox>
     </Grid>
 </UserControl>
