@@ -245,6 +245,11 @@ struct ILInstruction
 #define REG_DR14 0x0E // dr14 REX extention
 #define REG_DR15 0x0F // dr15 REX extention
 
+#define REG_BND0 0x00 // bnd0
+#define REG_BND1 0x01 // bnd1
+#define REG_BND2 0x02 // bnd2
+#define REG_BND3 0x03 // bnd3
+
 #define REG_CS 0 // cs
 #define REG_SS 1 // ss
 #define REG_DS 2 // ds

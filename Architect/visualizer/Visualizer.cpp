@@ -98,7 +98,7 @@ std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstru
 				}
 				else
 				{
-					visual.m_Memory.m_Multiplier = 0;
+					visual.m_Memory.m_Multiplier = 1;
 					visual.m_Memory.m_Index = VIS_INVALID_REGISTER;
 				}
 

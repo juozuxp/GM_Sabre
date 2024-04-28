@@ -193,7 +193,7 @@ namespace Sabre.Dismantler
 
 							builder.Append($"\0{c_RegisterColor}{c_Registers[visual.m_Memory.m_Index]}\x1");
 
-							if (visual.m_Memory.m_Multiplier != 0)
+							if (visual.m_Memory.m_Multiplier != 1)
 							{
 								builder.Append($" * \0{c_NumberColor}{visual.m_Memory.m_Multiplier}\x1");
 							}
