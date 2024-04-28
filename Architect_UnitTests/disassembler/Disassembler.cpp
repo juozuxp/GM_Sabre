@@ -143,7 +143,7 @@ public:
 
 	TEST_METHOD(Disassemble_mov_4)
 	{
-		constexpr uint8_t code[] = { 0x48, 0x66, 0x89, 0xC4 }; // invalid rex.w .66 mov rsp, rax
+		constexpr uint8_t code[] = { 0x8B, 0x04, 0x25, 0x08, 0x00, 0x00, 0x00 }; // mov eax, dword ptr [8]
 
 		std::vector<ILInstruction> instructions;
 		Disassembler dissasembler;
@@ -152,12 +152,205 @@ public:
 
 		Assert::IsTrue(instructions.size() > 0);
 
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
 		const ILInstruction& instruction = instructions[0];
 
-		Assert::AreEqual(instruction.m_Type, InsType_invalid);
-		Assert::AreEqual<uint8_t>(instruction.m_Size, 1);
+		Assert::AreEqual(instruction.m_Type, InsType_mov);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
 
-		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_None);
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_32);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_Register);
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Register.m_Type, Register::general);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_Base, REG_EAX);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_BaseHigh, false);
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Scale, ILOperandScale_32);
+		Assert::AreEqual(instruction.m_Operands[1].m_Type, ILOperandType_MemoryAbsolute);
+
+		Assert::AreEqual<int64_t>(instruction.m_Operands[1].m_MemoryValue.m_Value, 8);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[1].m_MemoryValue.m_Segment, IL_INVALID_REGISTER);
+
+		Assert::AreEqual(instruction.m_Operands[2].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_mov_5)
+	{
+		constexpr uint8_t code[] = { 0x8B, 0x04, 0x05, 0x08, 0x00, 0x00, 0x00 }; // mov eax, dword ptr [rax + 8]
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::IsTrue(instructions.size() > 0);
+
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_mov);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_32);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_Register);
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Register.m_Type, Register::general);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_Base, REG_EAX);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_BaseHigh, false);
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Scale, ILOperandScale_32);
+		Assert::AreEqual(instruction.m_Operands[1].m_Type, ILOperandType_Memory);
+
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[1].m_Memory.m_Segment, IL_INVALID_REGISTER);
+		Assert::AreEqual(instruction.m_Operands[1].m_Memory.m_Scale, ILMemoryScaler_1);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[1].m_Memory.m_Base, IL_INVALID_REGISTER);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[1].m_Memory.m_Index, REG_RAX);
+		Assert::AreEqual<int32_t>(instruction.m_Operands[1].m_Memory.m_Offset, 8);
+
+		Assert::AreEqual(instruction.m_Operands[2].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_mov_6)
+	{
+		constexpr uint8_t code[] = { 0x8B, 0x40, 0x08 }; // mov eax, dword ptr [rax + 8]
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::IsTrue(instructions.size() > 0);
+
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_mov);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_32);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_Register);
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Register.m_Type, Register::general);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_Base, REG_EAX);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_BaseHigh, false);
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Scale, ILOperandScale_32);
+		Assert::AreEqual(instruction.m_Operands[1].m_Type, ILOperandType_Memory);
+
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[1].m_Memory.m_Segment, IL_INVALID_REGISTER);
+		Assert::AreEqual(instruction.m_Operands[1].m_Memory.m_Scale, ILMemoryScaler_1);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[1].m_Memory.m_Base, REG_RAX);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[1].m_Memory.m_Index, IL_INVALID_REGISTER);
+		Assert::AreEqual<int32_t>(instruction.m_Operands[1].m_Memory.m_Offset, 8);
+
+		Assert::AreEqual(instruction.m_Operands[2].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_mov_7)
+	{
+		constexpr uint8_t code[] = { 0x8B, 0x80, 0x00, 0x01, 0x00, 0x00 }; // mov eax, dword ptr [rax + 8]
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::IsTrue(instructions.size() > 0);
+
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_mov);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_32);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_Register);
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Register.m_Type, Register::general);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_Base, REG_EAX);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_BaseHigh, false);
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Scale, ILOperandScale_32);
+		Assert::AreEqual(instruction.m_Operands[1].m_Type, ILOperandType_Memory);
+
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[1].m_Memory.m_Segment, IL_INVALID_REGISTER);
+		Assert::AreEqual(instruction.m_Operands[1].m_Memory.m_Scale, ILMemoryScaler_1);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[1].m_Memory.m_Base, REG_RAX);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[1].m_Memory.m_Index, IL_INVALID_REGISTER);
+		Assert::AreEqual<int32_t>(instruction.m_Operands[1].m_Memory.m_Offset, 256);
+
+		Assert::AreEqual(instruction.m_Operands[2].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_mov_8)
+	{
+		constexpr uint8_t code[] = { 0xA0, 0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01 }; // mov al, byte ptr [0123456789ABCDEF]
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::IsTrue(instructions.size() > 0);
+
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_mov);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_8);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_Register);
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Register.m_Type, Register::general);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_Base, REG_AL);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_BaseHigh, false);
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Scale, ILOperandScale_8);
+		Assert::AreEqual(instruction.m_Operands[1].m_Type, ILOperandType_MemoryAbsolute);
+
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[1].m_MemoryValue.m_Segment, IL_INVALID_REGISTER);
+		Assert::AreEqual<int64_t>(instruction.m_Operands[1].m_MemoryValue.m_Value, 0x0123456789ABCDEF);
+
+		Assert::AreEqual(instruction.m_Operands[2].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_mov_9)
+	{
+		constexpr uint8_t code[] = { 0x48, 0xB8, 0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01 }; // mov rax, 0x0123456789ABCDEF
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::IsTrue(instructions.size() > 0);
+
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_mov);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_64);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_Register);
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Register.m_Type, Register::general);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_Base, REG_RAX);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_BaseHigh, false);
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Scale, ILOperandScale_64);
+		Assert::AreEqual(instruction.m_Operands[1].m_Type, ILOperandType_Value);
+
+		Assert::AreEqual<int64_t>(instruction.m_Operands[1].m_Value, 0x0123456789ABCDEF);
+
+		Assert::AreEqual(instruction.m_Operands[2].m_Type, ILOperandType_None);
 	}
 
 	TEST_METHOD(Disassemble_fwait_0)
@@ -322,7 +515,7 @@ public:
 
 	TEST_METHOD(Disassemble_psubq)
 	{
-		constexpr uint8_t code[] = { 0x0F, 0xFB, 0x3C, 0x00 }; // psubq mm7, [rax + rax]
+		constexpr uint8_t code[] = { 0x0F, 0xFB, 0x3C, 0x00 }; // psubq mm7, qword ptr [rax + rax]
 
 		std::vector<ILInstruction> instructions;
 		Disassembler dissasembler;
@@ -488,6 +681,44 @@ public:
 		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_None);
 	}
 
+	TEST_METHOD(Disassemble_invalid_7)
+	{
+		constexpr uint8_t code[] = { 0x66, 0x0F, 0x1A, 0xC7 }; // invalid
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::IsTrue(instructions.size() > 0);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_invalid);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, 1);
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_invalid_8)
+	{
+		constexpr uint8_t code[] = { 0x48, 0x66, 0x89, 0xC4 }; // invalid rex.w .66 mov rsp, rax
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::IsTrue(instructions.size() > 0);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_invalid);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, 1);
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_None);
+	}
+
 	TEST_METHOD(Disassemble_fxam)
 	{
 		constexpr uint8_t code[] = { 0xD9, 0xE5 }; // fxam
@@ -564,5 +795,265 @@ public:
 		Assert::AreEqual<uint8_t>(instruction.m_Operands[1].m_Register.m_BaseHigh, false);
 
 		Assert::AreEqual(instruction.m_Operands[2].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_cmp)
+	{
+		constexpr uint8_t code[] = { 0x3C, 0x09 }; // cmp al, 9
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_cmp);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_8);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_Register);
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Register.m_Type, Register::general);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_Base, REG_AL);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_BaseHigh, false);
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Scale, ILOperandScale_8);
+		Assert::AreEqual(instruction.m_Operands[1].m_Type, ILOperandType_Value);
+
+		Assert::AreEqual<int64_t>(instruction.m_Operands[1].m_Value, 9);
+
+		Assert::AreEqual(instruction.m_Operands[2].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_bswap)
+	{
+		constexpr uint8_t code[] = { 0x4F, 0x0F, 0xC8 }; // bswap r8
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_bswap);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_64);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_Register);
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Register.m_Type, Register::general);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_Base, REG_R8);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_BaseHigh, false);
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_rol)
+	{
+		constexpr uint8_t code[] = { 0x41, 0xD1, 0xC1 }; // rol r9d, 1
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_rol);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_32);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_Register);
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Register.m_Type, Register::general);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_Base, REG_R9);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_BaseHigh, false);
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Scale, ILOperandScale_8);
+		Assert::AreEqual(instruction.m_Operands[1].m_Type, ILOperandType_Value);
+
+		Assert::AreEqual<int64_t>(instruction.m_Operands[1].m_Value, 1);
+
+		Assert::AreEqual(instruction.m_Operands[2].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_ret)
+	{
+		constexpr uint8_t code[] = { 0xC2, 0xBB, 0xAA }; // ret 0xAABB
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_ret);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_16);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_Value);
+
+		Assert::AreEqual<int64_t>(instruction.m_Operands[0].m_Value, static_cast<int16_t>(0xAABB));
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_sbb)
+	{
+		constexpr uint8_t code[] = { 0x66, 0x1D, 0x23, 0x01 }; // sbb ax, 0x0123
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_sbb);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_16);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_Register);
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Register.m_Type, Register::general);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_Base, REG_AX);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_BaseHigh, false);
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Scale, ILOperandScale_16);
+		Assert::AreEqual(instruction.m_Operands[1].m_Type, ILOperandType_Value);
+
+		Assert::AreEqual<int64_t>(instruction.m_Operands[1].m_Value, 0x0123);
+
+		Assert::AreEqual(instruction.m_Operands[2].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_xor)
+	{
+		constexpr uint8_t code[] = { 0x41, 0x81, 0xF5, 0x67, 0x45, 0x23, 0x01 }; // xor r13d, 0x01234567
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_xor);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_32);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_Register);
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Register.m_Type, Register::general);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_Base, REG_R13D);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Register.m_BaseHigh, false);
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Scale, ILOperandScale_32);
+		Assert::AreEqual(instruction.m_Operands[1].m_Type, ILOperandType_Value);
+
+		Assert::AreEqual<int64_t>(instruction.m_Operands[1].m_Value, 0x01234567);
+
+		Assert::AreEqual(instruction.m_Operands[2].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_vmread)
+	{
+		constexpr uint8_t code[] = { 0x45, 0x0F, 0x78, 0x5C, 0x24, 0x0A }; // vmread qword ptr [r12 + 10], r11
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_vmread);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_64);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_Memory);
+
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Memory.m_Segment, IL_INVALID_REGISTER);
+		Assert::AreEqual(instruction.m_Operands[0].m_Memory.m_Scale, ILMemoryScaler_1);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Memory.m_Base, REG_R12);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Memory.m_Index, IL_INVALID_REGISTER);
+		Assert::AreEqual<int32_t>(instruction.m_Operands[0].m_Memory.m_Offset, 10);
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Scale, ILOperandScale_64);
+		Assert::AreEqual(instruction.m_Operands[1].m_Type, ILOperandType_Register);
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Register.m_Type, Register::general);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[1].m_Register.m_Base, REG_R11);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[1].m_Register.m_BaseHigh, false);
+
+		Assert::AreEqual(instruction.m_Operands[2].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_jo)
+	{
+		constexpr uint8_t code[] = { 0x0F, 0x80, 0x44, 0x33, 0x22, 0x11 }; // jo 0x11223344
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_jo);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_32);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_ValueRelative);
+
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Relative.m_Segment, IL_INVALID_REGISTER);
+		Assert::AreEqual<int64_t>(instruction.m_Operands[0].m_Relative.m_Value, 0x11223344);
+
+		Assert::AreEqual(instruction.m_Operands[1].m_Type, ILOperandType_None);
+	}
+
+	TEST_METHOD(Disassemble_fstp)
+	{
+		constexpr uint8_t code[] = { 0x41, 0xDB, 0x7A, 0x2D }; // fstp tbyte ptr [r10 + 45]
+
+		std::vector<ILInstruction> instructions;
+		Disassembler dissasembler;
+
+		dissasembler.Disassemble(code, sizeof(code), instructions);
+
+		Assert::AreEqual<size_t>(instructions.size(), 1);
+
+		const ILInstruction& instruction = instructions[0];
+
+		Assert::AreEqual(instruction.m_Type, InsType_fstp);
+		Assert::AreEqual<uint8_t>(instruction.m_Size, sizeof(code));
+
+		Assert::AreEqual(instruction.m_Operands[0].m_Scale, ILOperandScale_80);
+		Assert::AreEqual(instruction.m_Operands[0].m_Type, ILOperandType_Memory);
+
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Memory.m_Segment, IL_INVALID_REGISTER);
+		Assert::AreEqual(instruction.m_Operands[0].m_Memory.m_Scale, ILMemoryScaler_1);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Memory.m_Base, REG_R10);
+		Assert::AreEqual<uint8_t>(instruction.m_Operands[0].m_Memory.m_Index, IL_INVALID_REGISTER);
+		Assert::AreEqual<int32_t>(instruction.m_Operands[0].m_Memory.m_Offset, 45);
 	}
 };

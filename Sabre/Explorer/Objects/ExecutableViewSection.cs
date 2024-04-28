@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Markup;
 using Microsoft.VisualStudio.VCProjectEngine;
+using Sabre.Dismantler;
 using Sabre.Dismantler.Visuals;
 using Sabre.ListItems;
 

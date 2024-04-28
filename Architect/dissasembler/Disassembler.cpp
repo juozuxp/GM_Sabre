@@ -493,6 +493,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 		{
 			resolved.m_Operands[i].m_Type = ILOperandType_ValueRelative;
 			resolved.m_Operands[i].m_Relative.m_Value = value;
+			resolved.m_Operands[i].m_Relative.m_Segment = IL_INVALID_REGISTER;
 		}
 		else if (operand.m_Type == OpType::moffs)
 		{

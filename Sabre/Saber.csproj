@@ -61,7 +61,7 @@
     <Compile Include="Dismantler\Visuals\Scale.cs" />
     <Compile Include="Dismantler\Visuals\Value.cs" />
     <Compile Include="Dismantler\Visuals\NativeVisual.cs" />
-    <Compile Include="Dismantler\Visuals\Visualizer.cs" />
+    <Compile Include="Dismantler\Visualizer.cs" />
     <Compile Include="Explorer\ExecutableExplorer.cs" />
     <Compile Include="Explorer\Objects\ExecutableXRef.cs" />
     <Compile Include="Explorer\Objects\ExecutableString.cs" />
