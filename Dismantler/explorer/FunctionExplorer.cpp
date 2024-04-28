@@ -580,7 +580,8 @@ bool FunctionExplorer::ReadOperand(const ILOperand& operand, const State& state,
 
 void FunctionExplorer::GatherExports(std::vector<const void*>& functions)
 {
-	if (m_Buffer->GetFileHeader().Machine != IMAGE_FILE_MACHINE_AMD64)
+	const IMAGE_FILE_HEADER& file = m_Buffer->GetFileHeader();
+	if (file.Machine != IMAGE_FILE_MACHINE_AMD64)
 	{
 		return;
 	}
@@ -593,6 +594,19 @@ void FunctionExplorer::GatherExports(std::vector<const void*>& functions)
 		return;
 	}
 
+	std::vector<std::pair<uint64_t, uint64_t>> executableArea;
+
+	const IMAGE_SECTION_HEADER* section = IMAGE_FIRST_SECTION(&m_Buffer->GetNtHeaders64());
+	for (uint32_t i = 0; i < file.NumberOfSections; i++, section++)
+	{
+		if ((section->Characteristics & IMAGE_SCN_MEM_EXECUTE) == 0)
+		{
+			continue;
+		}
+
+		executableArea.push_back(std::pair<uint64_t, uint64_t>(optional.ImageBase + section->VirtualAddress, optional.ImageBase + section->VirtualAddress + section->SizeOfRawData));
+	}
+
 	const IMAGE_EXPORT_DIRECTORY* exportTable = reinterpret_cast<const IMAGE_EXPORT_DIRECTORY*>(reinterpret_cast<uintptr_t>(m_Buffer->GetBuffer()) + exportDirectory->VirtualAddress);
 
 	const uint32_t* names = reinterpret_cast<const uint32_t*>(reinterpret_cast<uintptr_t>(m_Buffer->GetBuffer()) + exportTable->AddressOfNames);
@@ -602,6 +616,22 @@ void FunctionExplorer::GatherExports(std::vector<const void*>& functions)
 	{
 		if (*exports >= exportDirectory->VirtualAddress &&
 			*exports < (exportDirectory->VirtualAddress + exportDirectory->Size))
+		{
+			continue;
+		}
+
+		bool executable = false;
+		uint64_t base = optional.ImageBase + *exports;
+		for (const std::pair<uint64_t, uint64_t>& area : executableArea)
+		{
+			if (base >= area.first &&
+				base < area.second)
+			{
+				executable = true;
+			}
+		}
+
+		if (!executable)
 		{
 			continue;
 		}
@@ -628,11 +658,11 @@ void FunctionExplorer::GatherExports(std::vector<const void*>& functions)
 			mbstowcs_s(&converted, wide.data(), wide.size(), name, length);
 
 			wide.erase(wide.size() - 1);
-			m_Names[optional.ImageBase + *exports] = wide;
+			m_Names[base] = wide;
 		}
 		else
 		{
-			m_Names[optional.ImageBase + *exports] = std::format(L"export_{:}", exportTable->Base + i);
+			m_Names[base] = std::format(L"export_{:}", exportTable->Base + i);
 		}
 
 		functions.push_back(reinterpret_cast<const uint8_t*>(m_Buffer->GetBuffer()) + *exports);
