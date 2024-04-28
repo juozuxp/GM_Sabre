@@ -3,6 +3,7 @@
 #include <string>
 
 #include <include/Disassembler.hpp>
+#include <include/Visualizer.hpp>
 
 namespace Microsoft
 {
@@ -84,6 +85,21 @@ namespace Microsoft
 					L"sreg",
 					L"cr",
 					L"dr"
+				};
+
+				return string[static_cast<uint8_t>(value)];
+			}
+
+			template<> static std::wstring ToString<Visualizer::VisType>(const Visualizer::VisType& value)
+			{
+				static std::wstring string[] =
+				{
+					L"Instruction",
+					L"OperandMemory",
+					L"OperandMemoryValue",
+					L"OperandAddressValue",
+					L"OperandValue",
+					L"OperandRegister"
 				};
 
 				return string[static_cast<uint8_t>(value)];

@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#define VIS_INVALID_REGISTER static_cast<uint8_t>(~0);
+#define VIS_INVALID_REGISTER static_cast<uint8_t>(~0)
 
 class Visualizer
 {
@@ -36,7 +36,7 @@ public:
 		OperandMemoryValue,
 		OperandAddressValue,
 		OperandValue,
-		OperandRegister,
+		OperandRegister
 	};
 
 #pragma pack(push, 1)

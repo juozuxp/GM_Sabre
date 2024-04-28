@@ -183,6 +183,7 @@ std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstru
 
 				visual.m_Value.m_Size = operand.m_Scale;
 				visual.m_Value.m_Value = operand.m_Value;
+				visual.m_Value.m_Segment = VIS_INVALID_REGISTER;
 
 				visuals.push_back(visual);
 			} break;
@@ -193,6 +194,7 @@ std::vector<Visualizer::Visual> Visualizer::ToVisuals(const std::vector<ILInstru
 				visual.m_Type = VisType::OperandAddressValue;
 
 				visual.m_Value.m_Size = operand.m_Scale;
+				visual.m_Value.m_Segment = VIS_INVALID_REGISTER;
 				visual.m_Value.m_Value = reinterpret_cast<int64_t>(reference) + operand.m_Relative.m_Value;
 
 				visuals.push_back(visual);
