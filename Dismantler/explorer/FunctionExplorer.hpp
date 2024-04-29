@@ -47,7 +47,6 @@ public:
 
 public:
 	std::vector<Function> ExploreExecutable();
-	std::vector<Function> ExploreFunction(const void* function);
 
 private:
 	void CollectFunctions(const void* function, std::vector<Function>& functions);

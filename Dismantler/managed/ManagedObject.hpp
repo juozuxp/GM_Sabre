@@ -18,4 +18,7 @@ public:
 
 private:
 	ManagedObject* m_Handle;
+
+private:
+	friend class ManagedObject_Unit;
 };

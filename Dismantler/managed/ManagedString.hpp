@@ -53,4 +53,12 @@ public:
 private:
 	wchar_t* m_Buffer = nullptr;
 	uint32_t m_Size = 0;
+
+private:
+	friend class ManagedString_Unit;
+	friend class PEImportEntry_Unit;
+	friend class PEImportTable_Unit;
+	friend class PEExportEntry_Unit;
+	friend class PEExportTable_Unit;
+	friend class PEDelayImportTable_Unit;
 };

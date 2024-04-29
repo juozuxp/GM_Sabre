@@ -18,16 +18,31 @@ PEHeaders* ExecutableExplorer::GetHeaders() const
 
 ExecutableView* ExecutableExplorer::GetExecutableView() const
 {
+	if (m_Buffer.GetBuffer() == nullptr)
+	{
+		return nullptr;
+	}
+
 	return new ExecutableView(m_Buffer, m_Disassembler, m_Visualizer);
 }
 
 ManagedString* ExecutableExplorer::GetPCFunction(uintptr_t function)
 {
+	if (m_Buffer.GetBuffer() == nullptr)
+	{
+		return nullptr;
+	}
+
 	return new ManagedString(m_PCVisualizer.ToString(m_PCCoverter.Convert(function)));
 }
 
 ManagedArray<ExecutableExplorer::ManagedFunction>* ExecutableExplorer::GetExecutableFunctions()
 {
+	if (m_Buffer.GetBuffer() == nullptr)
+	{
+		return nullptr;
+	}
+
 	std::vector<FunctionExplorer::Function> functions = m_FunctionExplorer.ExploreExecutable();
 	ManagedArray<ManagedFunction>* array = new ManagedArray<ManagedFunction>(functions.size());
 
@@ -48,6 +63,11 @@ ManagedArray<ExecutableExplorer::ManagedFunction>* ExecutableExplorer::GetExecut
 
 ManagedArray<ExecutableExplorer::ManagedStringEntry>* ExecutableExplorer::GetExecutableStrings()
 {
+	if (m_Buffer.GetBuffer() == nullptr)
+	{
+		return nullptr;
+	}
+
 	std::vector<StringExplorer::Entry> entries = m_StringExplorer.ExploreExecutable();
 	ManagedArray<ManagedStringEntry>* array = new ManagedArray<ManagedStringEntry>(entries.size());
 
@@ -68,6 +88,11 @@ ManagedArray<ExecutableExplorer::ManagedStringEntry>* ExecutableExplorer::GetExe
 
 ManagedArray<XRefExplorer::Entry>* ExecutableExplorer::GetAddressXRefs(uintptr_t address) const
 {
+	if (m_Buffer.GetBuffer() == nullptr)
+	{
+		return nullptr;
+	}
+
 	return new ManagedArray<XRefExplorer::Entry>(m_XRefExplorer.GetXReferences(address));
 }
 

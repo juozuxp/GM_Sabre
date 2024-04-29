@@ -44,14 +44,6 @@ std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreExecutable()
 	return found;
 }
 
-std::vector<FunctionExplorer::Function> FunctionExplorer::ExploreFunction(const void* function)
-{
-	std::vector<FunctionExplorer::Function> functions;
-
-	CollectFunctions(function, functions);
-	return functions;
-}
-
 void FunctionExplorer::CollectFunctions(const void* function, std::vector<Function>& functions)
 {
 	if (!m_Explored.insert(function).second)

@@ -115,5 +115,13 @@ private:
 
 	uint32_t m_Size = 0;
 	uint32_t m_Capacity = 0;
+
+private:
+	friend class ManagedArray_Unit;
+	friend class PERelocationTable_Unit;
+	friend class PEImportTable_Unit;
+	friend class PEExportTable_Unit;
+	friend class PEDelayImportTable_Unit;
+	friend class PEHeaders_Unit;
 };
 

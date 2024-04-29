@@ -959,8 +959,9 @@ KaraBlob KaraConverter::Convert(uintptr_t function) const
 					break;
 				}
 
-				pseudo.m_Operands[1].m_Type = KaraOperand::Type::Literal;
 				pseudo.m_Operands[1].m_Literal = 1;
+				pseudo.m_Operands[1].m_Scale = lhs.m_Scale;
+				pseudo.m_Operands[1].m_Type = KaraOperand::Type::Literal;
 
 				block.m_Type = BlockType::Instruction;
 				block.m_Instruction = pseudo;
@@ -987,8 +988,9 @@ KaraBlob KaraConverter::Convert(uintptr_t function) const
 					break;
 				}
 
-				pseudo.m_Operands[1].m_Type = KaraOperand::Type::Literal;
 				pseudo.m_Operands[1].m_Literal = 1;
+				pseudo.m_Operands[1].m_Scale = lhs.m_Scale;
+				pseudo.m_Operands[1].m_Type = KaraOperand::Type::Literal;
 
 				block.m_Type = BlockType::Instruction;
 				block.m_Instruction = pseudo;
