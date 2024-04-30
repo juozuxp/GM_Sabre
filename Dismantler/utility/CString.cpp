@@ -92,7 +92,7 @@ std::string CString::ConvertDefinition(const std::string_view& string)
 {
 	std::string converted;
 
-	converted.reserve(GetLengthReadable(string));
+	converted.reserve(GetLengthDefinition(string));
 	for (char letter : string)
 	{
 		switch (letter)
@@ -146,7 +146,7 @@ std::wstring CString::ConvertDefinition(const std::wstring_view& string)
 {
 	std::wstring converted;
 
-	converted.reserve(GetLengthReadable(string));
+	converted.reserve(GetLengthDefinition(string));
 	for (wchar_t letter : string)
 	{
 		switch (letter)

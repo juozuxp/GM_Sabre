@@ -160,6 +160,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="explorer\ExecutableExplorer_Unit.cpp" />
     <ClCompile Include="explorer\ExecutableView_Unit.cpp" />
     <ClCompile Include="explorer\FunctionExplorer_Unit.cpp" />
     <ClCompile Include="explorer\StringExplorer_Unit.cpp" />

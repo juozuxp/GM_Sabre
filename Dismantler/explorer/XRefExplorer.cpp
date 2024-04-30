@@ -8,6 +8,11 @@ XRefExplorer::Entry::Entry(uintptr_t address, Origin origin) :
 
 XRefExplorer::XRefExplorer(const PEBuffer& buffer)
 {
+	if (buffer.GetBuffer() == nullptr)
+	{
+		return;
+	}
+
 	CollectCodeXRefs(buffer);
 	CollectDataXRefs(buffer);
 }
