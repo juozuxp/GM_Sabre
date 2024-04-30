@@ -123,5 +123,6 @@ private:
 	friend class PEExportTable_Unit;
 	friend class PEDelayImportTable_Unit;
 	friend class PEHeaders_Unit;
+	friend class ExecutableView_Unit;
 };
 

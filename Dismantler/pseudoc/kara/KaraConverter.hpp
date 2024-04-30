@@ -96,4 +96,7 @@ private:
 private:
 	const PEBuffer* m_Buffer;
 	Disassembler m_Disassembler;
+
+private:
+	friend class KaraConverter_Unit;
 };

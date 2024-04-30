@@ -1284,6 +1284,7 @@ KaraBlob KaraConverter::Convert(uintptr_t function) const
 				state.m_LastValid = address;
 			} break;
 			case InsType_mov:
+			case InsType_movzx:
 			{
 				const ILOperand& lhs = ins.m_Operands[0];
 				const ILOperand& rhs = ins.m_Operands[1];

@@ -8,7 +8,7 @@ PCConverter::PCConverter(const PEBuffer& buffer)
 
 PCBlob PCConverter::Convert(uintptr_t function) const
 {
-	State state;
+	State state = {};
 
 	state.m_Blob.m_Function = function;
 	state.m_Kara = m_Kara.Convert(function);
@@ -873,7 +873,7 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 			}
 
 			dereference->m_Type = PCExpression::Type::Variable;
-			dereference->m_Variable = index;
+			dereference->m_Variable = index - 1;
 		}
 
 		if (operand.m_Expression.m_Multiplier != 1)
@@ -999,7 +999,7 @@ PCExpression PCConverter::ConvertExpression(State& state, const KaraOperand& ope
 			}
 
 			expression.m_Type = PCExpression::Type::Variable;
-			expression.m_Variable = index;
+			expression.m_Variable = index - 1;
 		}
 
 		if (operand.m_Expression.m_Multiplier != 1)

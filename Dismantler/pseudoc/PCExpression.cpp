@@ -77,6 +77,7 @@ PCExpression& PCExpression::operator=(const PCExpression& copy)
 		m_Literal = copy.m_Literal;
 	} break;
 	case Type::Variable:
+	case Type::Reference:
 	{
 		m_Variable = copy.m_Variable;
 	} break;

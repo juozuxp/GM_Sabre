@@ -160,6 +160,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="explorer\ExecutableView_Unit.cpp" />
     <ClCompile Include="explorer\FunctionExplorer_Unit.cpp" />
     <ClCompile Include="explorer\StringExplorer_Unit.cpp" />
     <ClCompile Include="explorer\XRefExplorer_Unit.cpp" />
@@ -181,10 +182,18 @@
     <ClCompile Include="pe\PEImportTable_Unit.cpp" />
     <ClCompile Include="pe\PERelocationEntry_Unit.cpp" />
     <ClCompile Include="pe\PERelocationTable_Unit.cpp" />
+    <ClCompile Include="pseudoc\kara\KaraConverter_Unit.cpp" />
+    <ClCompile Include="pseudoc\PCConverter_Unit.cpp" />
+    <ClCompile Include="pseudoc\PCExpression_Unit.cpp" />
+    <ClCompile Include="pseudoc\PCLine_Unit.cpp" />
+    <ClCompile Include="pseudoc\PCVisualizer_Unit.cpp" />
+    <ClCompile Include="utility\CString_Unit.cpp" />
+    <ClCompile Include="utility\LowTrustString_Unit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utility\Object.hpp" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="utility\Setup.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dismantler\Dismantler.vcxproj">
