@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Sabre.Explorer.Objects
 {
-	internal struct ExecutableFunction
+	public struct ExecutableFunction
 	{
 		public uint m_Size;
 		public IntPtr m_Base;

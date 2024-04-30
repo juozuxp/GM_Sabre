@@ -12,7 +12,7 @@ namespace Sabre.Views.FunctionView
 	/// <summary>
 	/// Command handler
 	/// </summary>
-	internal sealed class FunctionViewCommand
+	public sealed class FunctionViewCommand
 	{
 		/// <summary>
 		/// Command ID.

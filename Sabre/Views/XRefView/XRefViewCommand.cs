@@ -12,7 +12,7 @@ namespace Sabre.Views.XRefView
 	/// <summary>
 	/// Command handler
 	/// </summary>
-	internal sealed class XRefViewCommand
+	public sealed class XRefViewCommand
 	{
 		/// <summary>
 		/// Command ID.
@@ -88,7 +88,7 @@ namespace Sabre.Views.XRefView
 		{
 			this.package.JoinableTaskFactory.RunAsync(async delegate
 			{
-				ToolWindowPane window = await this.package.ShowToolWindowAsync(typeof(XRefView), 0, true, this.package.DisposalToken);
+				ToolWindowPane window = await this.package.ShowToolWindowAsync(typeof(XRefViewView), 0, true, this.package.DisposalToken);
 				if ((null == window) || (null == window.Frame))
 				{
 					throw new NotSupportedException("Cannot create tool window");

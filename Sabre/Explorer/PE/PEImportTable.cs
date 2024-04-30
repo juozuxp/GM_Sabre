@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Sabre.Explorer.PE
 {
-	internal struct PEImportTable
+	public struct PEImportTable
 	{
 		public string m_Name;
 

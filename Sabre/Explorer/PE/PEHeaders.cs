@@ -11,7 +11,7 @@ using System.Windows.Documents;
 
 namespace Sabre.Explorer.PE
 {
-	internal struct PEHeaders
+	public struct PEHeaders
 	{
 		public IntPtr m_Base;
 

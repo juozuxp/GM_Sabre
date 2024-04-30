@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Sabre.Native.Managed
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal readonly struct ManagedString : IDisposable
+	public readonly struct ManagedString : IDisposable
 	{
 		private readonly ManagedObject m_Base;
 

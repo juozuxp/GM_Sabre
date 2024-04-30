@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Sabre.Native.PE
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct IMAGE_IMPORT_DESCRIPTOR
+	public struct IMAGE_IMPORT_DESCRIPTOR
 	{
 		public readonly uint OriginalFirstThunk;				// RVA to original unbound IAT (PIMAGE_THUNK_DATA)
 		public readonly uint TimeDateStamp;						// 0 if not bound,

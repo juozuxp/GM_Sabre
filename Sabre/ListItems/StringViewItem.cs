@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Sabre.ListItems
 {
-	internal class StringViewItem
+	public class StringViewItem
 	{
 		public StringViewItem(ExecutableString executableString)
 		{

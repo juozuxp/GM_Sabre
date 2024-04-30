@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Sabre.Dismantler.Visuals
 {
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
-	internal struct Memory
+	public struct Memory
 	{
 		public Scale m_Size;
 

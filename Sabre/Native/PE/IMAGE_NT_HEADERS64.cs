@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Sabre.Native.PE
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct IMAGE_NT_HEADERS64
+	public struct IMAGE_NT_HEADERS64
 	{
 		public readonly uint Signature;
 		public readonly IMAGE_FILE_HEADER FileHeader;

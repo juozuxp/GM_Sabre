@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Sabre.Native.PE
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct IMAGE_BASE_RELOCATION
+	public struct IMAGE_BASE_RELOCATION
 	{
 		public enum Type
 		{

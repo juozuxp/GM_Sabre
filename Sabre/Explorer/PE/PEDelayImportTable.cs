@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Sabre.Explorer.PE
 {
-	internal struct PEDelayImportTable
+	public struct PEDelayImportTable
 	{
 		public IMAGE_DELAYLOAD_DESCRIPTOR m_Descriptor;
 

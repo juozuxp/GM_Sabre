@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Sabre.Native.PE
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct IMAGE_DELAYLOAD_DESCRIPTOR
+	public struct IMAGE_DELAYLOAD_DESCRIPTOR
 	{
 		public readonly uint AllAttributes;
 		public readonly uint DllNameRVA;						// RVA to the name of the target library (NULL-terminate ASCII string)

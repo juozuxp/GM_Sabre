@@ -12,7 +12,7 @@ namespace Sabre.Views.PseudoC
 	/// <summary>
 	/// Command handler
 	/// </summary>
-	internal sealed class PCCommand
+	public sealed class PCCommand
 	{
 		/// <summary>
 		/// Command ID.

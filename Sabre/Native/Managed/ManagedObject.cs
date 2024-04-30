@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Sabre.Native.Managed
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal readonly struct ManagedObject : IDisposable
+	public readonly struct ManagedObject : IDisposable
 	{
 		[DllImport("Dismantler.dll")]
 		private static extern void Managed_Destroy(IntPtr handle);

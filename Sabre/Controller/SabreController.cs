@@ -9,7 +9,7 @@ using Sabre.Explorer.Objects;
 
 namespace Sabre.Controller
 {
-	internal class SabreController
+	public class SabreController
 	{
 		public delegate void OnLoad();
 		public delegate void OnJumpTo(IntPtr address);

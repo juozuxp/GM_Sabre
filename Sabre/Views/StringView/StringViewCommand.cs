@@ -9,10 +9,10 @@ using Task = System.Threading.Tasks.Task;
 
 namespace Sabre.Views
 {
-    /// <summary>
-    /// Command handler
-    /// </summary>
-    internal sealed class StringViewCommand
+	/// <summary>
+	/// Command handler
+	/// </summary>
+	public sealed class StringViewCommand
     {
         /// <summary>
         /// Command ID.

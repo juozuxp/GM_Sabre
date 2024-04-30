@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Sabre.Native.PE
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct IMAGE_FILE_HEADER
+	public struct IMAGE_FILE_HEADER
 	{
 		public readonly ushort Machine;
 		public readonly ushort NumberOfSections;

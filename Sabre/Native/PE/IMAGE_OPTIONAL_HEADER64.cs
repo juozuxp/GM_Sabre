@@ -3,7 +3,7 @@
 namespace Sabre.Native.PE
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct IMAGE_OPTIONAL_HEADER64
+	public struct IMAGE_OPTIONAL_HEADER64
 	{
 		const int IMAGE_NUMBEROF_DIRECTORY_ENTRIES = 16;
 

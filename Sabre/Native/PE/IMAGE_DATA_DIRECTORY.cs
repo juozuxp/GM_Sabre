@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Sabre.Native.PE
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct IMAGE_DATA_DIRECTORY
+	public struct IMAGE_DATA_DIRECTORY
 	{
 		public readonly uint VirtualAddress;
 		public readonly uint Size;

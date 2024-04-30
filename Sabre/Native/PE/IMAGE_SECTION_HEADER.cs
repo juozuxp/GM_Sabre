@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Sabre.Native.PE
 {
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-	internal struct IMAGE_SECTION_HEADER
+	public struct IMAGE_SECTION_HEADER
 	{
 		const int IMAGE_SIZEOF_SHORT_NAME = 8;
 

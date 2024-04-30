@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace Sabre.Dismantler.Visuals
 {
 	[StructLayout(LayoutKind.Explicit, Pack = 1)]
-	internal struct NativeVisual
+	public struct NativeVisual
 	{
-		internal enum Type : byte
+		public enum Type : byte
 		{
 			Instruction,
 			OperandMemory,

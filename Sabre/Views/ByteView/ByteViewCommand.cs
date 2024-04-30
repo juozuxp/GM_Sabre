@@ -9,10 +9,10 @@ using Task = System.Threading.Tasks.Task;
 
 namespace Sabre.Views.ByteView
 {
-    /// <summary>
-    /// Command handler
-    /// </summary>
-    internal sealed class ByteViewCommand
+	/// <summary>
+	/// Command handler
+	/// </summary>
+	public sealed class ByteViewCommand
     {
         /// <summary>
         /// Command ID.

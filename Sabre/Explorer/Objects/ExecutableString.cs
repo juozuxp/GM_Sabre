@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sabre.Explorer.Objects
 {
-    internal struct ExecutableString
+	public struct ExecutableString
     {
         public bool m_IsWide;
         public IntPtr m_Base;

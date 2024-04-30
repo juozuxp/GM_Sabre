@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Sabre.Explorer.PE
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct PERelocationEntry
+	public struct PERelocationEntry
 	{
 		public byte m_Type;
 		public ushort m_Offset;

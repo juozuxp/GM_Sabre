@@ -12,7 +12,7 @@ using Sabre.Dismantler.Visuals;
 
 namespace Sabre.Dismantler
 {
-	internal static class Visualizer
+	public static class Visualizer
 	{
 		public struct Options
 		{
@@ -225,13 +225,22 @@ namespace Sabre.Dismantler
 
 					case NativeVisual.Type.OperandMemoryValue:
 
-						jumpable = (IntPtr)visual.m_Value.m_Value;
-						builder.Append($"\0{c_MemorySizeColor}{c_MemoryScale[(byte)visual.m_Value.m_Size]}\x1[\0{c_NumberColor}{visual.m_Value.m_Value.ToString("X16")}\x1]");
+						builder.Append($"\0{c_MemorySizeColor}{c_MemoryScale[(byte)visual.m_Value.m_Size]}\x1");
+						if (visual.m_Value.m_Segment != NativeVisual.c_InvalidRegister)
+						{
+							builder.Append($"\0{c_RegisterColor}{c_Registers[visual.m_Value.m_Segment]}\x1:");
+						}
+						else
+						{
+							jumpable = new IntPtr(visual.m_Value.m_Value);
+						}
+
+						builder.Append($"\0{c_NumberColor}{visual.m_Value.m_Value.ToString("X16")}\x1]");
 						break;
 
 					case NativeVisual.Type.OperandAddressValue:
 
-						jumpable = (IntPtr)visual.m_Value.m_Value;
+						jumpable = new IntPtr(visual.m_Value.m_Value);
 						builder.Append($"\0{c_NumberColor}{visual.m_Value.m_Value.ToString("X16")}\x1");
 						break;
 
@@ -269,7 +278,7 @@ namespace Sabre.Dismantler
 
 			if (builder.Length != 0)
 			{
-				elements.Add(new ByteViewItem(address, ByteViewItem.Type.Code, bytesStr, builder.ToString(), jumpable));
+				elements.Add(new ByteViewItem(currentAddress, ByteViewItem.Type.Code, bytesStr, builder.ToString(), jumpable));
 			}
 
 			return elements.ToArray();

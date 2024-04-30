@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Sabre.Native.PE
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct IMAGE_DOS_HEADER
+	public struct IMAGE_DOS_HEADER
 	{
 		public readonly ushort e_magic;			// Magic number
 		public readonly ushort e_cblp;			// Bytes on last page of file

@@ -9,10 +9,10 @@ using static Sabre.Explorer.ExecutableExplorer;
 
 namespace Sabre.Explorer
 {
-	internal class ExecutableExplorer
+	public class ExecutableExplorer
 	{
 		[StructLayout(LayoutKind.Sequential)]
-		internal struct NativePEImportEntry : IDisposable
+		private struct NativePEImportEntry : IDisposable
 		{
 			private readonly ManagedObject m_Base;
 
@@ -40,7 +40,7 @@ namespace Sabre.Explorer
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		struct NativePEExportEntry : IDisposable
+		private struct NativePEExportEntry : IDisposable
 		{
 			private readonly ManagedObject m_Base;
 
@@ -70,7 +70,7 @@ namespace Sabre.Explorer
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		internal struct NativePEExportTable : IDisposable
+		private struct NativePEExportTable : IDisposable
 		{
 			private readonly ManagedObject m_Base;
 
@@ -104,7 +104,7 @@ namespace Sabre.Explorer
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		internal struct NativePEImportTable : IDisposable
+		private struct NativePEImportTable : IDisposable
 		{
 			private readonly ManagedObject m_Base;
 
@@ -138,7 +138,7 @@ namespace Sabre.Explorer
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		struct NativePEDelayImportTable : IDisposable
+		private struct NativePEDelayImportTable : IDisposable
 		{
 			private readonly ManagedObject m_Base;
 
@@ -172,7 +172,7 @@ namespace Sabre.Explorer
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		internal struct NativePERelocationTable : IDisposable
+		private struct NativePERelocationTable : IDisposable
 		{
 			private readonly ManagedObject m_Base;
 
@@ -196,7 +196,7 @@ namespace Sabre.Explorer
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		internal struct NativeHeaders : IDisposable
+		private struct NativeHeaders : IDisposable
 		{
 			private readonly ManagedObject m_Base;
 
@@ -261,7 +261,7 @@ namespace Sabre.Explorer
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		internal struct NativeExecutableViewSection : IDisposable
+		private struct NativeExecutableViewSection : IDisposable
 		{
 			private readonly ManagedObject m_Base;
 
@@ -293,7 +293,7 @@ namespace Sabre.Explorer
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		internal struct NativeExecutableView : IDisposable
+		private struct NativeExecutableView : IDisposable
 		{
 			private readonly ManagedObject m_Base;
 
@@ -327,7 +327,7 @@ namespace Sabre.Explorer
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		internal struct NativeExecutableFunction : IDisposable
+		private struct NativeExecutableFunction : IDisposable
 		{
 			private readonly ManagedObject m_Base;
 
@@ -356,7 +356,7 @@ namespace Sabre.Explorer
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		internal struct NativeExecutableString : IDisposable
+		private struct NativeExecutableString : IDisposable
         {
 			public readonly ManagedObject m_Base;
 

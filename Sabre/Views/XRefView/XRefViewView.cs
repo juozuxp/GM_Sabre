@@ -16,12 +16,12 @@ namespace Sabre.Views.XRefView
 	/// </para>
 	/// </remarks>
 	[Guid("e9e9f7d9-55cf-4abe-b7ec-a2ae319a05c3")]
-	public class XRefView : ToolWindowPane
+	public class XRefViewView : ToolWindowPane
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="XRefView"/> class.
+		/// Initializes a new instance of the <see cref="XRefViewView"/> class.
 		/// </summary>
-		public XRefView() : base(null)
+		public XRefViewView() : base(null)
 		{
 			this.Caption = "XRef view";
 

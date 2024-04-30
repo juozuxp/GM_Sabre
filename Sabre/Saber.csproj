@@ -92,7 +92,6 @@
     <Compile Include="Native\PE\IMAGE_OPTIONAL_HEADER32.cs" />
     <Compile Include="Native\PE\IMAGE_OPTIONAL_HEADER64.cs" />
     <Compile Include="Native\PE\IMAGE_SECTION_HEADER.cs" />
-    <Compile Include="Utility\FontManager.cs" />
     <Compile Include="Utility\VsTheme.cs" />
     <Compile Include="Views\FunctionView\FunctionViewView.cs" />
     <Compile Include="Views\FunctionView\FunctionViewCommand.cs" />
@@ -124,7 +123,7 @@
     <Compile Include="Views\StringView\StringViewControl.xaml.cs">
       <DependentUpon>StringViewControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\XRefView\XRefView.cs" />
+    <Compile Include="Views\XRefView\XRefViewView.cs" />
     <Compile Include="Views\XRefView\XRefViewCommand.cs" />
     <Compile Include="Views\XRefView\XRefViewControl.xaml.cs">
       <DependentUpon>XRefViewControl.xaml</DependentUpon>

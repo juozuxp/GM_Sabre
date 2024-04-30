@@ -7,7 +7,7 @@ using System.Windows.Documents;
 
 namespace Sabre.ListItems
 {
-	internal class ByteViewItem
+	public class ByteViewItem
 	{
 		public enum Type
 		{

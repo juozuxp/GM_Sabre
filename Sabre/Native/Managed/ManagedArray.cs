@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Sabre.Native.Managed
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct ManagedArray : IDisposable
+	public struct ManagedArray : IDisposable
 	{
 		private readonly ManagedObject m_Base;
 

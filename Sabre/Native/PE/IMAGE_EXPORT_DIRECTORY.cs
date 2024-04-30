@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Sabre.Native.PE
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct IMAGE_EXPORT_DIRECTORY
+	public struct IMAGE_EXPORT_DIRECTORY
 	{
 		public readonly uint Characteristics;
 		public readonly uint TimeDateStamp;

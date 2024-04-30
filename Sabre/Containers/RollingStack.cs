@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sabre.Containers
 {
-	internal class RollingStack<T>
+	public class RollingStack<T>
 	{
 		private int m_Count;
 		private int m_Cursor;
@@ -45,8 +45,13 @@ namespace Sabre.Containers
 				throw new Exception("Nothing to pop");
 			}
 
+			if (m_Cursor <= 0)
+			{
+				m_Cursor = m_Stack.Length;
+			}
+
 			m_Count--;
-			return m_Stack[m_Cursor--];
+			return m_Stack[--m_Cursor];
 		}
 
 		public bool TryPop(out T value)

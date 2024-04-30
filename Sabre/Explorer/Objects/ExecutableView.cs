@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Sabre.Explorer.Objects
 {
-	internal struct ExecutableView
+	public struct ExecutableView
 	{
 		public IntPtr m_BaseAddress; // image base address
 		public IntPtr m_DataAddress; // actual mapped address

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Sabre.Explorer.PE
 {
-	internal struct PEExportTable
+	public struct PEExportTable
 	{
 		public IMAGE_EXPORT_DIRECTORY m_Descriptor;
 

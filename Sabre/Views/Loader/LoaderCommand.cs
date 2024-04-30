@@ -12,7 +12,7 @@ namespace Sabre.Views.Loader
 	/// <summary>
 	/// Command handler
 	/// </summary>
-	internal sealed class LoaderCommand
+	public sealed class LoaderCommand
 	{
 		public const int CommandId = 256;
 

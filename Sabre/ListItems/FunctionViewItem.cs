@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Sabre.ListItems
 {
-	internal class FunctionViewItem
+	public class FunctionViewItem
 	{
 		public FunctionViewItem(ExecutableFunction function)
 		{

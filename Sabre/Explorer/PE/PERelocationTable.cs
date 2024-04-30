@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Sabre.Explorer.PE
 {
-	internal struct PERelocationTable
+	public struct PERelocationTable
 	{
 		public IMAGE_BASE_RELOCATION m_Descriptor;
 		public PERelocationEntry[] m_Relocations;

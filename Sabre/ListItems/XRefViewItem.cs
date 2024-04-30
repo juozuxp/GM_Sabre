@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Sabre.ListItems
 {
-	internal class XRefViewItem
+	public class XRefViewItem
 	{
 		public XRefViewItem(ExecutableXRef xref)
 		{

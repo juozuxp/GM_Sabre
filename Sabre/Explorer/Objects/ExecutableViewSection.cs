@@ -13,7 +13,7 @@ using Sabre.ListItems;
 
 namespace Sabre.Explorer.Objects
 {
-	internal struct ExecutableViewSection
+	public struct ExecutableViewSection
 	{
 		public enum Type
 		{

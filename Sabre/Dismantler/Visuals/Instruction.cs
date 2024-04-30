@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Sabre.Dismantler.Visuals
 {
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
-	internal struct Instruction
+	public struct Instruction
 	{
 		public ushort m_Type;
 		public byte m_Size;

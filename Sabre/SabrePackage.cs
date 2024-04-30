@@ -34,7 +34,7 @@ namespace Sabre
 	[ProvideToolWindow(typeof(Sabre.Views.FunctionView.FunctionViewView))]
 	[ProvideToolWindow(typeof(Sabre.Views.PseudoC.PCView))]
 	[ProvideToolWindow(typeof(Sabre.Views.StringViewView))]
-	[ProvideToolWindow(typeof(Sabre.Views.XRefView.XRefView))]
+	[ProvideToolWindow(typeof(Sabre.Views.XRefView.XRefViewView))]
 	public sealed class SabrePackage : AsyncPackage
     {
         /// <summary>

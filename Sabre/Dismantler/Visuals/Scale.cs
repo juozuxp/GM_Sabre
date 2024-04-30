@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sabre.Dismantler.Visuals
 {
-	internal enum Scale : byte
+	public enum Scale : byte
 	{
 		Scale_Undefined,
 		Scale_8,

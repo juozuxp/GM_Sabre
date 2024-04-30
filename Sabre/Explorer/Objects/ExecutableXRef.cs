@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Sabre.Explorer.Objects
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct ExecutableXRef
+	public struct ExecutableXRef
 	{
 		public enum Origin : byte
 		{

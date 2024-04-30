@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Sabre.Explorer.PE
 {
-	internal struct PEImportEntry
+	public struct PEImportEntry
 	{
 		public ushort m_Ordinal;
 		public uint m_FunctionAddressBase;
