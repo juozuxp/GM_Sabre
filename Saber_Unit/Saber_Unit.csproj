@@ -58,6 +58,7 @@
     <Compile Include="Explorer\Objects\ExecutableViewSection_Unit.cs" />
     <Compile Include="Explorer\Objects\ExecutableView_Unit.cs" />
     <Compile Include="Explorer\ExecutableExplorer_Unit.cs" />
+    <Compile Include="Explorer\PE\PEHeaders_Unit.cs" />
     <Compile Include="ListItems\ByteViewItem_Unit.cs" />
     <Compile Include="ListItems\StringViewItem_Unit.cs" />
     <Compile Include="ListItems\FunctionViewItem_Unit.cs" />
