@@ -8,6 +8,11 @@ DescriptorOperand::DescriptorOperand(const std::vector<std::string>& variations)
 
 	for (std::string variation : variations)
 	{
+		if (variation.empty())
+		{
+			continue;
+		}
+
 		if (!found)
 		{
 			found = true;
@@ -154,9 +159,9 @@ bool DescriptorOperand::ParseForMm(const std::string_view& variation)
 				{
 					if (!strncmp(variation.data() + 2, "/m", 2))
 					{
+						m_Type.m_Type = Type::modrm;
 						ParseSize(variation.data() + 4);
 
-						m_Type.m_Type = Type::modrm;
 						return true;
 					}
 				}
@@ -362,7 +367,7 @@ bool DescriptorOperand::ParseForBnd(const std::string_view& variation)
 
 		if (variation.size() != 3)
 		{
-			if (variation[3] != '/' && (variation[3] < '0' || variation[3] > '9'))
+			if (variation[3] != '/')
 			{
 				return false;
 			}
