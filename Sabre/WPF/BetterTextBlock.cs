@@ -24,7 +24,7 @@ namespace Sabre.WPF
 		}
 
 		private static readonly ConcurrentDictionary<uint, SolidColorBrush> m_Brushes = new ConcurrentDictionary<uint, SolidColorBrush>();
-		public static readonly DependencyProperty m_DynamicText = DependencyProperty.Register("DynamicText", typeof(string), typeof(BetterTextBlock), new UIPropertyMetadata(null, OnPropertyChanged));
+		private static readonly DependencyProperty m_DynamicText = DependencyProperty.Register("DynamicText", typeof(string), typeof(BetterTextBlock), new UIPropertyMetadata(null, OnPropertyChanged));
 
 		private static uint GetColor(string number, int index)
 		{
@@ -67,9 +67,9 @@ namespace Sabre.WPF
 			int closer = 0;
 			while (index != -1)
 			{
-				if ((closer + 1) < index)
+				if (closer < index)
 				{
-					block.Inlines.Add(new Run() { Text = value.Substring(closer + 1, index - (closer + 1)) });
+					block.Inlines.Add(new Run() { Text = value.Substring(closer, index - closer) });
 				}
 
 				uint color = GetColor(value, index + 1);
@@ -85,13 +85,14 @@ namespace Sabre.WPF
 				{
 					block.Inlines.Add(new Run() { Text = value.Substring(index + 1 + 8, closer - (index + 1 + 8)), Foreground = brush });
 				}
-				
-				index = value.IndexOf('\0', closer + 1);
+
+				closer += 1;
+				index = value.IndexOf('\0', closer);
 			}
 
-			if (closer + 1 < value.Length)
+			if (closer < value.Length)
 			{
-				block.Inlines.Add(new Run() { Text = value.Substring(closer + 1) });
+				block.Inlines.Add(new Run() { Text = value.Substring(closer) });
 			}
 		}
 	}

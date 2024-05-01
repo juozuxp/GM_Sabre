@@ -272,6 +272,11 @@ namespace Saber_Unit.Dismantler
 			Assert.AreEqual(items[2].m_Address, options.m_Reference + 0x10 + 0x20);
 			Assert.AreEqual(items[3].m_Address, options.m_Reference + 0x10 + 0x20 + 0x40);
 			Assert.AreEqual(items[4].m_Address, options.m_Reference + 0x10 + 0x20 + 0x40 + 0x10);
+
+			Assert.AreEqual(items[1].m_Jumpable, IntPtr.Zero);
+			Assert.AreEqual(items[2].m_Jumpable, new IntPtr(0x800));
+			Assert.AreEqual(items[3].m_Jumpable, IntPtr.Zero);
+			Assert.AreEqual(items[4].m_Jumpable, new IntPtr(0x100000));
 		}
 	}
 }

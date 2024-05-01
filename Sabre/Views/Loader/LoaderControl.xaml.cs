@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
-using Sabre.Controller;
+using Sabre.Controllers;
 using Sabre.Explorer;
 using Sabre.Explorer.PE;
 using Sabre.Views.ByteView;

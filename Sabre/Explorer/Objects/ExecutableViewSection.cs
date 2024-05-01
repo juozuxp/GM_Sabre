@@ -60,7 +60,7 @@ namespace Sabre.Explorer.Objects
 
 					IntPtr address = view.m_BaseAddress + (int)m_Start;
 
-					ByteViewItem[] list = new ByteViewItem[m_Size / 8 + (((m_Size - (8 - (m_Start % 8))) % 8) != 0 ? 1 : 0) + ((m_Start % 8) != 0 ? 1 : 0)];
+					ByteViewItem[] list = new ByteViewItem[(m_Size - (8 - ((m_Start % 8) == 0 ? 8 : (m_Start % 8)))) / 8 + ((m_Start % 8) == 0 ? 0 : 1) + (((m_Size - (8 - ((m_Start % 8) == 0 ? 8 : (m_Start % 8)))) % 8) == 0 ? 0 : 1)];
 
 					int listIndex = 0;
 					if (m_Start % 8 != 0)
@@ -173,7 +173,7 @@ namespace Sabre.Explorer.Objects
 					return Visualizer.ToListElements(m_Visuals, options);
 			}
 
-			return null;
+			return null; // not a possibility
 		}
 	}
 }
