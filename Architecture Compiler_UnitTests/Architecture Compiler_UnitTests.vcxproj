@@ -160,9 +160,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="compiler\Prefix_Unit.cpp" />
     <ClCompile Include="lexer\TokenSet_Unit.cpp" />
     <ClCompile Include="lexer\Token_Unit.cpp" />
     <ClCompile Include="parser\DescriptorOperand_Unit.cpp" />
+    <ClCompile Include="parser\DescriptorSet_Unit.cpp" />
+    <ClCompile Include="parser\Descriptor_Unit.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

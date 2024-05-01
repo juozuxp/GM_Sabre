@@ -3,6 +3,7 @@
 #include <string>
 
 #include <parser/DescriptorOperand.hpp>
+#include <compiler/Redirection.hpp>
 
 namespace Microsoft
 {
@@ -57,6 +58,22 @@ namespace Microsoft
 					L"base_128",
 					L"base_256",
 					L"base_512"
+				};
+
+				return string[static_cast<uint8_t>(value)];
+			}
+
+			template<> static std::wstring ToString<Redirection::Prefix>(const Redirection::Prefix& value)
+			{
+				static std::wstring string[] =
+				{
+					L"Wait",
+					L"Repe",
+					L"Repne",
+					L"x66",
+					L"RexW",
+					L"Default",
+					L"ArrayMAX"
 				};
 
 				return string[static_cast<uint8_t>(value)];
