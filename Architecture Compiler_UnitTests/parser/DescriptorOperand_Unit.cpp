@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "utility/Setup.hpp"
 #include <parser/DescriptorOperand.hpp>
+#include <Windows.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -648,17 +649,6 @@ public:
 	{
 		std::vector<std::string> variations;
 
-		variations.push_back("mm_");
-
-		DescriptorOperand operand = DescriptorOperand(variations);
-
-		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::mem);
-	}
-
-	TEST_METHOD(Construct_28)
-	{
-		std::vector<std::string> variations;
-
 		variations.push_back("gs");
 
 		DescriptorOperand operand = DescriptorOperand(variations);
@@ -681,7 +671,7 @@ public:
 		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::sreg);
 	}
 
-	TEST_METHOD(Construct_29)
+	TEST_METHOD(Construct_28)
 	{
 		std::vector<std::string> variations;
 
@@ -705,5 +695,373 @@ public:
 
 		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::reg);
 		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::sreg);
+	}
+
+	TEST_METHOD(Construct_29)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("st(1)");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::IsFalse(operand.GetFlagMask().m_Rex);
+		Assert::IsTrue(operand.GetFlagMask().m_Constant);
+		Assert::AreEqual<uint8_t>(operand.GetFlagMask().m_RegisterIndex, 1);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Mem.m_Size, DescriptorOperand::Size::undefined);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Reg.m_Size, DescriptorOperand::Size::base_80);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::reg);
+		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::st);
+	}
+
+	TEST_METHOD(Construct_30)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("st/m64");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::IsFalse(operand.GetFlagMask().m_Rex);
+		Assert::IsFalse(operand.GetFlagMask().m_Constant);
+		Assert::AreEqual<uint8_t>(operand.GetFlagMask().m_RegisterIndex, 0);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Mem.m_Size, DescriptorOperand::Size::base_64);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Reg.m_Size, DescriptorOperand::Size::base_64);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::modrm);
+		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::st);
+	}
+
+	TEST_METHOD(Construct_31)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("st/m");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::IsFalse(operand.GetFlagMask().m_Rex);
+		Assert::IsFalse(operand.GetFlagMask().m_Constant);
+		Assert::AreEqual<uint8_t>(operand.GetFlagMask().m_RegisterIndex, 0);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Mem.m_Size, DescriptorOperand::Size::undefined);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Reg.m_Size, DescriptorOperand::Size::undefined);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::modrm);
+		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::st);
+	}
+
+	TEST_METHOD(Construct_32)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("xmm.");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::none);
+	}
+
+	TEST_METHOD(Construct_33)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("xmm5");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::IsFalse(operand.GetFlagMask().m_Rex);
+		Assert::IsTrue(operand.GetFlagMask().m_Constant);
+		Assert::AreEqual<uint8_t>(operand.GetFlagMask().m_RegisterIndex, 5);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Mem.m_Size, DescriptorOperand::Size::undefined);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Reg.m_Size, DescriptorOperand::Size::base_128);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::reg);
+		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::xmm);
+	}
+
+	TEST_METHOD(Construct_34)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("m512");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::IsFalse(operand.GetFlagMask().m_Rex);
+		Assert::IsFalse(operand.GetFlagMask().m_Constant);
+		Assert::AreEqual<uint8_t>(operand.GetFlagMask().m_RegisterIndex, 0);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Mem.m_Size, DescriptorOperand::Size::base_512);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Reg.m_Size, DescriptorOperand::Size::undefined);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::mem);
+		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::general);
+	}
+
+	TEST_METHOD(Construct_35)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("m256");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::IsFalse(operand.GetFlagMask().m_Rex);
+		Assert::IsFalse(operand.GetFlagMask().m_Constant);
+		Assert::AreEqual<uint8_t>(operand.GetFlagMask().m_RegisterIndex, 0);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Mem.m_Size, DescriptorOperand::Size::base_256);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Reg.m_Size, DescriptorOperand::Size::undefined);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::mem);
+		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::general);
+	}
+
+	TEST_METHOD(Construct_36)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("r16");
+		variations.push_back("32");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::IsFalse(operand.GetFlagMask().m_Rex);
+		Assert::IsFalse(operand.GetFlagMask().m_Constant);
+		Assert::AreEqual<uint8_t>(operand.GetFlagMask().m_RegisterIndex, 0);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Mem.m_Size, DescriptorOperand::Size::undefined);
+
+		Assert::IsTrue(operand.GetSizeMask().m_Reg.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Reg.m_Size, DescriptorOperand::Size::base_16);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::reg);
+		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::general);
+	}
+
+	TEST_METHOD(Construct_37)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("m128");
+		variations.push_back("256");
+		variations.push_back("512");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::IsFalse(operand.GetFlagMask().m_Rex);
+		Assert::IsFalse(operand.GetFlagMask().m_Constant);
+		Assert::AreEqual<uint8_t>(operand.GetFlagMask().m_RegisterIndex, 0);
+
+		Assert::IsTrue(operand.GetSizeMask().m_Mem.m_Override1);
+		Assert::IsTrue(operand.GetSizeMask().m_Mem.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Mem.m_Size, DescriptorOperand::Size::base_128);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Reg.m_Size, DescriptorOperand::Size::undefined);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::mem);
+		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::general);
+	}
+
+	TEST_METHOD(Construct_38)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("xmm");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::IsFalse(operand.GetFlagMask().m_Rex);
+		Assert::IsFalse(operand.GetFlagMask().m_Constant);
+		Assert::AreEqual<uint8_t>(operand.GetFlagMask().m_RegisterIndex, 0);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Mem.m_Size, DescriptorOperand::Size::undefined);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Reg.m_Size, DescriptorOperand::Size::base_128);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::reg);
+		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::xmm);
+	}
+
+	TEST_METHOD(Construct_39)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("st.");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::none);
+	}
+
+	TEST_METHOD(Construct_40)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("bnd");
+		variations.push_back(".......");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::IsFalse(operand.GetFlagMask().m_Rex);
+		Assert::IsFalse(operand.GetFlagMask().m_Constant);
+		Assert::AreEqual<uint8_t>(operand.GetFlagMask().m_RegisterIndex, 0);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Mem.m_Size, DescriptorOperand::Size::undefined);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Reg.m_Size, DescriptorOperand::Size::base_128);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::reg);
+		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::bnd);
+	}
+
+	TEST_METHOD(Construct_41)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("mm");
+		variations.push_back(".......");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::IsFalse(operand.GetFlagMask().m_Rex);
+		Assert::IsFalse(operand.GetFlagMask().m_Constant);
+		Assert::AreEqual<uint8_t>(operand.GetFlagMask().m_RegisterIndex, 0);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Mem.m_Size, DescriptorOperand::Size::undefined);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Reg.m_Size, DescriptorOperand::Size::base_64);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::reg);
+		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::mm);
+	}
+
+	TEST_METHOD(Construct_42)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("st");
+		variations.push_back("st(...");
+		variations.push_back(".......");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::IsFalse(operand.GetFlagMask().m_Rex);
+		Assert::IsFalse(operand.GetFlagMask().m_Constant);
+		Assert::AreEqual<uint8_t>(operand.GetFlagMask().m_RegisterIndex, 0);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Mem.m_Size, DescriptorOperand::Size::undefined);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Reg.m_Size, DescriptorOperand::Size::base_80);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::reg);
+		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::st);
+	}
+
+	TEST_METHOD(Construct_43)
+	{
+		std::vector<std::string> variations;
+
+		variations.push_back("xmm");
+		variations.push_back(".......");
+
+		DescriptorOperand operand = DescriptorOperand(variations);
+
+		Assert::IsFalse(operand.GetFlagMask().m_Rex);
+		Assert::IsFalse(operand.GetFlagMask().m_Constant);
+		Assert::AreEqual<uint8_t>(operand.GetFlagMask().m_RegisterIndex, 0);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Mem.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Mem.m_Size, DescriptorOperand::Size::undefined);
+
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override1);
+		Assert::IsFalse(operand.GetSizeMask().m_Reg.m_Override2);
+
+		Assert::AreEqual(operand.GetSizeMask().m_Reg.m_Size, DescriptorOperand::Size::base_128);
+
+		Assert::AreEqual(operand.GetTypeMask().m_Type, DescriptorOperand::Type::reg);
+		Assert::AreEqual(operand.GetTypeMask().m_Register, DescriptorOperand::Register::xmm);
 	}
 };
