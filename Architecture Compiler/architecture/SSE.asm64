@@ -1,0 +1,98 @@
+0F 58 -> ADDPS xmm, xmm/m128
+F3 0F 58 -> ADDSS xmm, xmm/m32
+
+0F 54 -> ANDPS xmm, xmm/m128
+0F 55 -> ANDNPS xmm, xmm/m128
+
+0F C2 -> CMPPS xmm, xmm/m128, imm8
+F3 0F C2 -> CMPSS xmm, xmm/m32, imm8
+
+0F 2F -> COMISS xmm, xmm/m32
+
+F3 0F 2A -> CVTSI2SS xmm, r/m32|64
+F3 0F 2D -> CVTSS2SI r32|64, xmm/m32
+
+F3 0F 2C -> CVTTSS2SI r32|64, xmm/m32
+
+0F 5E -> DIVPS xmm, xmm/m128
+F3 0F 5E -> DIVSS xmm, xmm/m32
+
+0F AE /2 -> LDMXCSR m32
+
+0F 5F -> MAXPS xmm, xmm/m128
+F3 0F 5F -> MAXSS xmm, xmm/m32
+
+0F 5D -> MINPS xmm, xmm/m128
+F3 0F 5D -> MINSS xmm,xmm/m32
+
+0F F7 -> MASKMOVQ mm, mm
+
+0F 28 -> MOVAPS xmm, xmm/m128
+0F 29 -> MOVAPS xmm/m128, xmm
+
+0F 12 -> MOVHLPS xmm, xmm
+0F 16 -> MOVLHPS xmm, xmm
+
+0F 12 -> MOVLPS xmm, m64
+0F 13 -> MOVLPS m64, xmm
+
+0F 16 -> MOVHPS xmm, m64
+0F 17 -> MOVHPS m64, xmm
+
+0F 50 -> MOVMSKPS r32|64, xmm
+
+0F 2B -> MOVNTPS m128, xmm
+0F E7 -> MOVNTQ m64, mm
+
+F3 0F 10 -> MOVSS xmm, xmm/m32
+F3 0F 11 -> MOVSS xmm/m32, xmm
+
+0F 10 -> MOVUPS xmm, xmm/m128
+0F 11 -> MOVUPS xmm/m128, xmm
+
+0F 59 -> MULPS xmm, xmm/m128
+F3 0F 59 -> MULSS xmm, xmm/m32
+
+0F 56 -> ORPS xmm, xmm/m128
+
+0F E0 -> PAVGB mm, mm/m64
+0F E3 -> PAVGW mm, mm/m64
+
+0F C5 -> PEXTRW r32|64, mm, imm8
+0F C4 -> PINSRW mm, r32/m16, imm8
+
+0F EE -> PMAXSW mm, mm/m64
+0F DE -> PMAXUB mm, mm/m64
+
+0F EA -> PMINSW mm, mm/m64
+0F DA -> PMINUB mm, mm/m64
+
+0F D7 -> PMOVMSKB r32|64, mm
+
+0F E4 -> PMULHUW mm, mm/m64
+
+0F F6 -> PSADBW mm, mm/m64
+
+0F 53 -> RCPPS xmm, xmm/m128
+
+F3 0F 53 -> RCPSS xmm, xmm/m32
+
+0F 52 -> RSQRTPS xmm, xmm/m128
+F3 0F 52 -> RSQRTSS xmm, xmm/m32
+
+0F C6 -> SHUFPS xmm, xmm/m128, imm8
+
+0F 51 -> SQRTPS xmm, xmm/m128
+F3 0F 51 -> SQRTSS xmm, xmm/m32
+
+0F AE /3 -> STMXCSR m32
+
+0F 5C -> SUBPS xmm, xmm/m128
+F3 0F 5C -> SUBSS xmm, xmm/m32
+
+0F 2E -> UCOMISS xmm, xmm/m32
+
+0F 14 -> UNPCKLPS xmm, xmm/m128
+0F 15 -> UNPCKHPS xmm, xmm/m128
+
+0F 57 -> XORPS xmm, xmm/m128

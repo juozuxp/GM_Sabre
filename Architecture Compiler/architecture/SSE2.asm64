@@ -1,0 +1,220 @@
+66 0F 58 -> ADDPD xmm, xmm/m128
+F2 0F 58 -> ADDSD xmm, xmm/m64
+
+66 0F 54 -> ANDPD xmm, xmm/m128
+66 0F 55 -> ANDNPD xmm, xmm/m128
+
+66 0F C2 -> CMPPD xmm, xmm/m128, imm8
+F2 0F C2 -> CMPSD xmm, xmm/m64, imm8
+
+66 0F 2F -> COMISD xmm, xmm/m64
+
+F3 0F E6 -> CVTDQ2PD xmm, xmm/m64
+0F 5B -> CVTDQ2PS xmm, xmm/m128
+
+F2 0F E6 -> CVTPD2DQ xmm, xmm/m128
+66 0F 2D -> CVTPD2PI mm, xmm/m128
+
+66 0F 5A -> CVTPD2PS xmm, xmm/m128
+66 0F 2A -> CVTPI2PD xmm, mm/m64
+
+0F 2A -> CVTPI2PS xmm, mm/m64
+66 0F 5B -> CVTPS2DQ xmm, xmm/m128
+
+0F 5A -> CVTPS2PD xmm, xmm/m64
+0F 2D -> CVTPS2PI mm, xmm/m64
+
+F2 0F 2D -> CVTSD2SI r32|64, xmm/m64
+F2 0F 5A -> CVTSD2SS xmm, xmm/m64
+
+F2 0F 2A -> CVTSI2SD xmm, r/m32|64
+F3 0F 5A -> CVTSS2SD xmm, xmm/m32
+
+66 0F E6 -> CVTTPD2DQ xmm, xmm/m128
+66 0F 2C -> CVTTPD2PI mm, xmm/m128
+F3 0F 5B -> CVTTPS2DQ xmm, xmm/m128
+
+0F 2C -> CVTTPS2PI mm, xmm/m64
+
+F2 0F 2C -> CVTTSD2SI r32|64, xmm/m64
+
+66 0F 5E -> DIVPD xmm, xmm/m128
+F2 0F 5E -> DIVSD xmm, xmm/m64
+
+0F AE E8 -> LFENCE
+
+66 0F F7 -> MASKMOVDQU xmm, xmm
+
+66 0F 5F -> MAXPD xmm, xmm/m128
+F2 0F 5F -> MAXSD xmm, xmm/m64
+
+0F AE F0 -> MFENCE
+
+66 0F 5D -> MINPD xmm, xmm/m128
+F2 0F 5D -> MINSD xmm, xmm/m64
+
+66 0F 28 -> MOVAPD xmm, xmm/m128
+66 0F 29 -> MOVAPD xmm/m128, xmm
+
+66 0F 6E -> MOV xmm, r/m32|64
+66 0F 7E -> MOV r/m32|64, xmm
+
+66 0F 6F -> MOVDQA xmm, xmm/m128
+66 0F 7F -> MOVDQA xmm/m128, xmm
+
+F3 0F 6F -> MOVDQU xmm, xmm/m128
+F3 0F 7F -> MOVDQU xmm/m128, xmm
+
+F2 0F D6 -> MOVDQ2Q mm, xmm
+F3 0F D6 -> MOVQ2DQ xmm, mm
+
+66 0F 16 -> MOVHPD xmm, m64
+66 0F 17 -> MOVHPD m64, xmm1
+
+66 0F 12 -> MOVLPD xmm, m64
+66 0F 13 -> MOVLPD m64, xmm
+
+66 0F 50 -> MOVMSKPD r32|64, xmm
+
+66 0F E7 -> MOVNTDQ m128, xmm
+66 0F 2B -> MOVNTPD m128, xmm
+
+0F C3 -> MOVNTI m32|64, r32|64
+
+F3 0F 7E -> MOVQ xmm, xmm/m64
+66 0F D6 -> MOVQ xmm/m64, xmm
+
+F2 0F 10 -> MOVSD xmm, xmm/m64
+F2 0F 11 -> MOVSD xmm/m64, xmm
+
+66 0F 10 -> MOVUPD xmm, xmm/m128
+66 0F 11 -> MOVUPD xmm/m128, xmm
+
+66 0F 59 -> MULPD xmm, xmm/m128
+F2 0F 59 -> MULSD xmm, xmm/m64
+
+66 0F 56 -> ORPD xmm, xmm/m128
+
+66 0F 63 -> PACKSSWB xmm, xmm/m128
+66 0F 6B -> PACKSSDW xmm, xmm/m128
+
+66 0F 67 -> PACKUSWB xmm, xmm/m128
+
+66 0F FC -> PADDB xmm, xmm/m128
+66 0F FD -> PADDW xmm, xmm/m128
+66 0F FE -> PADDD xmm, xmm/m128
+66 0F D4 -> PADDQ xmm, xmm/m128
+
+66 0F EC -> PADDSB xmm, xmm/m128
+66 0F ED -> PADDSW xmm, xmm/m128
+
+66 0F DC -> PADDUSB xmm, xmm/m128
+66 0F DD -> PADDUSW xmm, xmm/m128
+
+66 0F DB -> PAND xmm, xmm/m128
+66 0F DF -> PANDN xmm, xmm/m128
+
+66 0F E0 -> PAVGB xmm, xmm/m128
+66 0F E3 -> PAVGW xmm, xmm/m128
+
+66 0F 74 -> PCMPEQB xmm, xmm/m128
+66 0F 75 -> PCMPEQW xmm, xmm/m128
+66 0F 76 -> PCMPEQD xmm, xmm/m128
+
+66 0F 64 -> PCMPGTB xmm, xmm/m128
+66 0F 65 -> PCMPGTW xmm, xmm/m128
+66 0F 66 -> PCMPGTD xmm, xmm/m128
+
+66 0F C5 -> PEXTRW r32|64, xmm, imm8
+66 0F C4 -> PINSRW xmm, r32/m16, imm8
+
+66 0F F5 -> PMADDWD xmm, xmm/m128
+
+66 0F EE -> PMAXSW xmm, xmm/m128
+66 0F DE -> PMAXUB xmm, xmm/m128
+
+66 0F EA -> PMINSW xmm, xmm/m128
+66 0F DA -> PMINUB xmm, xmm/m128
+
+66 0F D7 -> PMOVMSKB r32|64, xmm
+
+66 0F E4 -> PMULHUW xmm, xmm/m128
+66 0F E5 -> PMULHW xmm, xmm/m128
+66 0F D5 -> PMULLW xmm, xmm/m128
+
+0F F4 -> PMULUDQ mm, mm/m64
+66 0F F4 -> PMULUDQ xmm, xmm/m128
+
+66 0F EB -> POR xmm, xmm/m128
+
+66 0F F6 -> PSADBW xmm, xmm/m128
+
+66 0F 70 -> PSHUFD xmm, xmm/m128, imm8
+F3 0F 70 -> PSHUFHW xmm, xmm/m128, imm8
+F2 0F 70 -> PSHUFLW xmm, xmm/m128, imm8
+
+66 0F 73 /7 -> PSLLDQ xmm, imm8
+
+66 0F F1 -> PSLLW xmm, xmm/m128
+66 0F F2 -> PSLLD xmm, xmm/m128
+66 0F F3 -> PSLLQ xmm, xmm/m128
+
+66 0F 71 /6 -> PSLLW xmm, imm8
+66 0F 72 /6 -> PSLLD xmm, imm8
+66 0F 73 /6 -> PSLLQ xmm, imm8
+
+66 0F E1 -> PSRAW xmm, xmm/m128
+66 0F E2 -> PSRAD xmm, xmm/m128
+
+66 0F 71 /4 -> PSRAW xmm, imm8
+66 0F 72 /4 -> PSRAD xmm, imm8
+
+66 0F 73 /3 -> PSRLDQ xmm, imm8
+
+66 0F D1 -> PSRLW xmm, xmm/m128
+66 0F D2 -> PSRLD xmm, xmm/m128
+66 0F D3 -> PSRLQ xmm, xmm/m128
+
+66 0F 71 /2 -> PSRLW xmm, imm8
+66 0F 72 /2 -> PSRLD xmm, imm8
+66 0F 73 /2 -> PSRLQ xmm, imm8
+
+66 0F F8 -> PSUBB xmm, xmm/m128
+66 0F F9 -> PSUBW xmm, xmm/m128
+66 0F FA -> PSUBD xmm, xmm/m128
+66 0F FB -> PSUBQ xmm, xmm/m128
+
+0F FB -> PSUBQ mm, mm/m64
+
+66 0F E8 -> PSUBSB xmm, xmm/m128
+66 0F E9 -> PSUBSW xmm, xmm/m128
+
+66 0F D8 -> PSUBUSB xmm, xmm/m128
+66 0F D9 -> PSUBUSW xmm, xmm/m128
+
+66 0F 68 -> PUNPCKHBW xmm, xmm/m128
+66 0F 69 -> PUNPCKHWD xmm, xmm/m128
+66 0F 6A -> PUNPCKHDQ xmm, xmm/m128
+66 0F 6D -> PUNPCKHQDQ xmm, xmm/m128
+
+66 0F 60 -> PUNPCKLBW xmm, xmm/m128
+66 0F 61 -> PUNPCKLWD xmm, xmm/m128
+66 0F 62 -> PUNPCKLDQ xmm, xmm/m128
+66 0F 6C -> PUNPCKLQDQ xmm, xmm/m128
+
+66 0F EF -> PXOR xmm, xmm/m128
+
+66 0F C6 -> SHUFPD xmm, xmm/m128, imm8
+
+66 0F 51 -> SQRTPD xmm, xmm/m128
+F2 0F 51 -> SQRTSD xmm, xmm/m64
+
+66 0F 5C -> SUBPD xmm, xmm/m128
+F2 0F 5C -> SUBSD xmm, xmm/m64
+
+66 0F 2E -> UCOMISD xmm, xmm/m64
+
+66 0F 14 -> UNPCKLPD xmm, xmm/m128
+66 0F 15 -> UNPCKHPD xmm, xmm/m128
+
+66 0F 57 -> XORPD xmm, xmm/m128
