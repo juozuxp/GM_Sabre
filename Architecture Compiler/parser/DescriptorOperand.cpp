@@ -326,9 +326,9 @@ bool DescriptorOperand::ParseForXmm(const std::string_view& variation)
 				{
 					if (!strncmp(variation.data() + 3, "/m", 2))
 					{
+						m_Type.m_Type = Type::modrm;
 						ParseSize(variation.data() + 5);
 
-						m_Type.m_Type = Type::modrm;
 						return true;
 					}
 				}
@@ -375,9 +375,9 @@ bool DescriptorOperand::ParseForBnd(const std::string_view& variation)
 	{
 		if (!strncmp(variation.data(), "bnd/m", 5))
 		{
+			m_Type.m_Type = Type::modrm;
 			ParseSize(variation.data() + 5);
 
-			m_Type.m_Type = Type::modrm;
 			return true;
 		}
 	}

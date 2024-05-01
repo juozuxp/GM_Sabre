@@ -1,7 +1,7 @@
 #include "TokenSet.hpp"
 #include <sstream>
 
-TokenSet::TokenSet(std::ifstream& file)
+TokenSet::TokenSet(std::ifstream&& file)
 {
 	std::string line;
 
@@ -16,11 +16,11 @@ TokenSet::TokenSet(std::ifstream& file)
 	}
 }
 
-TokenSet::TokenSet(std::string text)
+TokenSet::TokenSet(const std::string_view& text)
 {
-	std::string line;
-	std::stringstream textStream(text);
+	std::stringstream textStream(text.data());
 
+	std::string line;
 	while (std::getline(textStream, line))
 	{
 		if (line.empty())
