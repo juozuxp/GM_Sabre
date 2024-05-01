@@ -55,7 +55,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Containers\RollingStack.cs" />
-    <Compile Include="Controller\SabreController.cs" />
+    <Compile Include="Controllers\SabreController.cs" />
     <Compile Include="Dismantler\Visuals\Instruction.cs" />
     <Compile Include="Dismantler\Visuals\Memory.cs" />
     <Compile Include="Dismantler\Visuals\Scale.cs" />

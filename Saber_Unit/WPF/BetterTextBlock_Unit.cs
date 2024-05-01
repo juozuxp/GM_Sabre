@@ -25,10 +25,10 @@ namespace Saber_Unit.WPF
 			Assert.AreEqual(textblock.Text.Length, 0);
 			Assert.AreEqual(textblock.Inlines.Count, 0);
 
-			textblock.DynamicText = "hello world \0FFFFFFFFbut\x1 \000FF2045collored :)\x1\0FFFFFFFF\x1";
+			textblock.DynamicText = "hello world \0FFFFFFFFbut\x1 \000FF2045collored :)\x1\0FFFFFFFF\x1 and another text";
 
 			Assert.AreEqual(textblock.Text.Length, 0);
-			Assert.AreEqual(textblock.Inlines.Count, 4);
+			Assert.AreEqual(textblock.Inlines.Count, 5);
 
 			foreach (Inline inline in textblock.Inlines)
 			{
@@ -50,6 +50,9 @@ namespace Saber_Unit.WPF
 
 			Assert.AreEqual((inlines[3] as Run).Text, "collored :)");
 			Assert.AreEqual(((inlines[3] as Run).Foreground as SolidColorBrush).Color, Color.FromArgb(0x00, 0xFF, 0x20, 0x45));
+
+			Assert.AreEqual((inlines[4] as Run).Text, " and another text");
+			Assert.AreEqual((inlines[4] as Run).Foreground, def.Foreground);
 		}
 	}
 }

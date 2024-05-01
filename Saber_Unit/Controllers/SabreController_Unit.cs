@@ -4,7 +4,7 @@ using System;
 namespace Saber_Unit.Controllers
 {
 	[TestClass]
-	public class UnitTest1
+	public class SabreController_Unit
 	{
 		[TestMethod]
 		public void TestMethod1()
