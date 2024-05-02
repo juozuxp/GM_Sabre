@@ -387,7 +387,7 @@ std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, 
 			{
 				if (redirect->m_Type == Type::Prefix)
 				{
-					for (uint8_t entry : std::reinterpret_pointer_cast<Instruction>(base)->GetCompatiblePrefixes())
+					for (uint8_t entry : instruction->GetCompatiblePrefixes())
 					{
 						if (!redirect->m_Redirects[entry])
 						{

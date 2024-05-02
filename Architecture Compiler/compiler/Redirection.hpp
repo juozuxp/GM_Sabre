@@ -178,4 +178,7 @@ private:
 private:
 	Type m_Type = Type::None;
 	std::shared_ptr<ByteEntry> m_Redirects[8];
+
+private:
+	friend class Redirection_Unit;
 };

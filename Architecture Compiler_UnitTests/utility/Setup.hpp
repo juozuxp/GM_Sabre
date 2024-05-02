@@ -4,6 +4,8 @@
 
 #include <parser/DescriptorOperand.hpp>
 #include <compiler/Redirection.hpp>
+#include <compiler/Operand.hpp>
+#include <compiler/ByteEntry.hpp>
 
 namespace Microsoft
 {
@@ -74,6 +76,50 @@ namespace Microsoft
 					L"RexW",
 					L"Default",
 					L"ArrayMAX"
+				};
+
+				return string[static_cast<uint8_t>(value)];
+			}
+
+			template<> static std::wstring ToString<Operand::Type>(const Operand::Type& value)
+			{
+				static std::wstring string[] =
+				{
+					L"none",
+					L"reg",
+					L"modrm",
+					L"imm",
+					L"rel",
+					L"moffs"
+				};
+
+				return string[static_cast<uint8_t>(value)];
+			}
+
+			template<> static std::wstring ToString<ByteEntry::PackageType>(const ByteEntry::PackageType& value)
+			{
+				static std::wstring string[] =
+				{
+					L"Invalid",
+					L"Prefix",
+					L"Redirection",
+					L"Instruction",
+					L"FullRedirection"
+				};
+
+				return string[static_cast<uint8_t>(value)];
+			}
+
+			template<> static std::wstring ToString<Redirection::Type>(const Redirection::Type& value)
+			{
+				static std::wstring string[] =
+				{
+					L"None",
+					L"X0F383A",
+					L"Prefix",
+					L"Mod",
+					L"Reg",
+					L"Mem"
 				};
 
 				return string[static_cast<uint8_t>(value)];
