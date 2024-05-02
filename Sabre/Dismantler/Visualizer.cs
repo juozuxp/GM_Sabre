@@ -235,7 +235,7 @@ namespace Sabre.Dismantler
 							jumpable = new IntPtr(visual.m_Value.m_Value);
 						}
 
-						builder.Append($"\0{c_NumberColor}{visual.m_Value.m_Value.ToString("X16")}\x1]");
+						builder.Append($"[\0{c_NumberColor}{visual.m_Value.m_Value.ToString("X16")}\x1]");
 						break;
 
 					case NativeVisual.Type.OperandAddressValue:

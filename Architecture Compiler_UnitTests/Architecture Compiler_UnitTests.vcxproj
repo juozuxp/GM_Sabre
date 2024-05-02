@@ -169,6 +169,8 @@
     <ClCompile Include="compiler\Redirection_Unit.cpp" />
     <ClCompile Include="lexer\TokenSet_Unit.cpp" />
     <ClCompile Include="lexer\Token_Unit.cpp" />
+    <ClCompile Include="packager\Packager_Unit.cpp" />
+    <ClCompile Include="packager\Package_Unit.cpp" />
     <ClCompile Include="parser\DescriptorOperand_Unit.cpp" />
     <ClCompile Include="parser\DescriptorSet_Unit.cpp" />
     <ClCompile Include="parser\Descriptor_Unit.cpp" />

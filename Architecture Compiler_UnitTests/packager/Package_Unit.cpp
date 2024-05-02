@@ -2,15 +2,17 @@
 #include "utility/Setup.hpp"
 #include <compiler/BytePackage.hpp>
 #include <compiler/InstructionSet.hpp>
+#include <packager/Package.hpp>
+#include <filesystem>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-TEST_CLASS(InstructionSet_Unit)
+TEST_CLASS(Package_Unit)
 {
 public:
 	TEST_METHOD(Construct)
 	{
-		std::string_view text = 
+		std::string_view text =
 		{
 			"B5 -> MOV CH|REX, imm8\n"
 			"B6 -> MOV DH|REX, imm8\n"
@@ -45,58 +47,14 @@ public:
 			"66 0F 3A 0A -> ROUNDSS xmm, xmm/m32, imm8\n"
 		};
 
-		const char* textTypes[] = 
-		{
-			"INVALID",
-			"MOV",
-			"PMAXSB",
-			"PMAXSD",
-			"PMAXUW",
-			"PMAXUD",
-			"FWAIT",
-			"VMPTRLD",
-			"VMPTRST",
-			"VMXON",
-			"VMCLEAR",
-			"FINCSTP",
-			"FLD",
-			"FLD1",
-			"FLDL2T",
-			"FLDL2E",
-			"FLDPI",
-			"FLDLG2",
-			"FLDLN2",
-			"FLDZ",
-			"ROUNDPD",
-			"ROUNDPS",
-			"ROUNDSD",
-			"ROUNDSS"
-		};
-
 		TokenSet tokens = TokenSet(text);
 		DescriptorSet descriptors = DescriptorSet(tokens);
 		InstructionSet instructions = InstructionSet(descriptors);
 
-		std::vector<std::string> types = instructions.GetTypes();
+		Package package = Package(instructions);
 
-		for (const std::string& type : types)
-		{
-			bool present = false;
-			for (const char* textType : textTypes)
-			{
-				if (_stricmp(type.c_str(), textType) == 0)
-				{
-					present = true;
-					break;
-				}
-			}
+		package.OutputToHeader("package_compiled.hpp");
 
-			Assert::IsTrue(present);
-		}
-
-		BytePackage package = instructions.GetPackage();
-
-		Assert::AreEqual<uint32_t>(package.GetCount(), 583);
-		Assert::AreEqual<size_t>(package.GetRaw().size(), 582);
+		Assert::IsTrue(std::filesystem::exists("package_compiled.hpp"));
 	}
 };
