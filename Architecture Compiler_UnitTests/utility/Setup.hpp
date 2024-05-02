@@ -3,9 +3,11 @@
 #include <string>
 
 #include <parser/DescriptorOperand.hpp>
+
+#include <compiler/BytePackage.hpp>
 #include <compiler/Redirection.hpp>
-#include <compiler/Operand.hpp>
 #include <compiler/ByteEntry.hpp>
+#include <compiler/Operand.hpp>
 
 namespace Microsoft
 {

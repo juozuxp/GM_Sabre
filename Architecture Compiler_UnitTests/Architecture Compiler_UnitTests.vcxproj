@@ -160,6 +160,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="compiler\BytePackage_Unit.cpp" />
+    <ClCompile Include="compiler\FullRedirection_Unit.cpp" />
+    <ClCompile Include="compiler\InstructionSet_Unit.cpp" />
     <ClCompile Include="compiler\Instruction_Unit.cpp" />
     <ClCompile Include="compiler\Operand_Unit.cpp" />
     <ClCompile Include="compiler\Prefix_Unit.cpp" />
