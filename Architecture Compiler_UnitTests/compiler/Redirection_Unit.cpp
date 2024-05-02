@@ -198,4 +198,241 @@ public:
 
 		Assert::AreEqual(target->GetPackageType(), ByteEntry::PackageType::Instruction);
 	}
+
+	TEST_METHOD(Insert_4)
+	{
+		std::shared_ptr<Instruction> fsub = std::make_shared<Instruction>(Descriptor(Token("DC /4 -> FSUB m64")), 123);
+
+		std::vector<Redirection::Entry> entries;
+
+		entries.push_back(Redirection::Entry(Redirection::Type::Reg, 2));
+		entries.push_back(Redirection::Entry(Redirection::Type::Mem, 2));
+
+		std::shared_ptr<Redirection> reg = std::reinterpret_pointer_cast<Redirection>(Redirection::Insert(nullptr, fsub, entries));
+
+		Assert::AreEqual(reg->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(reg->m_Type, Redirection::Type::Reg);
+
+		std::shared_ptr<Redirection> mem = std::reinterpret_pointer_cast<Redirection>(reg->m_Redirects[2]);
+
+		Assert::AreEqual(mem->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(mem->m_Type, Redirection::Type::Mem);
+
+		std::shared_ptr<Instruction> target = std::reinterpret_pointer_cast<Instruction>(mem->m_Redirects[2]);
+
+		Assert::AreEqual(target->GetPackageType(), ByteEntry::PackageType::Instruction);
+
+		entries.clear();
+
+		entries.push_back(Redirection::Entry(Redirection::Type::Mem, 4));
+
+		reg = std::reinterpret_pointer_cast<Redirection>(Redirection::Insert(reg, fsub, entries));
+
+		Assert::AreEqual(reg->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(reg->m_Type, Redirection::Type::Reg);
+
+		Assert::AreEqual(reg->m_Redirects[0]->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(reg->m_Redirects[1]->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(reg->m_Redirects[2]->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(reg->m_Redirects[3]->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(reg->m_Redirects[4]->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(reg->m_Redirects[5]->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(reg->m_Redirects[6]->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(reg->m_Redirects[7]->GetPackageType(), ByteEntry::PackageType::Redirection);
+
+		mem = std::reinterpret_pointer_cast<Redirection>(reg->m_Redirects[2]);
+
+		Assert::AreEqual(mem->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(mem->m_Type, Redirection::Type::Mem);
+
+		target = std::reinterpret_pointer_cast<Instruction>(mem->m_Redirects[4]);
+
+		Assert::AreEqual(target->GetPackageType(), ByteEntry::PackageType::Instruction);
+	}
+
+	TEST_METHOD(Insert_5)
+	{
+		std::shared_ptr<Instruction> fsub = std::make_shared<Instruction>(Descriptor(Token("DC /4 -> FSUB m64")), 123);
+		std::shared_ptr<Instruction> ltr = std::make_shared<Instruction>(Descriptor(Token("0F 00 /3 -> LTR r32|16|64/m16")), 123);
+
+		std::vector<Redirection::Entry> entries;
+
+		entries.push_back(Redirection::Entry(Redirection::Type::Mod, 2));
+		entries.push_back(Redirection::Entry(Redirection::Type::Mem, 2));
+		entries.push_back(Redirection::Entry(Redirection::Type::Reg, 2));
+
+		std::shared_ptr<Redirection> mod = std::reinterpret_pointer_cast<Redirection>(Redirection::Insert(nullptr, ltr, entries));
+
+		Assert::AreEqual(mod->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(mod->m_Type, Redirection::Type::Mod);
+
+		std::shared_ptr<Redirection> reg = std::reinterpret_pointer_cast<Redirection>(mod->m_Redirects[2]);
+
+		Assert::AreEqual(reg->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(reg->m_Type, Redirection::Type::Reg);
+
+		std::shared_ptr<Redirection> mem = std::reinterpret_pointer_cast<Redirection>(reg->m_Redirects[2]);
+
+		Assert::AreEqual(mem->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(mem->m_Type, Redirection::Type::Mem);
+
+		std::shared_ptr<Instruction> target = std::reinterpret_pointer_cast<Instruction>(mem->m_Redirects[2]);
+
+		Assert::AreEqual(target->GetPackageType(), ByteEntry::PackageType::Instruction);
+
+		entries.clear();
+
+		entries.push_back(Redirection::Entry(Redirection::Prefix::Repe));
+		entries.push_back(Redirection::Entry(Redirection::Type::Mod, 2));
+
+		std::shared_ptr<Redirection> prefix = std::reinterpret_pointer_cast<Redirection>(Redirection::Insert(mod, fsub, entries));
+
+		Assert::AreEqual(prefix->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(prefix->m_Type, Redirection::Type::Prefix);
+
+		mod = std::reinterpret_pointer_cast<Redirection>(prefix->m_Redirects[static_cast<uint8_t>(Redirection::Prefix::Repe)]);
+
+		Assert::AreEqual(mod->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(mod->m_Type, Redirection::Type::Mod);
+
+		target = std::reinterpret_pointer_cast<Instruction>(mod->m_Redirects[2]);
+
+		Assert::AreEqual(target->GetPackageType(), ByteEntry::PackageType::Instruction);
+		
+		entries.clear();
+
+		entries.push_back(Redirection::Entry(Redirection::Prefix::RexW));
+		entries.push_back(Redirection::Entry(Redirection::Prefix::Repe));
+		entries.push_back(Redirection::Entry(Redirection::Type::Mod, 3));
+
+		prefix = std::reinterpret_pointer_cast<Redirection>(Redirection::Insert(prefix, fsub, entries));
+
+		Assert::AreEqual(prefix->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(prefix->m_Type, Redirection::Type::Prefix);
+
+		mod = std::reinterpret_pointer_cast<Redirection>(prefix->m_Redirects[static_cast<uint8_t>(Redirection::Prefix::RexW)]);
+
+		Assert::AreEqual(mod->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(mod->m_Type, Redirection::Type::Mod);
+
+		target = std::reinterpret_pointer_cast<Instruction>(mod->m_Redirects[3]);
+
+		Assert::AreEqual(target->GetPackageType(), ByteEntry::PackageType::Instruction);
+	}
+
+	TEST_METHOD(Insert_6)
+	{
+		std::shared_ptr<Instruction> fsub = std::make_shared<Instruction>(Descriptor(Token("DC /4 -> FSUB m64")), 123);
+
+		std::vector<Redirection::Entry> entries;
+
+		entries.push_back(Redirection::Entry(Redirection::X0F383A::x0F38));
+
+		std::shared_ptr<Redirection> x0F383A = std::reinterpret_pointer_cast<Redirection>(Redirection::Insert(nullptr, fsub, entries));
+
+		Assert::AreEqual(x0F383A->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(x0F383A->m_Type, Redirection::Type::X0F383A);
+
+		std::shared_ptr<Instruction> target = std::reinterpret_pointer_cast<Instruction>(x0F383A->m_Redirects[static_cast<uint8_t>(Redirection::X0F383A::x0F38)]);
+
+		Assert::AreEqual(target->GetPackageType(), ByteEntry::PackageType::Instruction);
+
+		x0F383A = std::reinterpret_pointer_cast<Redirection>(Redirection::Insert(x0F383A, fsub));
+
+		Assert::AreEqual(x0F383A->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(x0F383A->m_Type, Redirection::Type::X0F383A);
+
+		target = std::reinterpret_pointer_cast<Instruction>(x0F383A->m_Redirects[static_cast<uint8_t>(Redirection::X0F383A::Default)]);
+
+		Assert::AreEqual(target->GetPackageType(), ByteEntry::PackageType::Instruction);
+	}
+
+	TEST_METHOD(Insert_7)
+	{
+		std::shared_ptr<Instruction> fsub = std::make_shared<Instruction>(Descriptor(Token("DC /4 -> FSUB m64")), 123);
+
+		std::vector<Redirection::Entry> entries;
+
+		entries.push_back(Redirection::Entry(Redirection::Prefix::Repe));
+
+		std::shared_ptr<Redirection> prefix = std::reinterpret_pointer_cast<Redirection>(Redirection::Insert(nullptr, fsub, entries));
+
+		Assert::AreEqual(prefix->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(prefix->m_Type, Redirection::Type::Prefix);
+
+		std::shared_ptr<Instruction> target = std::reinterpret_pointer_cast<Instruction>(prefix->m_Redirects[static_cast<uint8_t>(Redirection::Prefix::Repe)]);
+
+		Assert::AreEqual(target->GetPackageType(), ByteEntry::PackageType::Instruction);
+
+		prefix = std::reinterpret_pointer_cast<Redirection>(Redirection::Insert(prefix, fsub));
+
+		Assert::AreEqual(prefix->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(prefix->m_Type, Redirection::Type::Prefix);
+
+		target = std::reinterpret_pointer_cast<Instruction>(prefix->m_Redirects[static_cast<uint8_t>(Redirection::Prefix::Default)]);
+
+		Assert::AreEqual(target->GetPackageType(), ByteEntry::PackageType::Instruction);
+	}
+
+	TEST_METHOD(Insert_8)
+	{
+		std::shared_ptr<Instruction> fsub = std::make_shared<Instruction>(Descriptor(Token("DC /4 -> FSUB m64")), 123);
+
+		std::vector<Redirection::Entry> entries;
+
+		entries.push_back(Redirection::Entry(Redirection::Type::Mem, 1));
+
+		std::shared_ptr<Redirection> mem = std::reinterpret_pointer_cast<Redirection>(Redirection::Insert(nullptr, fsub, entries));
+
+		Assert::AreEqual(mem->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(mem->m_Type, Redirection::Type::Mem);
+
+		std::shared_ptr<Instruction> target = std::reinterpret_pointer_cast<Instruction>(mem->m_Redirects[static_cast<uint8_t>(Redirection::Prefix::Repe)]);
+
+		Assert::AreEqual(target->GetPackageType(), ByteEntry::PackageType::Instruction);
+
+		entries.clear();
+
+		entries.push_back(Redirection::Entry(Redirection::Type::Mem, 2));
+		entries.push_back(Redirection::Entry(Redirection::Type::Reg, 2));
+
+		std::shared_ptr<Redirection> reg = std::reinterpret_pointer_cast<Redirection>(Redirection::Insert(mem, fsub, entries));
+
+		Assert::AreEqual(reg->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(reg->m_Type, Redirection::Type::Reg);
+
+		mem = std::reinterpret_pointer_cast<Redirection>(reg->m_Redirects[2]);
+
+		Assert::AreEqual(mem->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(mem->m_Type, Redirection::Type::Mem);
+
+		target = std::reinterpret_pointer_cast<Instruction>(mem->m_Redirects[2]);
+
+		Assert::AreEqual(target->GetPackageType(), ByteEntry::PackageType::Instruction);
+
+		entries.clear();
+
+		entries.push_back(Redirection::Entry(Redirection::Type::Mod, 3));
+		entries.push_back(Redirection::Entry(Redirection::Type::Mem, 3));
+		entries.push_back(Redirection::Entry(Redirection::Type::Reg, 3));
+
+		std::shared_ptr<Redirection> mod = std::reinterpret_pointer_cast<Redirection>(Redirection::Insert(reg, fsub, entries));
+
+		Assert::AreEqual(mod->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(mod->m_Type, Redirection::Type::Mod);
+
+		reg = std::reinterpret_pointer_cast<Redirection>(mod->m_Redirects[3]);
+
+		Assert::AreEqual(reg->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(reg->m_Type, Redirection::Type::Reg);
+
+		mem = std::reinterpret_pointer_cast<Redirection>(reg->m_Redirects[3]);
+
+		Assert::AreEqual(mem->GetPackageType(), ByteEntry::PackageType::Redirection);
+		Assert::AreEqual(mem->m_Type, Redirection::Type::Mem);
+
+		target = std::reinterpret_pointer_cast<Instruction>(mem->m_Redirects[3]);
+
+		Assert::AreEqual(target->GetPackageType(), ByteEntry::PackageType::Instruction);
+	}
 };

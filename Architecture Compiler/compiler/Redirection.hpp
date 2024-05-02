@@ -145,6 +145,7 @@ public:
 public:
 	Redirection() = default;
 
+private:
 	Redirection(Type type);
 	Redirection(const Instruction& instruction);
 	Redirection(std::shared_ptr<Instruction> instruction);

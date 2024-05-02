@@ -52,7 +52,7 @@ Redirection& Redirection::operator=(const Redirection& copy)
 
 		if (copy.m_Redirects[i]->GetPackageType() == PackageType::Redirection)
 		{
-			m_Redirects[i] = std::make_shared<Redirection>(*std::reinterpret_pointer_cast<Redirection>(copy.m_Redirects[i]));
+			m_Redirects[i] = std::make_shared<Redirection>(Redirection(*std::reinterpret_pointer_cast<Redirection>(copy.m_Redirects[i])));
 			continue;
 		}
 
@@ -215,7 +215,7 @@ std::shared_ptr<Redirection> Redirection::Convert(std::shared_ptr<ByteEntry> bas
 	{
 		assert(base->GetPackageType() == PackageType::Instruction);
 
-		redirect = std::make_shared<Redirection>(std::reinterpret_pointer_cast<Instruction>(base));
+		redirect = std::make_shared<Redirection>(Redirection(std::reinterpret_pointer_cast<Instruction>(base)));
 	}
 	else
 	{
@@ -258,7 +258,7 @@ std::shared_ptr<Redirection> Redirection::Convert(std::shared_ptr<ByteEntry> bas
 	{
 		assert(redirect->m_Type > type);
 
-		std::shared_ptr<Redirection> newBase = std::make_shared<Redirection>(type);
+		std::shared_ptr<Redirection> newBase = std::make_shared<Redirection>(Redirection(type));
 		if (type == Type::Prefix)
 		{
 			newBase->m_Redirects[static_cast<uint8_t>(Prefix::Default)] = redirect;
@@ -276,7 +276,7 @@ std::shared_ptr<Redirection> Redirection::Convert(std::shared_ptr<ByteEntry> bas
 		{
 			for (uint8_t i = 1; i < 4; i++)
 			{
-				newBase->m_Redirects[i] = std::make_shared<Redirection>(*redirect);
+				newBase->m_Redirects[i] = std::make_shared<Redirection>(Redirection(*redirect));
 			}
 
 			return newBase;
@@ -284,7 +284,7 @@ std::shared_ptr<Redirection> Redirection::Convert(std::shared_ptr<ByteEntry> bas
 
 		for (uint8_t i = 1; i < ARRAY_SIZE(redirect->m_Redirects); i++)
 		{
-			newBase->m_Redirects[i] = std::make_shared<Redirection>(*redirect);
+			newBase->m_Redirects[i] = std::make_shared<Redirection>(Redirection(*redirect));
 		}
 
 		return newBase;
@@ -329,7 +329,7 @@ std::shared_ptr<ByteEntry> Redirection::ChainForPrefix(std::shared_ptr<ByteEntry
 
 	bool isInserted = false;
 
-	std::shared_ptr<Redirection> result = std::make_shared<Redirection>(redirect->m_Type);
+	std::shared_ptr<Redirection> result = std::make_shared<Redirection>(Redirection(redirect->m_Type));
 	if (redirect->m_Type == Type::Mod)
 	{
 		for (uint8_t i = 0; i < 4; i++)
@@ -444,7 +444,7 @@ std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, 
 			for (uint8_t i = 0; i < length; i++)
 			{
 				const Entry& entry = chain[i];
-				if (!redirect->m_Redirects[entry.m_Index])
+				if (redirect->m_Redirects[entry.m_Index])
 				{
 					continue;
 				}
