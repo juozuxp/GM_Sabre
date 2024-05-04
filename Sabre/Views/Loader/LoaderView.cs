@@ -9,7 +9,7 @@ namespace Sabre.Views.Loader
 	{
 		public LoaderView() : base(null)
 		{
-			this.Caption = "Sabre";
+			this.Caption = "Saber";
 			this.Content = new LoaderControl();
 		}
 	}
