@@ -71,7 +71,7 @@ namespace Sabre.Views.FunctionView
 				return;
 			}
 
-			m_FunctionView.ItemsSource = m_FunctionItems.Where(x => x.m_Name.Contains(textBox.Text));
+			m_FunctionView.ItemsSource = m_FunctionItems.Where(x => x.m_Name.ToLower().Contains(textBox.Text.ToLower()));
 		}
 
 		private void FunctionView_MouseDoubleClick(object sender, MouseButtonEventArgs e)

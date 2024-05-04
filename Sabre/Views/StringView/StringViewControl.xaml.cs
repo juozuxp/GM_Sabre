@@ -1,4 +1,5 @@
-﻿using Sabre.Controllers;
+﻿using Microsoft.IO;
+using Sabre.Controllers;
 using Sabre.Explorer.Objects;
 using Sabre.ListItems;
 using System.Diagnostics.CodeAnalysis;
@@ -104,7 +105,7 @@ namespace Sabre.Views
 				return;
 			}
 
-			m_StringView.ItemsSource = m_StringItems.Where(x => x.m_String.Contains(textBox.Text));
+			m_StringView.ItemsSource = m_StringItems.Where(x => x.m_String.ToLower().Contains(textBox.Text.ToLower()));
 		}
 	}
 }

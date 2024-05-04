@@ -2142,6 +2142,7 @@ bool KaraConverter::ReadOperand(State& state, const ILOperand& asmOperand, KaraO
 	case ILOperandType_ValueRelative:
 	{
 		pcOperand.m_Type = KaraOperand::Type::Literal;
+		pcOperand.m_Scale = ILOperandScale::ILOperandScale_64;
 		pcOperand.m_Literal = reinterpret_cast<uintptr_t>(state.m_Cursor) + asmOperand.m_Relative.m_Value - state.m_CursorBase + state.m_ImageBase;
 		return true;
 	} break;
