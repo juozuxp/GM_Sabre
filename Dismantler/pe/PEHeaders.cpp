@@ -99,5 +99,4 @@ PEHeaders::PEHeaders(const void* base)
 			}
 		}
 	}
-
 }
