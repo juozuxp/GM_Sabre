@@ -45,5 +45,11 @@ TokenSet& TokenSet::operator+=(const TokenSet& lhs)
 
 void TokenSet::ProcessLine(const std::string& line)
 {
-	m_Tokens.push_back(Token(line));
+	Token token = Token(line);
+	if (token.GetBytes().empty())
+	{
+		return;
+	}
+
+	m_Tokens.push_back(token);
 }

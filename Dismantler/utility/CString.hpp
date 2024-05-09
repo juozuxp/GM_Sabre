@@ -17,4 +17,3 @@ private:
 	static size_t GetLengthDefinition(const std::string_view& string);
 	static size_t GetLengthDefinition(const std::wstring_view& string);
 };
-
