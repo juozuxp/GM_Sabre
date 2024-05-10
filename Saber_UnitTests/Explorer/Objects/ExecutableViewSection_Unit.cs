@@ -13,7 +13,7 @@ namespace Saber_Unit.Explorer.Objects
 	public class ExecutableViewSection_Unit
 	{
 		[TestMethod]
-		public void ToListElements()
+		public void ToListElements_0()
 		{
 			ExecutableView view = new ExecutableView();
 			ExecutableViewSection viewSection = new ExecutableViewSection();
@@ -56,6 +56,22 @@ namespace Saber_Unit.Explorer.Objects
 				address += IntPtr.Size;
 			}
 
+			Marshal.FreeCoTaskMem(view.m_DataAddress);
+		}
+
+		[TestMethod]
+		public void ToListElements_1()
+		{
+			ExecutableView view = new ExecutableView();
+			ExecutableViewSection viewSection = new ExecutableViewSection();
+
+			view.m_BaseAddress = new IntPtr(0x18000000);
+			view.m_DataAddress = Marshal.AllocCoTaskMem(0x1000);
+
+			string text = "hello world :)";
+
+			Marshal.Copy(Encoding.ASCII.GetBytes(text), 0, view.m_DataAddress + 0x2, text.Length);
+
 			viewSection.m_Type = ExecutableViewSection.Type.Code;
 			viewSection.m_Start = 0x0;
 			viewSection.m_Size = 0x100;
@@ -82,9 +98,10 @@ namespace Saber_Unit.Explorer.Objects
 			viewSection.m_Visuals[3].m_Instruction.m_Size = 0x8;
 			viewSection.m_Visuals[3].m_Instruction.m_Type = 0x33;
 
+			view.m_Sections = new ExecutableViewSection[1];
 			view.m_Sections[0] = viewSection;
 
-			items = viewSection.ToListElements(view);
+			ByteViewItem[] items = viewSection.ToListElements(view);
 
 			Assert.AreEqual(items.Length, 4);
 
@@ -105,7 +122,7 @@ namespace Saber_Unit.Explorer.Objects
 
 			Assert.AreEqual(items.Length, (viewSection.m_Size - (8 - ((viewSection.m_Start % 8) == 0 ? 8 : (viewSection.m_Start % 8)))) / 8 + ((viewSection.m_Start % 8) == 0 ? 0 : 1) + (((viewSection.m_Size - (8 - ((viewSection.m_Start % 8) == 0 ? 8 : (viewSection.m_Start % 8)))) % 8) == 0 ? 0 : 1));
 
-			address = view.m_BaseAddress;
+			IntPtr address = view.m_BaseAddress;
 			foreach (ByteViewItem item in items)
 			{
 				Assert.IsNotNull(item);
@@ -116,18 +133,33 @@ namespace Saber_Unit.Explorer.Objects
 				Assert.AreEqual(item.m_Address, address);
 				address += IntPtr.Size;
 			}
+		}
+
+		[TestMethod]
+		public void ToListElements_2()
+		{
+			ExecutableView view = new ExecutableView();
+			ExecutableViewSection viewSection = new ExecutableViewSection();
+
+			view.m_BaseAddress = new IntPtr(0x18000000);
+			view.m_DataAddress = Marshal.AllocCoTaskMem(0x1000);
+
+			string text = "hello world :)";
+
+			Marshal.Copy(Encoding.ASCII.GetBytes(text), 0, view.m_DataAddress + 0x2, text.Length);
 
 			viewSection.m_Type = ExecutableViewSection.Type.Bytes;
 			viewSection.m_Start = 0x0;
 			viewSection.m_Size = 0x9;
 
+			view.m_Sections = new ExecutableViewSection[1];
 			view.m_Sections[0] = viewSection;
 
-			items = viewSection.ToListElements(view);
+			ByteViewItem[] items = viewSection.ToListElements(view);
 
 			Assert.AreEqual(items.Length, (viewSection.m_Size - (8 - ((viewSection.m_Start % 8) == 0 ? 8 : (viewSection.m_Start % 8)))) / 8 + ((viewSection.m_Start % 8) == 0 ? 0 : 1) + (((viewSection.m_Size - (8 - ((viewSection.m_Start % 8) == 0 ? 8 : (viewSection.m_Start % 8)))) % 8) == 0 ? 0 : 1));
 
-			address = view.m_BaseAddress;
+			IntPtr address = view.m_BaseAddress;
 			foreach (ByteViewItem item in items)
 			{
 				Assert.IsNotNull(item);

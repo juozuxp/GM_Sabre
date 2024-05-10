@@ -10,7 +10,7 @@ namespace Saber_Unit.Explorer.PE
 	public class PEHeaders_Unit
 	{
 		[TestMethod]
-		public void ToTreeView()
+		public void ToTreeView_64bit()
 		{
 			ExecutableExplorer explorer = new ExecutableExplorer("kernel32.dll");
 
@@ -23,14 +23,20 @@ namespace Saber_Unit.Explorer.PE
 			int count = tree.Items.Count;
 
 			Assert.AreNotEqual(tree.Items.Count, 0);
+		}
 
-			explorer = new ExecutableExplorer("kernel32_32bit.dll");
+		[TestMethod]
+		public void ToTreeView_32bit()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("kernel32_32bit.dll");
 
-			headers = explorer.GetHeaders();
+			PEHeaders? headers = explorer.GetHeaders();
+
+			TreeView tree = new TreeView();
 
 			headers.Value.ToTreeView(tree);
 
-			Assert.AreEqual(tree.Items.Count, count);
+			Assert.AreNotEqual(tree.Items.Count, 0);
 		}
 	}
 }

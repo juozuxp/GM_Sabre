@@ -21,7 +21,7 @@ public:
 			"0F 43 -> CMOVAE r32|16|64, r/m32|16|64\n"
 			"\n"
 			"\n"
-			"48 0F C7 /1 -> CMPXCHG16B m128\n"
+			"48 0F C7 /1\n"
 			"3A -> CMP r8, r/m8\n"
 			"\n"
 			"0F 48 -> CMOVS r32|16|64, r/m32|16|64\n"
@@ -29,10 +29,10 @@ public:
 
 		TokenSet set = TokenSet(text);
 
-		Assert::AreEqual<size_t>(std::vector<Token>(set.begin(), set.end()).size(), 4);
+		Assert::AreEqual<size_t>(std::vector<Token>(set.begin(), set.end()).size(), 3);
 	}
 
-	TEST_METHOD(Insert)
+	TEST_METHOD(Insert_Stream)
 	{
 		std::string_view first =
 		{
@@ -53,6 +53,23 @@ public:
 		stream << TokenSet(second);
 
 		Assert::AreEqual<size_t>(std::vector<Token>(stream.begin(), stream.end()).size(), 5);
+	}
+
+	TEST_METHOD(Insert_Add)
+	{
+		std::string_view first =
+		{
+			"0F 43 -> CMOVAE r32|16|64, r/m32|16|64\n"
+			"\n"
+			"0F 48 -> CMOVS r32|16|64, r/m32|16|64\n"
+		};
+
+		std::string_view second =
+		{
+			"0F 43 -> CMOVAE r32|16|64, r/m32|16|64\n"
+			"3A -> CMP r8, r/m8\n"
+			"0F 48 -> CMOVS r32|16|64, r/m32|16|64\n"
+		};
 
 		TokenSet add = TokenSet(first);
 

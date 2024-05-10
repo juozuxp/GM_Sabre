@@ -33,7 +33,7 @@ public:
 		Assert::AreEqual<int32_t>(wcsncmp(string.m_Buffer, utf16, sizeof(utf16) - 1), 0);
 	}
 
-	TEST_METHOD(Move)
+	TEST_METHOD(Move_Constuct)
 	{
 		ManagedString string = ManagedString(L"hello world");
 
@@ -47,15 +47,23 @@ public:
 
 		Assert::AreEqual(string.m_Buffer, nullptr);
 		Assert::AreEqual<uint32_t>(string.m_Size, 0);
+	}
+
+	TEST_METHOD(Move_Equal)
+	{
+		ManagedString string = ManagedString(L"hello world");
+
+		uint32_t length = string.m_Size;
+		wchar_t* buffer = string.m_Buffer;
 
 		ManagedString equal;
 
-		equal = std::move(constructor);
+		equal = std::move(string);
 
 		Assert::AreEqual(equal.m_Size, length);
 		Assert::AreEqual(equal.m_Buffer, buffer);
 
-		Assert::AreEqual(constructor.m_Buffer, nullptr);
-		Assert::AreEqual<uint32_t>(constructor.m_Size, 0);
+		Assert::AreEqual(string.m_Buffer, nullptr);
+		Assert::AreEqual<uint32_t>(string.m_Size, 0);
 	}
 };

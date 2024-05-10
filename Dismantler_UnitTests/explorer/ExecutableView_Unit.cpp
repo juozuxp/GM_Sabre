@@ -7,7 +7,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 TEST_CLASS(ExecutableView_Unit)
 {
 public:
-	TEST_METHOD(Construct)
+	TEST_METHOD(Construct_64bit)
 	{
 		PEBuffer pe = PEBuffer(L"kernel32.dll");
 
@@ -73,10 +73,16 @@ public:
 		Assert::AreEqual<uint32_t>(view.m_Sections.m_Array[8].m_Size, 0x00000400);
 
 		Assert::AreEqual<uint32_t>(view.m_Sections.m_Array[8].m_Visuals.m_Size, 0);
+	}
 
-		pe = PEBuffer(L"kernel32_32bit.dll");
+	TEST_METHOD(Construct_32bit)
+	{
+		PEBuffer pe = PEBuffer(L"kernel32_32bit.dll");
 
-		view = ExecutableView(pe, dissasembler, visualizer);
+		Disassembler dissasembler;
+		Visualizer visualizer;
+
+		ExecutableView view = ExecutableView(pe, dissasembler, visualizer);
 
 		Assert::AreEqual<uintptr_t>(view.m_BaseAddress, 0x000000006b800000);
 

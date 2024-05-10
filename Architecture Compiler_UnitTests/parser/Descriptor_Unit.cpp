@@ -7,7 +7,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 TEST_CLASS(Descriptor_Unit)
 {
 public:
-	TEST_METHOD(Construct)
+	TEST_METHOD(Construct_0)
 	{
 		Descriptor descriptor = Descriptor(Token("0F BA /5 -> BTS r/m32|16|64, imm8"));
 
@@ -59,8 +59,11 @@ public:
 
 		Assert::AreEqual(second.GetTypeMask().m_Type, DescriptorOperand::Type::imm);
 		Assert::AreEqual(second.GetTypeMask().m_Register, DescriptorOperand::Register::general);
+	}
 
-		descriptor = Descriptor(Token("0F 1 CA -> CLAC"));
+	TEST_METHOD(Construct_1)
+	{
+		Descriptor descriptor = Descriptor(Token("0F 1 CA -> CLAC"));
 
 		Assert::AreEqual<uint8_t>(descriptor.GetUpperOperand(), ~0);
 
@@ -73,8 +76,11 @@ public:
 		Assert::AreEqual(descriptor.GetName().c_str(), "clac", true);
 
 		Assert::AreEqual<size_t>(descriptor.GetOperands().size(), 0);
+	}
 
-		descriptor = Descriptor(Token("0F R CA -> CLAC"));
+	TEST_METHOD(Construct_2)
+	{
+		Descriptor descriptor = Descriptor(Token("0F R CA -> CLAC"));
 
 		Assert::AreEqual<uint8_t>(descriptor.GetUpperOperand(), ~0);
 

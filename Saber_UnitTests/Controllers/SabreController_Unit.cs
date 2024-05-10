@@ -44,60 +44,80 @@ namespace Saber_Unit.Controllers
 		}
 
 		[TestMethod]
-		public void GetHeaders()
+		public void GetHeaders_null()
 		{
 			m_Instance.SetValue(null, null);
 
 			Assert.IsNull(SabreController.GetHeaders());
+		}
 
+			[TestMethod]
+		public void GetHeaders()
+		{
 			SabreController.LoadExecutable("kernel32.dll");
 
 			Assert.IsNotNull(SabreController.GetHeaders());
 		}
 
 		[TestMethod]
-		public void GetExecutableView()
+		public void GetExecutableView_null()
 		{
 			m_Instance.SetValue(null, null);
 
 			Assert.IsNull(SabreController.GetExecutableView());
+		}
 
+		[TestMethod]
+		public void GetExecutableView()
+		{
 			SabreController.LoadExecutable("kernel32.dll");
 
 			Assert.IsNotNull(SabreController.GetExecutableView());
 		}
 
 		[TestMethod]
-		public void GetExecutableFunctions()
+		public void GetExecutableFunctions_null()
 		{
 			m_Instance.SetValue(null, null);
 
 			Assert.AreEqual(SabreController.GetExecutableFunctions().Length, 0);
+		}
 
+		[TestMethod]
+		public void GetExecutableFunctions()
+		{
 			SabreController.LoadExecutable("kernel32.dll");
 
 			Assert.AreNotEqual(SabreController.GetExecutableFunctions().Length, 0);
 		}
 
 		[TestMethod]
-		public void GetExecutableStrings()
+		public void GetExecutableStrings_null()
 		{
 			m_Instance.SetValue(null, null);
 
 			Assert.AreEqual(SabreController.GetExecutableStrings().Length, 0);
+		}
 
+		[TestMethod]
+		public void GetExecutableStrings()
+		{
 			SabreController.LoadExecutable("kernel32.dll");
 
 			Assert.AreNotEqual(SabreController.GetExecutableStrings().Length, 0);
 		}
 
 		[TestMethod]
-		public void GetPseudoC()
+		public void GetPseudoC_null()
 		{
 			m_Instance.SetValue(null, null);
 
 			Assert.AreEqual(SabreController.GetPseudoC(new IntPtr(0x1000)).Length, 0);
+		}
 
+		[TestMethod]
+		public void GetPseudoC()
+		{
 			SabreController.LoadExecutable("kernel32.dll");
 
 			ExecutableFunction function = SabreController.GetExecutableFunctions()[0];
@@ -106,12 +126,16 @@ namespace Saber_Unit.Controllers
 		}
 
 		[TestMethod]
-		public void GetExecutableXRefs()
+		public void GetExecutableXRefs_null()
 		{
 			m_Instance.SetValue(null, null);
 
 			Assert.AreEqual(SabreController.GetExecutableXRefs(new IntPtr(0x1000)).Length, 0);
+		}
 
+		[TestMethod]
+		public void GetExecutableXRefs()
+		{
 			SabreController.LoadExecutable("kernel32.dll");
 
 			ExecutableFunction? choice = null;

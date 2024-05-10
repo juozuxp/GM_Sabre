@@ -63,6 +63,26 @@ namespace Saber_Unit.Containers
 		}
 
 		[TestMethod]
+		public void Push_roll()
+		{
+			RollingStack<int> stack = new RollingStack<int>(5);
+
+			stack.Push(40);
+			stack.Push(20);
+			stack.Push(30);
+			stack.Push(20);
+			stack.Push(30);
+			stack.Push(20);
+			stack.Push(30);
+
+			int count = (int)m_Count.GetValue(stack);
+			int cursor = (int)m_Cursor.GetValue(stack);
+
+			Assert.AreEqual(count, 5);
+			Assert.AreEqual(cursor, 2);
+		}
+
+		[TestMethod]
 		public void Pop()
 		{
 			RollingStack<int> stack = new RollingStack<int>(5);
@@ -116,6 +136,37 @@ namespace Saber_Unit.Containers
 		}
 
 		[TestMethod]
+		public void Pop_roll()
+		{
+			RollingStack<int> stack = new RollingStack<int>(5);
+
+			stack.Push(50);
+			stack.Push(40);
+			stack.Push(30);
+			stack.Push(20);
+			stack.Push(10);
+			stack.Push(0);
+
+			Assert.AreEqual(stack.Pop(), 0);
+			Assert.AreEqual(stack.Pop(), 10);
+			Assert.AreEqual(stack.Pop(), 20);
+			Assert.AreEqual(stack.Pop(), 30);
+			Assert.AreEqual(stack.Pop(), 40);
+
+			bool except = false;
+			try
+			{
+				stack.Pop();
+			}
+			catch
+			{
+				except = true;
+			}
+
+			Assert.IsTrue(except);
+		}
+
+		[TestMethod]
 		public void TryPop()
 		{
 			RollingStack<int> stack = new RollingStack<int>(5);
@@ -147,6 +198,38 @@ namespace Saber_Unit.Containers
 			stack.Push(20);
 			stack.Push(10);
 			stack.Push(0);
+
+			Assert.IsTrue(stack.TryPop(out value));
+			Assert.AreEqual(value, 0);
+
+			Assert.IsTrue(stack.TryPop(out value));
+			Assert.AreEqual(value, 10);
+
+			Assert.IsTrue(stack.TryPop(out value));
+			Assert.AreEqual(value, 20);
+
+			Assert.IsTrue(stack.TryPop(out value));
+			Assert.AreEqual(value, 30);
+
+			Assert.IsTrue(stack.TryPop(out value));
+			Assert.AreEqual(value, 40);
+
+			Assert.IsFalse(stack.TryPop(out value));
+		}
+
+		[TestMethod]
+		public void TryPop_roll()
+		{
+			RollingStack<int> stack = new RollingStack<int>(5);
+
+			stack.Push(50);
+			stack.Push(40);
+			stack.Push(30);
+			stack.Push(20);
+			stack.Push(10);
+			stack.Push(0);
+
+			int value;
 
 			Assert.IsTrue(stack.TryPop(out value));
 			Assert.AreEqual(value, 0);

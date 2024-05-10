@@ -37,7 +37,34 @@ public:
 		Assert::AreEqual<int32_t>(managed.m_Array[2], items[2]);
 	}
 
-	TEST_METHOD(Move)
+	TEST_METHOD(Move_Equal)
+	{
+		std::vector<int32_t> items;
+
+		items.push_back(100);
+		items.push_back(200);
+		items.push_back(500);
+
+		ManagedArray<int32_t> original = ManagedArray<int32_t>(items);
+
+		uint32_t size = original.m_Size;
+		int32_t* array = original.m_Array;
+		uint32_t capacity = original.m_Capacity;
+
+		ManagedArray<int32_t> equal;
+
+		equal = std::move(original);
+
+		Assert::AreEqual(equal.m_Size, size);
+		Assert::AreEqual(equal.m_Array, array);
+		Assert::AreEqual(equal.m_Capacity, capacity);
+
+		Assert::AreEqual<uint32_t>(original.m_Size, 0);
+		Assert::AreEqual<uint32_t>(original.m_Capacity, 0);
+		Assert::AreEqual<int32_t*>(original.m_Array, nullptr);
+	}
+
+	TEST_METHOD(Move_Construct)
 	{
 		std::vector<int32_t> items;
 
@@ -60,21 +87,9 @@ public:
 		Assert::AreEqual<uint32_t>(original.m_Size, 0);
 		Assert::AreEqual<uint32_t>(original.m_Capacity, 0);
 		Assert::AreEqual<int32_t*>(original.m_Array, nullptr);
-
-		ManagedArray<int32_t> equal;
-
-		equal = std::move(constructor);
-
-		Assert::AreEqual(equal.m_Size, size);
-		Assert::AreEqual(equal.m_Array, array);
-		Assert::AreEqual(equal.m_Capacity, capacity);
-
-		Assert::AreEqual<uint32_t>(constructor.m_Size, 0);
-		Assert::AreEqual<uint32_t>(constructor.m_Capacity, 0);
-		Assert::AreEqual<int32_t*>(constructor.m_Array, nullptr);
 	}
 
-	TEST_METHOD(Add)
+	TEST_METHOD(Add_ints)
 	{
 		ManagedArray<int32_t> ints = ManagedArray<int32_t>(2);
 
@@ -95,7 +110,10 @@ public:
 		Assert::AreEqual<int32_t>(ints.m_Array[0], 100);
 		Assert::AreEqual<int32_t>(ints.m_Array[1], 200);
 		Assert::AreEqual<int32_t>(ints.m_Array[2], 300);
+	}
 
+	TEST_METHOD(Add_objects)
+	{
 		ManagedArray<Object> objects;
 
 		Object move;

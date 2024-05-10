@@ -8,29 +8,41 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 TEST_CLASS(Prefix_Unit)
 {
 public:
-	TEST_METHOD(Construct)
+	TEST_METHOD(Construct_0)
 	{
 		Prefix prefix = Prefix(Prefix::Type_Lock | Prefix::Type_Wait);
 
 		Assert::AreEqual(prefix.GetPackageType(), ByteEntry::PackageType::Prefix);
 		Assert::AreEqual(prefix.GetRedirectPrefix(), Redirection::Prefix::Wait);
+	}
 
-		prefix = Prefix(Prefix::Type_Lock | Prefix::Type_Repe);
+	TEST_METHOD(Construct_1)
+	{
+		Prefix prefix = Prefix(Prefix::Type_Lock | Prefix::Type_Repe);
 
 		Assert::AreEqual(prefix.GetPackageType(), ByteEntry::PackageType::Prefix);
 		Assert::AreEqual(prefix.GetRedirectPrefix(), Redirection::Prefix::Repe);
+	}
 
-		prefix = Prefix(Prefix::Type_Lock | Prefix::Type_Repne);
+	TEST_METHOD(Construct_2)
+	{
+		Prefix prefix = Prefix(Prefix::Type_Lock | Prefix::Type_Repne);
 
 		Assert::AreEqual(prefix.GetPackageType(), ByteEntry::PackageType::Prefix);
 		Assert::AreEqual(prefix.GetRedirectPrefix(), Redirection::Prefix::Repne);
+	}
 
-		prefix = Prefix(Prefix::Type_Lock | Prefix::Type_x66);
+	TEST_METHOD(Construct_3)
+	{
+		Prefix prefix = Prefix(Prefix::Type_Lock | Prefix::Type_x66);
 
 		Assert::AreEqual(prefix.GetPackageType(), ByteEntry::PackageType::Prefix);
 		Assert::AreEqual(prefix.GetRedirectPrefix(), Redirection::Prefix::x66);
+	}
 
-		prefix = Prefix(Prefix::Type_Lock | Prefix::Type_RexW);
+	TEST_METHOD(Construct_4)
+	{
+		Prefix prefix = Prefix(Prefix::Type_Lock | Prefix::Type_RexW);
 
 		Assert::AreEqual(prefix.GetPackageType(), ByteEntry::PackageType::Prefix);
 		Assert::AreEqual(prefix.GetRedirectPrefix(), Redirection::Prefix::RexW);

@@ -14,17 +14,20 @@ public:
 		FunctionExplorer functions = FunctionExplorer(pe, xref);
 	}
 
-	TEST_METHOD(ExploreExecutable)
+	TEST_METHOD(ExploreExecutable_64bit)
 	{
 		PEBuffer pe = PEBuffer(L"kernel32.dll");
 		XRefExplorer xref = XRefExplorer(pe);
 		FunctionExplorer functions = FunctionExplorer(pe, xref);
 
 		functions.ExploreExecutable();
+	}
 
-		pe = PEBuffer(L"kernel32_32bit.dll");
-		xref = XRefExplorer(pe);
-		functions = FunctionExplorer(pe, xref);
+	TEST_METHOD(ExploreExecutable_32bit)
+	{
+		PEBuffer pe = PEBuffer(L"kernel32_32bit.dll");
+		XRefExplorer xref = XRefExplorer(pe);
+		FunctionExplorer functions = FunctionExplorer(pe, xref);
 
 		functions.ExploreExecutable();
 	}

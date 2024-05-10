@@ -34,5 +34,7 @@ public:
 
 		Assert::AreEqual<uint32_t>(entry.m_Name.m_Size, sizeof("hello world") - 1);
 		Assert::IsTrue(wcsncmp(entry.m_Name.m_Buffer, L"hello world", sizeof("hello world") - 1) == 0);
+
+		delete[] page;
 	}
 };

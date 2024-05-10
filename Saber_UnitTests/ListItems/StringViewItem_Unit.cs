@@ -10,7 +10,7 @@ namespace Saber_Unit.ListItems
 	public class StringViewItem_Unit
 	{
 		[TestMethod]
-		public void Construct()
+		public void Construct_unicode()
 		{
 			ExecutableString exec = new ExecutableString();
 
@@ -30,10 +30,21 @@ namespace Saber_Unit.ListItems
 			Assert.AreEqual(new IntPtr(long.Parse(item.m_BaseName, NumberStyles.HexNumber)), exec.m_Base);
 
 			Assert.AreEqual(item.m_Type, "UTF-16");
+		}
+
+		[TestMethod]
+		public void Construct_ascii()
+		{
+			ExecutableString exec = new ExecutableString();
 
 			exec.m_IsWide = false;
+			exec.m_String = "hello world";
+			exec.m_Base = new IntPtr(0x1000);
 
-			item = new StringViewItem(exec);
+			exec.m_XRefs = new ExecutableXRef[1];
+			exec.m_XRefs[0] = new ExecutableXRef();
+
+			StringViewItem item = new StringViewItem(exec);
 
 			Assert.AreEqual(item.m_Base, exec.m_Base);
 			Assert.AreEqual(item.m_String, exec.m_String);

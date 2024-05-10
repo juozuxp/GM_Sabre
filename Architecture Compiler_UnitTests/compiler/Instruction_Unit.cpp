@@ -9,7 +9,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 TEST_CLASS(Instruction_Unit)
 {
 public:
-	TEST_METHOD(Construct)
+	TEST_METHOD(Construct_0)
 	{
 		constexpr Redirection::Prefix valids[] = { Redirection::Prefix::x66, Redirection::Prefix::RexW };
 
@@ -33,24 +33,35 @@ public:
 
 			Assert::IsTrue(present);
 		}
+	}
 
-		instruction = Instruction(Descriptor(Token("F3 0F C7 /6 -> SENDUIPI r64")), 80);
+	TEST_METHOD(Construct_1)
+	{
+		Instruction instruction = Instruction(Descriptor(Token("F3 0F C7 /6 -> SENDUIPI r64")), 80);
 
-		prefixes = instruction.GetCompatiblePrefixes();
-
-		Assert::AreEqual<size_t>(prefixes.size(), 0);
-		Assert::AreEqual(instruction.GetPackageType(), ByteEntry::PackageType::Instruction);
-
-		instruction = Instruction(Descriptor(Token("DC /0 -> FADD m64")), 123);
-
-		prefixes = instruction.GetCompatiblePrefixes();
+		std::vector<uint8_t> prefixes = instruction.GetCompatiblePrefixes();
 
 		Assert::AreEqual<size_t>(prefixes.size(), 0);
 		Assert::AreEqual(instruction.GetPackageType(), ByteEntry::PackageType::Instruction);
+	}
 
-		instruction = Instruction(Descriptor(Token("6B -> IMUL r32|16|64, r/m32|16|64, imm8, RAX, RDX")), 123);
+	TEST_METHOD(Construct_2)
+	{
+		Instruction instruction = Instruction(Descriptor(Token("DC /0 -> FADD m64")), 123);
 
-		prefixes = instruction.GetCompatiblePrefixes();
+		std::vector<uint8_t> prefixes = instruction.GetCompatiblePrefixes();
+
+		Assert::AreEqual<size_t>(prefixes.size(), 0);
+		Assert::AreEqual(instruction.GetPackageType(), ByteEntry::PackageType::Instruction);
+	}
+
+	TEST_METHOD(Construct_3)
+	{
+		constexpr Redirection::Prefix valids[] = { Redirection::Prefix::x66, Redirection::Prefix::RexW };
+
+		Instruction instruction = Instruction(Descriptor(Token("6B -> IMUL r32|16|64, r/m32|16|64, imm8, RAX, RDX")), 123);
+
+		std::vector<uint8_t> prefixes = instruction.GetCompatiblePrefixes();
 
 		Assert::AreEqual<size_t>(prefixes.size(), 2);
 		Assert::AreEqual(instruction.GetPackageType(), ByteEntry::PackageType::Instruction);

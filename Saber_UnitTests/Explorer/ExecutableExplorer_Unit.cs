@@ -30,63 +30,103 @@ namespace Saber_Unit.Explorer
 		}
 
 		[TestMethod]
-		public void GetHeaders()
+		public void GetHeaders_64bit()
 		{
 			ExecutableExplorer explorer = new ExecutableExplorer("kernel32.dll");
 
 			Assert.IsNotNull(explorer.GetHeaders());
+		}
 
-			explorer = new ExecutableExplorer("kernel32_32bit.dll");
+		[TestMethod]
+		public void GetHeaders_32bit()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("kernel32_32bit.dll");
 
 			Assert.IsNotNull(explorer.GetHeaders());
+		}
 
-			explorer = new ExecutableExplorer("NotExe.txt");
-
-			Assert.IsNull(explorer.GetHeaders());
-
-			explorer = new ExecutableExplorer("NotAFile.dll");
+		[TestMethod]
+		public void GetHeaders_nonexe()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("NotExe.txt");
 
 			Assert.IsNull(explorer.GetHeaders());
 		}
 
 		[TestMethod]
-		public void GetExecutableView()
+		public void GetHeaders_nonfile()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("NotAFile.dll");
+
+			Assert.IsNull(explorer.GetHeaders());
+		}
+
+		[TestMethod]
+		public void GetExecutableView_64bit()
 		{
 			ExecutableExplorer explorer = new ExecutableExplorer("kernel32.dll");
 
 			Assert.IsNotNull(explorer.GetExecutableView());
+		}
 
-			explorer = new ExecutableExplorer("kernel32_32bit.dll");
+		[TestMethod]
+		public void GetExecutableView_32bit()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("kernel32_32bit.dll");
 
 			Assert.IsNotNull(explorer.GetExecutableView());
+		}
 
-			explorer = new ExecutableExplorer("NotExe.txt");
-
-			Assert.IsNull(explorer.GetExecutableView());
-
-			explorer = new ExecutableExplorer("NotAFile.dll");
+		[TestMethod]
+		public void GetExecutableView_notexe()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("NotExe.txt");
 
 			Assert.IsNull(explorer.GetExecutableView());
 		}
 
 		[TestMethod]
-		public void GetExecutableFunctions()
+		public void GetExecutableView_notfile()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("NotAFile.dll");
+
+			Assert.IsNull(explorer.GetExecutableView());
+		}
+
+		[TestMethod]
+		public void GetExecutableFunctions_64bit()
 		{
 			ExecutableExplorer explorer = new ExecutableExplorer("kernel32.dll");
 
 			Assert.AreNotEqual(explorer.GetExecutableFunctions().Length, 0);
+		}
 
-			explorer = new ExecutableExplorer("NotExe.txt");
-
-			Assert.AreEqual(explorer.GetExecutableFunctions().Length, 0);
-
-			explorer = new ExecutableExplorer("NotAFile.dll");
+		[TestMethod]
+		public void GetExecutableFunctions_32bit()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("kernel32_32bit.dll");
 
 			Assert.AreEqual(explorer.GetExecutableFunctions().Length, 0);
 		}
 
 		[TestMethod]
-		public void GetPCFunction()
+		public void GetExecutableFunctions_nonexe()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("NotExe.txt");
+
+			Assert.AreEqual(explorer.GetExecutableFunctions().Length, 0);
+		}
+
+		[TestMethod]
+		public void GetExecutableFunctions_nonfile()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("NotAFile.dll");
+
+			Assert.AreEqual(explorer.GetExecutableFunctions().Length, 0);
+		}
+
+		[TestMethod]
+		public void GetPCFunction_64bit()
 		{
 			ExecutableExplorer explorer = new ExecutableExplorer("kernel32.dll");
 
@@ -94,38 +134,58 @@ namespace Saber_Unit.Explorer
 			{
 				Assert.AreNotEqual(explorer.GetPCFunction(function.m_Base).Length, 0);
 			}
+		}
 
-			explorer = new ExecutableExplorer("NotExe.txt");
-
-			Assert.AreEqual(explorer.GetPCFunction(IntPtr.Zero).Length, 0);
-
-			explorer = new ExecutableExplorer("NotAFile.dll");
+		[TestMethod]
+		public void GetPCFunction_nonexe()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("NotExe.txt");
 
 			Assert.AreEqual(explorer.GetPCFunction(IntPtr.Zero).Length, 0);
 		}
 
 		[TestMethod]
-		public void GetExecutableStrings()
+		public void GetPCFunction_nonfile()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("NotAFile.dll");
+
+			Assert.AreEqual(explorer.GetPCFunction(IntPtr.Zero).Length, 0);
+		}
+
+		[TestMethod]
+		public void GetExecutableStrings_64bit()
 		{
 			ExecutableExplorer explorer = new ExecutableExplorer("kernel32.dll");
 
 			Assert.AreNotEqual(explorer.GetExecutableStrings().Length, 0);
+		}
 
-			explorer = new ExecutableExplorer("kernel32_32bit.dll");
+		[TestMethod]
+		public void GetExecutableStrings_32bit()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("kernel32_32bit.dll");
 
 			Assert.AreNotEqual(explorer.GetExecutableStrings().Length, 0);
+		}
 
-			explorer = new ExecutableExplorer("NotExe.txt");
-
-			Assert.AreEqual(explorer.GetExecutableStrings().Length, 0);
-
-			explorer = new ExecutableExplorer("NotAFile.dll");
+		[TestMethod]
+		public void GetExecutableStrings_nonexe()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("NotExe.txt");
 
 			Assert.AreEqual(explorer.GetExecutableStrings().Length, 0);
 		}
 
 		[TestMethod]
-		public void GetExecutableXRefs()
+		public void GetExecutableStrings_nonfile()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("NotAFile.dll");
+
+			Assert.AreEqual(explorer.GetExecutableStrings().Length, 0);
+		}
+
+		[TestMethod]
+		public void GetExecutableXRefs_64bit()
 		{
 			ExecutableExplorer explorer = new ExecutableExplorer("kernel32.dll");
 
@@ -157,6 +217,22 @@ namespace Saber_Unit.Explorer
 			Assert.AreEqual(explorer.GetExecutableXRefs(IntPtr.Zero).Length, 0);
 
 			explorer = new ExecutableExplorer("NotAFile.dll");
+
+			Assert.AreEqual(explorer.GetExecutableXRefs(IntPtr.Zero).Length, 0);
+		}
+
+		[TestMethod]
+		public void GetExecutableXRefs_nonexe()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("NotExe.txt");
+
+			Assert.AreEqual(explorer.GetExecutableXRefs(IntPtr.Zero).Length, 0);
+		}
+
+		[TestMethod]
+		public void GetExecutableXRefs_nonfile()
+		{
+			ExecutableExplorer explorer = new ExecutableExplorer("NotAFile.dll");
 
 			Assert.AreEqual(explorer.GetExecutableXRefs(IntPtr.Zero).Length, 0);
 		}
