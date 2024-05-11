@@ -24,7 +24,7 @@ namespace Sabre.Views.XRefView
 		private void OnLoad()
 		{
 			m_AddressField.Clear();
-			m_XRefView.Items.Clear();
+			m_XRefView.ItemsSource = null;
 		}
 
 		private void GatherXRefs(IntPtr address)

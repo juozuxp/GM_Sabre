@@ -31,7 +31,7 @@ namespace Sabre.Views
             }
 
 			m_SearchField.Clear();
-			m_XRefView.Items.Clear();
+			m_XRefView.ItemsSource = null;
 
 			m_StringItems = items.OrderBy(x => x.m_String).ToArray();
 			m_StringView.ItemsSource = m_StringItems;

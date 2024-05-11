@@ -36,7 +36,7 @@ namespace Sabre.Views.ByteView
 
 			if (view == null)
 			{
-				m_DismView.Items.Clear();
+				m_DismView.ItemsSource = null;
 				return;
 			}
 
