@@ -64,6 +64,11 @@ namespace Sabre.Views.XRefView
 			}
 
 			ListView listView = sender as ListView;
+			if (listView.SelectedItem == null)
+			{
+				return;
+			}
+
 			XRefViewItem item = listView.SelectedItem as XRefViewItem;
 
 			SabreController.SetJumpToAddress(item.m_Address);

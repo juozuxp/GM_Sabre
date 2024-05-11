@@ -131,6 +131,10 @@
     <Compile Include="WPF\BetterTextBlock.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\Saber.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Resource Include="Fonts\UbuntuMono-Regular.ttf" />
     <Content Include="Fonts\UFL.txt">
       <IncludeInVSIX>true</IncludeInVSIX>

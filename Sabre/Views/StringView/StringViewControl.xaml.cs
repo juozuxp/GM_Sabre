@@ -76,6 +76,11 @@ namespace Sabre.Views
 			}
 
 			ListView listView = sender as ListView;
+			if (listView.SelectedItem == null)
+			{
+				return;
+			}
+
 			StringViewItem item = listView.SelectedItem as StringViewItem;
 
 			SabreController.SetJumpToAddress(item.m_Base);
@@ -89,6 +94,11 @@ namespace Sabre.Views
 			}
 
 			ListView listView = sender as ListView;
+			if (listView.SelectedItem == null)
+			{
+				return;
+			}
+
 			XRefViewItem item = listView.SelectedItem as XRefViewItem;
 
 			SabreController.SetJumpToAddress(item.m_Address);

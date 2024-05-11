@@ -85,6 +85,11 @@ namespace Sabre.Views.FunctionView
 			}
 
 			ListView listView = sender as ListView;
+			if (listView.SelectedItem == null)
+			{
+				return;
+			}
+
 			FunctionViewItem item = listView.SelectedItem as FunctionViewItem;
 
 			SabreController.SetJumpToAddress(item.m_Base);
@@ -110,6 +115,11 @@ namespace Sabre.Views.FunctionView
 			}
 
 			ListView listView = sender as ListView;
+			if (listView.SelectedItem == null)
+			{
+				return;
+			}
+
 			XRefViewItem item = listView.SelectedItem as XRefViewItem;
 
 			SabreController.SetJumpToAddress(item.m_Address);

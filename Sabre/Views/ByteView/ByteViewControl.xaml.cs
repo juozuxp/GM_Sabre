@@ -179,7 +179,6 @@ namespace Sabre.Views.ByteView
 			}
 
 			ByteViewItem item = listView.SelectedItem as ByteViewItem;
-
 			if (item.m_Jumpable == IntPtr.Zero)
 			{
 				return;
