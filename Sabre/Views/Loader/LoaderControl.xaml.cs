@@ -37,6 +37,7 @@ namespace Sabre.Views.Loader
 			PEHeaders? headers = SabreController.GetHeaders();
 			if (headers == null)
 			{
+				m_HeaderView.Items.Clear();
 				return;
 			}
 

@@ -14,7 +14,14 @@ namespace Sabre.Views.PseudoC
 		public PCControl()
 		{
 			this.InitializeComponent();
+
+			SabreController.AddOnLoadEvent(OnLoad);
 			SabreController.AddOnConvertCEvent(LoadPseudoC);
+		}
+
+		private void OnLoad()
+		{
+			m_Display.Clear();
 		}
 
 		public void LoadPseudoC(IntPtr function)

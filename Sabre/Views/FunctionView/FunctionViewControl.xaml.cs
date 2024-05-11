@@ -34,6 +34,9 @@ namespace Sabre.Views.FunctionView
 				items.Add(new FunctionViewItem(function));
 			}
 
+			m_SearchField.Clear();
+			m_XRefView.Items.Clear();
+
 			m_FunctionItems = items.ToArray();
 			m_FunctionView.ItemsSource = m_FunctionItems;
 		}

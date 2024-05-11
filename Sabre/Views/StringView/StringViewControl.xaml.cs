@@ -30,6 +30,9 @@ namespace Sabre.Views
                 items[i] = new StringViewItem(strings[i]);
             }
 
+			m_SearchField.Clear();
+			m_XRefView.Items.Clear();
+
 			m_StringItems = items.OrderBy(x => x.m_String).ToArray();
 			m_StringView.ItemsSource = m_StringItems;
 		}

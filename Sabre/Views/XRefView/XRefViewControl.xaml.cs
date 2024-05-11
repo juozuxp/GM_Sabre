@@ -17,7 +17,14 @@ namespace Sabre.Views.XRefView
 		{
 			this.InitializeComponent();
 
+			SabreController.AddOnLoadEvent(OnLoad);
 			SabreController.AddOnGatherXRefsEvent(GatherXRefs);
+		}
+
+		private void OnLoad()
+		{
+			m_AddressField.Clear();
+			m_XRefView.Items.Clear();
 		}
 
 		private void GatherXRefs(IntPtr address)

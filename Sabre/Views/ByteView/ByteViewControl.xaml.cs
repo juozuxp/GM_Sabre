@@ -30,12 +30,16 @@ namespace Sabre.Views.ByteView
 		private void OnExecutableLoad()
 		{
 			ExecutableView? view = SabreController.GetExecutableView();
+
+			m_JumpHistory.Reset();
+			m_AddressField.Clear();
+
 			if (view == null)
 			{
+				m_DismView.Items.Clear();
 				return;
 			}
 
-			m_JumpHistory.Reset();
 			m_DismView.ItemsSource = view.Value.ToListElements();
 		}
 

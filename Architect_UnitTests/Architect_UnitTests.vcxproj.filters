@@ -18,10 +18,10 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="disassembler\Disassembler_Unit.cpp">
+    <ClCompile Include="visualizer\Visualizer_Unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="visualizer\Visualizer_Unit.cpp">
+    <ClCompile Include="disassembler\Disassembler_Unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -27,19 +27,43 @@
     <ClCompile Include="managed\ManagedString_Unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="pe\PERelocationTable_Unit.cpp">
+    <ClCompile Include="pe\PEBuffer_Unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pe\PERelocationEntry_Unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="pe\PEBuffer_Unit.cpp">
+    <ClCompile Include="pseudoc\PCExpression_Unit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pseudoc\PCLine_Unit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\CString_Unit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\LowTrustString_Unit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pseudoc\PCVisualizer_Unit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pseudoc\PCConverter_Unit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pseudoc\kara\KaraConverter_Unit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pe\PERelocationTable_Unit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pe\PEImportTable_Unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pe\PEImportEntry_Unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="pe\PEImportTable_Unit.cpp">
+    <ClCompile Include="pe\PEHeaders_Unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pe\PEExportEntry_Unit.cpp">
@@ -49,9 +73,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pe\PEDelayImportTable_Unit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pe\PEHeaders_Unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="explorer\XRefExplorer_Unit.cpp">
@@ -64,27 +85,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="explorer\ExecutableView_Unit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="utility\CString_Unit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="utility\LowTrustString_Unit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pseudoc\kara\KaraConverter_Unit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pseudoc\PCExpression_Unit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pseudoc\PCLine_Unit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pseudoc\PCVisualizer_Unit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pseudoc\PCConverter_Unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="explorer\ExecutableExplorer_Unit.cpp">
