@@ -31,45 +31,62 @@
       <IDSymbol value="260" name="cmdidStringViewCommand" />
       <IDSymbol value="261" name="cmdidXRefViewCommand" />
     </GuidSymbol>
+	<GuidSymbol value="{8e7cf5cc-c8f1-4bab-9401-023ed59b4421}" name="icons">
+	  <IDSymbol name="loadIcon" value="1" />
+	  <IDSymbol name="byteIcon" value="2" />
+	  <IDSymbol name="functionIcon" value="3" />
+	  <IDSymbol name="cIcon" value="4" />
+	  <IDSymbol name="textIcon" value="5" />
+	  <IDSymbol name="xrefIcon" value="6" />
+	</GuidSymbol>
   </Symbols>
   <Commands package="guidSabrePackage">
     <Buttons>
       <Button guid="guidSabrePackageCmdSet" id="cmdidLoaderCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+		<Icon guid="icons" id="loadIcon" />
         <Strings>
           <ButtonText>Saber load</ButtonText>
         </Strings>
       </Button>
       <Button guid="guidSabrePackageCmdSet" id="cmdidByteViewCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+		<Icon guid="icons" id="byteIcon" />
         <Strings>
           <ButtonText>Saber byte view</ButtonText>
         </Strings>
       </Button>
       <Button guid="guidSabrePackageCmdSet" id="cmdidFunctionViewCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+		<Icon guid="icons" id="functionIcon" />
         <Strings>
           <ButtonText>Saber function view</ButtonText>
         </Strings>
       </Button>
       <Button guid="guidSabrePackageCmdSet" id="cmdidPseudoCCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+		<Icon guid="icons" id="cIcon" />
         <Strings>
           <ButtonText>Saber pseudo C view</ButtonText>
         </Strings>
       </Button>
       <Button guid="guidSabrePackageCmdSet" id="cmdidStringViewCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+		<Icon guid="icons" id="textIcon" />
         <Strings>
           <ButtonText>Saber string view</ButtonText>
         </Strings>
       </Button>
       <Button guid="guidSabrePackageCmdSet" id="cmdidXRefViewCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+		<Icon guid="icons" id="xrefIcon" />
         <Strings>
           <ButtonText>Saber xref view</ButtonText>
         </Strings>
       </Button>
     </Buttons>
+	<Bitmaps>
+      <Bitmap guid="icons" href="Assets\window_icons.png" usedList="loadIcon, byteIcon, functionIcon, cIcon, textIcon, xrefIcon" />
+	</Bitmaps>
   </Commands>
 </CommandTable>

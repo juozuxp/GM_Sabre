@@ -4,8 +4,8 @@
         <Identity Id="216a5533-7394-4308-a9c1-810312cc62de" Version="1.0" Language="en-US" Publisher="Kyo" />
         <DisplayName>Saber</DisplayName>
         <Description xml:space="preserve">Saber the visual studio integrated static analysis tool</Description>
-        <Icon>Assets\Saber.png</Icon>
-        <PreviewImage>Assets\Saber.png</PreviewImage>
+        <Icon>Assets\main_icon.png</Icon>
+        <PreviewImage>Assets\main_icon.png</PreviewImage>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
