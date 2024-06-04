@@ -16,7 +16,7 @@ int main()
 	}
 
 	CreateInterface createInstance = reinterpret_cast<CreateInterface>(GetProcAddress(module, "CreateInterface"));
-	if (createInstance(80, 405, 453))
+	if (createInstance(0x62, 500, 406))
 	{
 		printf("success!!!\n");
 		system("pause");

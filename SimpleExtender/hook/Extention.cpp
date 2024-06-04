@@ -17,7 +17,7 @@ uint64_t __stdcall Extention::Handler(Registers& registers)
 	if (registers.m_RCX == 0)
 	{
 		registers.m_RAX = adder;
-		return reinterpret_cast<uintptr_t>(m_Module) + 0x1199E;
+		return reinterpret_cast<uintptr_t>(m_Module) + 0x1178; // return address goes here
 	}
 
 	int32_t trail = 0;
@@ -31,10 +31,10 @@ uint64_t __stdcall Extention::Handler(Registers& registers)
 	}
 
 	registers.m_RAX = result + adder;
-	return reinterpret_cast<uintptr_t>(m_Module) + 0x1199E;
+	return reinterpret_cast<uintptr_t>(m_Module) + 0x1178; // return address goes here
 }
 
 void Extention::ExtendFibo()
 {
-	m_Trampoline.Hook(reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(m_Module) + 0x11999));
+	m_Trampoline.Hook(reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(m_Module) + 0x1173)); // hook address goes here
 }

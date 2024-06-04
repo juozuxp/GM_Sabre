@@ -152,7 +152,7 @@ namespace Sabre.Views.ByteView
 
 				SabreController.SetXrefAddress(selected.m_Address);
 			}	
-			else if (e.Key == Key.Escape)
+			else if (e.Key == Key.Escape || e.Key == Key.Back)
             {
 				int index;
                 if (!m_JumpHistory.TryPop(out index))
